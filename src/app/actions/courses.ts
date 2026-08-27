@@ -14,8 +14,6 @@ export async function getActiveCourses(category?: CourseCategory) {
         id: true,
         name: true,
         category: true,
-        price: true,
-        currency: true,
       }
     });
     return courses;

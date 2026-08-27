@@ -77,11 +77,8 @@ async function main() {
     data: {
       name: 'Beginner Qaida',
       category: CourseCategory.QAIDA,
-      classesPerWeek: 3,
-      price: 3000,
-      currency: 'PKR',
-      timingNote: 'Flexible timings',
-      description: 'Perfect for beginners to learn reading Arabic with Tajweed rules.',
+      timingNote: 'Suitable for kids',
+      description: 'Foundation course for beginners to learn reading Arabic letters.',
     },
   });
 
@@ -89,11 +86,8 @@ async function main() {
     data: {
       name: 'Nazra Quran',
       category: CourseCategory.NAZRA,
-      classesPerWeek: 5,
-      price: 5000,
-      currency: 'PKR',
-      timingNote: 'Monday to Friday',
-      description: 'Reading the Holy Quran with proper pronunciation (Tajweed).',
+      timingNote: 'Advanced level',
+      description: 'Learn the rules of Tajweed to recite the Quran correctly.',
     },
   });
 
@@ -101,11 +95,8 @@ async function main() {
     data: {
       name: 'Hifz Program',
       category: CourseCategory.HIFZ,
-      classesPerWeek: 6,
-      price: 8000,
-      currency: 'PKR',
-      timingNote: 'Morning / Evening batches',
-      description: 'Memorization of the Holy Quran for all ages.',
+      timingNote: 'Flexible scheduling',
+      description: 'Complete memorization of the Holy Quran with proper Tajweed.',
     },
   });
   console.log(`Created courses: Qaida, Nazra, Hifz`);
