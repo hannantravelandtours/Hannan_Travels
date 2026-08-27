@@ -80,6 +80,22 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Days of Week (Comma separated)</label>
                 <input name="daysOfWeek" required placeholder="Monday, Wednesday, Friday" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
+              
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Classes per Week</label>
+                <input name="classesPerWeek" type="number" required min="1" max="7" defaultValue="3" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+              </div>
+
+              <div className="flex space-x-2">
+                <div className="w-2/3">
+                  <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Price</label>
+                  <input name="price" type="number" step="0.01" required defaultValue="35" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                </div>
+                <div className="w-1/3">
+                  <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Curr</label>
+                  <input name="currency" required defaultValue="PKR" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                </div>
+              </div>
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Live Class Link (Optional)</label>
@@ -111,21 +127,21 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
              <h3 className="text-lg font-bold text-navy-custom mt-1">{batch.name}</h3>
              
              <div className="mt-4 space-y-2 flex-grow">
-               <div className="flex items-center text-sm text-gray-600">
-                  <Users className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="font-semibold text-navy-custom">Teacher:</span> <span className="ml-1">{batch.teacher.user.name}</span>
+               <div className="flex items-center text-xs font-bold text-gray-600">
+                 <Users className="w-4 h-4 mr-2 text-emerald-custom" />
+                 Teacher: {batch.teacher?.user?.name || batch.teacher?.name}
                </div>
-               <div className="flex items-center text-sm text-gray-600">
-                  <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="font-semibold text-navy-custom">Days:</span> <span className="ml-1">{batch.daysOfWeek.join(", ")}</span>
+               <div className="flex items-center text-xs font-bold text-gray-600">
+                 <Clock className="w-4 h-4 mr-2 text-emerald-custom" />
+                 {batch.time} ({batch.daysOfWeek.join(", ")})
                </div>
-               <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="font-semibold text-navy-custom">Time:</span> <span className="ml-1">{batch.time}</span>
+               <div className="flex items-center text-xs font-bold text-gray-600">
+                 <Users className="w-4 h-4 mr-2 text-emerald-custom" />
+                 {batch._count?.registrations || 0} Students Registered
                </div>
-               <div className="flex items-center text-sm text-gray-600">
-                  <Users className="w-4 h-4 mr-2 text-gray-400" />
-                  <span className="font-semibold text-navy-custom">Enrolled:</span> <span className="ml-1">{batch._count.registrations} Students</span>
+               <div className="flex items-center justify-between text-xs font-bold text-gray-600 mt-4 border-t border-gray-100 pt-3">
+                 <span className="text-emerald-custom">{batch.classesPerWeek} Classes/Week</span>
+                 <span className="text-lg font-black text-navy-custom">{batch.price} <span className="text-xs font-bold text-gray-400">{batch.currency}</span></span>
                </div>
              </div>
 

@@ -8,8 +8,6 @@ export async function createCourse(formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const category = formData.get("category") as CourseCategory;
-    const price = parseFloat(formData.get("price") as string) || 0;
-    const currency = formData.get("currency") as string || "USD";
     const description = formData.get("description") as string;
     const isActive = formData.get("isActive") === "on";
 
@@ -21,9 +19,6 @@ export async function createCourse(formData: FormData) {
       data: {
         name,
         category,
-        classesPerWeek: 3,
-        price,
-        currency,
         description: description || null,
         isActive,
       },

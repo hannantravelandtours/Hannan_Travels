@@ -612,7 +612,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               <div className="space-y-2">
                 <span className="text-[11px] text-gray-400 font-bold block uppercase tracking-wider">Tuition Fees starts at:</span>
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-4xl font-black text-emerald-custom">{course.price}</span>
+                  <span className="text-4xl font-black text-emerald-custom">Varies by Batch</span>
                 </div>
                 <p className="text-[11px] text-gray-500 font-medium">Includes 3 free classes. Cancel subscription anytime.</p>
               </div>

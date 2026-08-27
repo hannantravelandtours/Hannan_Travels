@@ -10,6 +10,9 @@ export async function createBatch(formData: FormData) {
     const teacherId = formData.get("teacherId") as string;
     const daysOfWeekStr = formData.get("daysOfWeek") as string; // comma separated
     const time = formData.get("time") as string;
+    const price = parseFloat(formData.get("price") as string) || 0;
+    const currency = formData.get("currency") as string || "USD";
+    const classesPerWeek = parseInt(formData.get("classesPerWeek") as string) || 3;
     const liveClassLink = formData.get("liveClassLink") as string;
 
     if (!name || !courseId || !teacherId || !daysOfWeekStr || !time) {
@@ -25,6 +28,9 @@ export async function createBatch(formData: FormData) {
         teacherId,
         daysOfWeek,
         time,
+        classesPerWeek,
+        price,
+        currency,
         liveClassLink: liveClassLink || null,
       },
     });

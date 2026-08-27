@@ -63,16 +63,6 @@ export function CoursesClient({ courses }: { courses: any[] }) {
                   <option value="HIFZ">Hifz</option>
                 </select>
               </div>
-              <div className="flex space-x-2">
-                <div className="w-2/3">
-                  <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Price</label>
-                  <input name="price" type="number" step="0.01" required defaultValue="50" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
-                </div>
-                <div className="w-1/3">
-                  <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Curr</label>
-                  <input name="currency" required defaultValue="USD" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
-                </div>
-              </div>
               <div className="md:col-span-3">
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Description</label>
                 <textarea name="description" rows={2} placeholder="Brief description of the course..." className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
@@ -120,8 +110,7 @@ export function CoursesClient({ courses }: { courses: any[] }) {
              <h3 className="text-lg font-bold text-navy-custom">{course.name}</h3>
              <p className="text-sm text-gray-500 mt-2 line-clamp-2 flex-grow">{course.description || "No description provided."}</p>
              
-             <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-lg font-extrabold text-emerald-custom">{course.price} <span className="text-sm text-gray-400 uppercase">{course.currency}</span></span>
+             <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-end">
                 <div className="flex items-center text-xs font-bold text-gray-400">
                   <BookOpen className="w-4 h-4 mr-1.5" />
                   {course.batches?.length || 0} Batches

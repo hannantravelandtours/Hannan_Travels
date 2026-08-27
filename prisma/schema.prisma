@@ -77,9 +77,6 @@ model Course {
   id             String         @id @default(cuid())
   name           String
   category       CourseCategory
-  classesPerWeek Int
-  price          Decimal
-  currency       String         @default("PKR")
   timingNote     String?        // e.g. "Mon/Wed/Fri 6-7 PM"
   description    String?
   isActive       Boolean        @default(true)
@@ -97,6 +94,9 @@ model Batch {
   teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   daysOfWeek  String[]  // ["Mon","Wed","Fri"]
   time        String    // "18:00-19:00" or store timezone-aware DateTime slots
+  classesPerWeek Int       @default(3)
+  price       Decimal   @default(35)
+  currency    String    @default("PKR")
   liveClassLink String?
   registrations Registration[]
   recordings  ClassRecording[]

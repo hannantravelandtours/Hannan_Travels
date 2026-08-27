@@ -185,7 +185,7 @@ function StudentRegistrationForm() {
                 >
                   <option value="" disabled>Choose a course</option>
                   {courses.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} ({c.category}) - {c.price} {c.currency}</option>
+                    <option key={c.id} value={c.id}>{c.name} ({c.category})</option>
                   ))}
                 </select>
               </div>

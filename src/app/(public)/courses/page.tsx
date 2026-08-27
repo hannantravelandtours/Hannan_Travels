@@ -275,8 +275,7 @@ export default function CoursesPage() {
                         <span className="block font-bold text-navy-custom">{course.teacher}</span>
                       </div>
                       <div className="text-right">
-                        <span className="block text-gray-400 font-semibold">Starting:</span>
-                        <span className="block font-black text-emerald-custom text-sm">{course.price}</span>
+                        <span className="block font-bold text-emerald-custom text-xs">Varies by Batch</span>
                       </div>
                     </div>
                   </div>

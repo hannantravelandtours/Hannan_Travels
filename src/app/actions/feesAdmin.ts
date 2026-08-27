@@ -15,12 +15,13 @@ export async function recordFeePayment(formData: FormData) {
 
     const reg = await prisma.registration.findUnique({
       where: { id: registrationId },
-      include: { course: true }
+      include: { course: true, batch: true }
     });
 
     if (!reg) return { error: "Registration not found" };
+    if (!reg.batch) return { error: "Cannot generate fee because the student is not assigned to a batch." };
 
-    const amountDue = reg.course.price;
+    const amountDue = reg.batch.price;
 
     await prisma.feeRecord.create({
       data: {
