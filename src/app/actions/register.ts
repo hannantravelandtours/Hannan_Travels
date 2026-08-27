@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import crypto from "crypto";
+import { sendVerificationEmail } from "@/lib/email";
 
 const studentRegisterSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -86,7 +88,20 @@ export async function registerStudent(formData: FormData) {
       });
     });
 
-    // TODO: Send verification email here (using Resend/Nodemailer)
+    // Generate Verification Token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.verificationToken.create({
+      data: {
+        email,
+        token,
+        expires,
+      }
+    });
+
+    // Send verification email
+    await sendVerificationEmail(email, token);
 
     return { success: true };
   } catch (error) {

@@ -50,6 +50,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid email or password");
         }
 
+        if (user.role === "STUDENT" && !user.emailVerified) {
+          throw new Error("Please verify your email address to log in. Check your inbox for the verification link.");
+        }
+
         return {
           id: user.id,
           email: user.email,
