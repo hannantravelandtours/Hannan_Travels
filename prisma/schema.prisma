@@ -18,6 +18,12 @@ enum CourseCategory {
   QAIDA
   NAZRA
   HIFZ
+  QURAN
+  TAJWEED
+  ARABIC
+  ISLAMIC_STUDIES
+  KIDS
+  FEMALE_ONLY
 }
 
 enum RegistrationStatus {

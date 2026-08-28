@@ -61,6 +61,12 @@ export function CoursesClient({ courses }: { courses: any[] }) {
                   <option value="QAIDA">Qaida</option>
                   <option value="NAZRA">Nazra</option>
                   <option value="HIFZ">Hifz</option>
+                  <option value="QURAN">Quran</option>
+                  <option value="TAJWEED">Tajweed</option>
+                  <option value="ARABIC">Arabic</option>
+                  <option value="ISLAMIC_STUDIES">Islamic Studies</option>
+                  <option value="KIDS">Kids</option>
+                  <option value="FEMALE_ONLY">Female Only</option>
                 </select>
               </div>
               <div className="md:col-span-3">
