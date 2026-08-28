@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { 
@@ -21,17 +21,25 @@ import {
   ChevronLeft
 } from "lucide-react";
 
+import { getActiveCourses } from "@/app/actions/courses";
+
 export default function HomePage() {
   const { t, direction } = useLanguage();
   const isRTL = direction === "rtl";
   const [activeTab, setActiveTab] = useState("All");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
+  const [courses, setCourses] = useState<any[]>([]);
+
+  useEffect(() => {
+    getActiveCourses().then(setCourses);
+  }, []);
+
   const stats = [
-    { value: t("stats.students"), label: "Active Learners", icon: Users },
-    { value: t("stats.teachers"), label: "Native Scholars", icon: UserCheck },
+    { value: "100+", label: "Active Students", icon: Users },
+    { value: "20+", label: "Expert Teachers", icon: UserCheck },
     { value: t("stats.countries"), label: "Global Reach", icon: Globe },
-    { value: t("stats.satisfaction"), label: "Positive Feedback", icon: Award },
+    { value: "99%", label: "Parent Satisfaction", icon: Award },
   ];
 
   const whyChooseUs = [
@@ -77,80 +85,7 @@ export default function HomePage() {
     },
   ];
 
-  const courses = [
-    {
-      id: "noorani-qaida",
-      title: "Noorani Qaida Basics",
-      category: "Quran",
-      desc: "Learn standard pronunciation of Arabic letters, vowel signs, and fundamental recitation rules. Perfect for kids and absolute beginners.",
-      duration: "3 Months",
-      level: "Beginner",
-      teacher: "Mufti Muhammad Ibrahim",
-      rating: 4.9,
-      students: 480,
-      imageBg: "bg-emerald-50 text-emerald-custom",
-    },
-    {
-      id: "quran-tajweed",
-      title: "Quran Recitation with Tajweed",
-      category: "Tajweed",
-      desc: "Master the rules of Tajweed (Makharij, Sifaat, Madd, etc.) to recite the Holy Quran with correct pronunciation and beautiful tone.",
-      duration: "6 Months",
-      level: "Intermediate",
-      teacher: "Qari Ahmad Raza",
-      rating: 4.8,
-      students: 620,
-      imageBg: "bg-teal-50 text-teal-700",
-    },
-    {
-      id: "hifz-quran",
-      title: "Hifz-ul-Quran Memorization",
-      category: "Hifz",
-      desc: "A systematic curriculum to memorize selected Surahs or the entire Quran under expert supervision. Includes regular revision cycles.",
-      duration: "2-3 Years",
-      level: "Advanced",
-      teacher: "Hafiz Muhammad Abdullah",
-      rating: 5.0,
-      students: 230,
-      imageBg: "bg-amber-50 text-amber-700",
-    },
-    {
-      id: "arabic-language",
-      title: "Classical Arabic Grammar",
-      category: "Arabic",
-      desc: "Understand the grammar, syntax, and vocabulary of Quranic Arabic. Designed to build direct translation skills of Quranic verses.",
-      duration: "12 Months",
-      level: "Intermediate",
-      teacher: "Ustadha Fatima Noor",
-      rating: 4.7,
-      students: 180,
-      imageBg: "bg-blue-50 text-blue-700",
-    },
-    {
-      id: "islamic-studies",
-      title: "Islamic Studies & Supplications",
-      category: "Islamic Studies",
-      desc: "Comprehensive coursework on Islamic jurisprudence, Aqeedah, Seerah of Prophet Muhammad (PBUH), and daily Sunnah Duas.",
-      duration: "6 Months",
-      level: "Beginner",
-      teacher: "Dr. Sajid Rehman",
-      rating: 4.9,
-      students: 310,
-      imageBg: "bg-purple-50 text-purple-700",
-    },
-    {
-      id: "quran-for-kids",
-      title: "Quran and Akhlaq for Kids",
-      category: "Kids",
-      desc: "Interactive gamified Quran learning designed to engage children. Focuses on short Surah memorization and character development.",
-      duration: "Flexible",
-      level: "Beginner",
-      teacher: "Ustadha Ayesha Siddiqua",
-      rating: 4.9,
-      students: 750,
-      imageBg: "bg-rose-50 text-rose-700",
-    },
-  ];
+
 
   const testimonials = [
     {
@@ -234,7 +169,7 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-wrap items-center justify-start rtl:justify-end gap-4 pt-2">
               <Link
-                href="/register"
+                href="/courses"
                 className="px-8 py-3.5 rounded-full text-sm font-bold text-white bg-emerald-custom hover:bg-emerald-900 transition-all shadow-lg hover-lift flex items-center space-x-2 rtl:space-x-reverse"
               >
                 <span>Start Free Trial</span>
@@ -448,7 +383,7 @@ export default function HomePage() {
             >
               <div>
                 {/* Visual Header */}
-                <div className={`p-8 ${course.imageBg} relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
+                <div className={`p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
                   <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
                     <BookOpen className="h-32 w-32" />
                   </div>
@@ -456,27 +391,21 @@ export default function HomePage() {
                     {course.category}
                   </span>
                   <h3 className="text-xl font-extrabold text-navy-custom mt-4">
-                    {course.title}
+                    {course.name}
                   </h3>
                 </div>
 
                 {/* Details list */}
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-gray-500 font-semibold line-clamp-2 leading-relaxed">
-                    {course.desc}
+                    {course.description || "Learn the Quran with our expert scholars."}
                   </p>
 
                   <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-y border-gray-50 py-3">
                     <div className="flex items-center space-x-1 rtl:space-x-reverse">
                       <Clock className="h-4 w-4 text-emerald-custom-light" />
-                      <span>{course.duration}</span>
+                      <span>{course.batches?.length || 0} Batches Available</span>
                     </div>
-                    <div>Level: <span className="text-emerald-custom">{course.level}</span></div>
-                  </div>
-
-                  <div className="space-y-1 text-xs">
-                    <span className="block text-gray-400 font-medium">Lead Scholar:</span>
-                    <span className="block font-bold text-navy-custom">{course.teacher}</span>
                   </div>
                 </div>
               </div>
@@ -490,10 +419,10 @@ export default function HomePage() {
                   View Curriculum
                 </Link>
                 <Link
-                  href="/register"
+                  href="/courses"
                   className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow"
                 >
-                  Enroll Free
+                  Start Free Trial
                 </Link>
               </div>
             </div>

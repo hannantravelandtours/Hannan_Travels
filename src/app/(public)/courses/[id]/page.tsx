@@ -1,7 +1,8 @@
 "use client";
 
-import React, { use, useState } from "react";
+import React, { use, useState, useEffect } from "react";
 import Link from "next/link";
+import { getCourseDetails } from "@/app/actions/courses";
 import { 
   BookOpen, 
   Clock, 
@@ -455,9 +456,22 @@ const mockCourseData: Record<string, CourseDetails> = {
 export default function CourseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [expandedCurriculum, setExpandedCurriculum] = useState<number | null>(0);
+  const [dbCourse, setDbCourse] = useState<any>(null);
+  const [trialVideo, setTrialVideo] = useState<string | null>(null);
 
-  // Fallback to quran-tajweed if ID is not custom
-  const course = mockCourseData[id] || mockCourseData["quran-tajweed"];
+  useEffect(() => {
+    getCourseDetails(id).then(setDbCourse);
+  }, [id]);
+
+  // Fallback to mock data for static content like curriculum/faqs
+  const mockCourse = mockCourseData[id] || mockCourseData["quran-tajweed"];
+
+  if (!dbCourse) {
+    return <div className="py-32 text-center text-gray-500 font-bold">Loading Course...</div>;
+  }
+
+  const courseTitle = dbCourse.name || mockCourse.title;
+  const courseDesc = dbCourse.description || mockCourse.desc;
 
   return (
     <div className="space-y-16 pb-20">
@@ -476,11 +490,11 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </Link>
               
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
-                {course.title}
+                {courseTitle}
               </h1>
               
               <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
-                {course.tagline}
+                {courseDesc.substring(0, 100)}...
               </p>
 
               <div className="pt-2">
@@ -495,8 +509,8 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
             {/* Right Image */}
             <div className="lg:col-span-6 relative h-[350px] lg:h-[420px] flex items-center justify-center">
-              {course.image ? (
-                <img src={course.image} className="w-full h-full object-contain drop-shadow-2xl" alt={course.title} />
+              {mockCourse.image ? (
+                <img src={mockCourse.image} className="w-full h-full object-contain drop-shadow-2xl" alt={courseTitle} />
               ) : (
                 <div className="w-full h-full bg-gray-800 animate-pulse rounded-[30px]" />
               )}
@@ -515,27 +529,23 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="flex flex-wrap gap-4 sm:gap-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] text-sm font-semibold text-navy-custom">
               <div className="flex items-center space-x-2">
                 <Star className="h-5 w-5 fill-gold-custom text-gold-custom" />
-                <span className="text-gray-700">{course.rating} Rating</span>
+                <span className="text-gray-700">{mockCourse.rating} Rating</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Users className="h-5 w-5 text-emerald-custom" />
-                <span className="text-gray-700">{course.students}+ Enrolled</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-emerald-custom" />
-                <span className="text-gray-700">{course.duration}</span>
+                <span className="text-gray-700">{dbCourse.batches?.length || 0} Batches</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Award className="h-5 w-5 text-emerald-custom" />
-                <span className="text-gray-700">Level: {course.level}</span>
+                <span className="text-gray-700">Level: {mockCourse.level}</span>
               </div>
             </div>
 
             {/* Description */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-navy-custom">Course Overview</h2>
-              <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                {course.desc}
+              <p className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-line">
+                {courseDesc}
               </p>
             </div>
 
@@ -543,7 +553,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="bg-emerald-custom/5 p-6 sm:p-8 rounded-2xl space-y-4 border border-emerald-custom/10">
               <h2 className="text-xl font-bold text-navy-custom">What You Will Learn</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                {course.whatYouWillLearn.map((item, idx) => (
+                {mockCourse.whatYouWillLearn.map((item, idx) => (
                   <div key={idx} className="flex items-start space-x-2">
                     <CheckCircle className="h-5 w-5 text-emerald-custom shrink-0 mt-0.5" />
                     <span className="text-xs text-navy-custom/90 font-medium">{item}</span>
@@ -556,7 +566,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-navy-custom">Course Curriculum</h2>
               <div className="space-y-3">
-                {course.curriculum.map((module, idx) => {
+                {mockCourse.curriculum.map((module, idx) => {
                   const isOpen = expandedCurriculum === idx;
                   return (
                     <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
@@ -595,7 +605,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-navy-custom">Prerequisites & Requirements</h2>
               <ul className="space-y-3">
-                {course.requirements.map((req, idx) => (
+                {mockCourse.requirements.map((req, idx) => (
                   <li key={idx} className="flex items-start space-x-2.5 text-xs text-gray-500 font-semibold">
                     <AlertCircle className="h-4 w-4 text-emerald-custom shrink-0 mt-0.5" />
                     <span>{req}</span>
@@ -606,76 +616,64 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Sidebar Right Column */}
-          <div className="lg:col-span-4 space-y-8">
-            {/* Pricing & CTA Card (Moved from Hero) */}
-            <div className="bg-white text-navy-custom p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 space-y-6">
-              <div className="space-y-2">
-                <span className="text-[11px] text-gray-400 font-bold block uppercase tracking-wider">Tuition Fees starts at:</span>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-4xl font-black text-emerald-custom">Varies by Batch</span>
-                </div>
-                <p className="text-[11px] text-gray-500 font-medium">Includes 3 free classes. Cancel subscription anytime.</p>
-              </div>
+          <div className="lg:col-span-4 space-y-6">
+            <h2 className="text-2xl font-bold text-navy-custom mb-6 border-b border-gray-100 pb-4">Available Batches</h2>
+            
+            {dbCourse.batches && dbCourse.batches.length > 0 ? (
+              dbCourse.batches.map((batch: any) => (
+                <div key={batch.id} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+                  <h3 className="text-lg font-bold text-navy-custom">{batch.name}</h3>
+                  
+                  <div className="space-y-2 text-xs font-semibold text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <UserCheck className="w-4 h-4 text-emerald-custom" />
+                      <span>{batch.teacher?.user?.name || "Expert Scholar"}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-emerald-custom" />
+                      <span>{batch.time} ({batch.daysOfWeek.join(", ")})</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-custom" />
+                      <span>{batch.classesPerWeek} Classes / Week</span>
+                    </div>
+                  </div>
 
-              <div className="space-y-3">
-                <Link
-                  href="/register"
-                  className="block w-full text-center py-3.5 bg-emerald-custom hover:bg-emerald-900 text-white font-bold text-sm rounded-xl shadow-md transition-colors"
-                >
-                  Start 3-Class Free Trial
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block w-full text-center py-3.5 border-2 border-gray-100 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom rounded-xl transition-all"
-                >
-                  Inquire Tuition Fees Structure
-                </Link>
-              </div>
+                  <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
+                    <span className="text-xl font-black text-emerald-custom">{batch.price} {batch.currency}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Per Month</span>
+                  </div>
 
-              <div className="border-t border-gray-100 pt-5 space-y-3 text-xs font-semibold text-gray-600">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-emerald-custom shrink-0" />
-                  <span>1-on-1 Individual Classes</span>
+                  <div className="pt-2 space-y-2">
+                    {batch.trialVideoUrl && (
+                      <button 
+                        onClick={() => setTrialVideo(batch.trialVideoUrl)}
+                        className="w-full block text-center py-2.5 rounded-lg border-2 border-emerald-custom text-emerald-custom hover:bg-emerald-50 text-xs font-bold transition-all"
+                      >
+                        Watch Free Trial
+                      </button>
+                    )}
+                    <Link
+                      href="/register/student"
+                      className="w-full block text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow"
+                    >
+                      Enroll in Batch
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-emerald-custom shrink-0" />
-                  <span>Female Teachers Available</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-emerald-custom shrink-0" />
-                  <span>Reschedule Classes up to 4h before</span>
-                </div>
+              ))
+            ) : (
+              <div className="bg-gray-50 rounded-2xl p-6 text-center border border-gray-100">
+                <p className="text-sm font-semibold text-gray-500">No batches are currently scheduled for this course.</p>
+                <Link href="/contact" className="mt-4 inline-block text-xs font-bold text-emerald-custom">Contact us to request a batch</Link>
               </div>
-            </div>
-
-            {/* Lead Teacher Widget */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-navy-custom border-b border-gray-100 pb-3">
-                Lead Course Instructor
-              </h3>
-              <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-custom text-white flex items-center justify-center font-bold text-xl uppercase">
-                  {course.teacher.name.charAt(0)}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-navy-custom">{course.teacher.name}</h4>
-                  <p className="text-xs text-emerald-custom font-semibold">{course.teacher.title}</p>
-                </div>
-              </div>
-              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
-                {course.teacher.bio}
-              </p>
-              <div className="border-t border-gray-100 pt-3 space-y-2 text-xs font-semibold text-gray-600">
-                <div>Experience: <span className="text-navy-custom">{course.teacher.experience}</span></div>
-                <div>Languages: <span className="text-navy-custom">{course.teacher.languages.join(", ")}</span></div>
-              </div>
-            </div>
+            )}
 
             {/* Course FAQs */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-8">
               <h3 className="text-lg font-bold text-navy-custom">Course FAQs</h3>
               <div className="space-y-3 text-xs">
-                {course.faqs.map((faq, idx) => (
+                {mockCourse.faqs.map((faq, idx) => (
                   <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-1">
                     <h4 className="font-bold text-navy-custom flex items-center gap-1">
                       <HelpCircle className="h-4 w-4 text-gold-custom shrink-0" />
@@ -689,6 +687,39 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </section>
+
+      {/* Trial Video Modal */}
+      {trialVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl relative">
+            <button 
+              onClick={() => setTrialVideo(null)}
+              className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/80 rounded-full p-2 z-10 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="aspect-video w-full bg-black">
+              {/* Note: This handles basic iframe embedding for YouTube/Vimeo. Adjust if necessary. */}
+              <iframe 
+                src={trialVideo.replace("watch?v=", "embed/")} 
+                className="w-full h-full" 
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              ></iframe>
+            </div>
+            <div className="p-6 text-center space-y-4">
+              <h3 className="text-xl font-bold text-navy-custom">Free Trial Recording</h3>
+              <p className="text-sm text-gray-500 font-medium">Experience the teaching style and quality of our scholars.</p>
+              <Link
+                href="/register/student"
+                className="inline-block px-8 py-3 bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg transition-colors"
+              >
+                Enroll Now
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -14,6 +14,14 @@ export async function getActiveCourses(category?: CourseCategory) {
         id: true,
         name: true,
         category: true,
+        description: true,
+        batches: {
+          include: {
+            teacher: {
+              include: { user: true }
+            }
+          }
+        }
       }
     });
     return courses;
@@ -60,5 +68,31 @@ export async function getTeachersForCourse(courseId: string) {
   } catch (error) {
     console.error("Failed to get teachers:", error);
     return [];
+  }
+}
+
+export async function getCourseDetails(courseId: string) {
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        description: true,
+        isActive: true,
+        batches: {
+          include: {
+            teacher: {
+              include: { user: true }
+            }
+          }
+        }
+      }
+    });
+    return course;
+  } catch (error) {
+    console.error("Failed to get course details:", error);
+    return null;
   }
 }

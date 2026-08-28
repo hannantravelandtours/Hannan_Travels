@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { createBatch, deleteBatch } from "@/app/actions/batchesAdmin";
+import { createBatch, deleteBatch, editBatch } from "@/app/actions/batchesAdmin";
 import { Clock, Plus, Trash2, Video, Users, Calendar, AlertCircle } from "lucide-react";
 
 export function BatchesClient({ batches, courses, teachers }: { batches: any[], courses: any[], teachers: any[] }) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingBatch, setEditingBatch] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,11 +15,19 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
     setIsSubmitting(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
-    const res = await createBatch(formData);
+    let res;
+    if (editingBatch) {
+      formData.append("id", editingBatch.id);
+      res = await editBatch(formData);
+    } else {
+      res = await createBatch(formData);
+    }
+    
     if (res.error) {
       setError(res.error);
     } else {
       setIsAdding(false);
+      setEditingBatch(null);
     }
     setIsSubmitting(false);
   };
@@ -31,11 +40,11 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
           <p className="text-sm text-gray-500">Assign teachers and schedule course batches.</p>
         </div>
         <button 
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => { setIsAdding(!isAdding); setEditingBatch(null); }}
           className="px-4 py-2 bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition-colors shadow-sm flex items-center space-x-2"
         >
           <Plus className="w-4 h-4" />
-          <span>{isAdding ? "Cancel" : "Add Batch"}</span>
+          <span>{isAdding || editingBatch ? "Cancel" : "Add Batch"}</span>
         </button>
       </div>
 
@@ -52,12 +61,12 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Batch Name</label>
-                <input name="name" required placeholder="E.g. Evening Batch A" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="name" required defaultValue={editingBatch?.name || ""} placeholder="E.g. Evening Batch A" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
               
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Course</label>
-                <select name="courseId" required className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all appearance-none">
+                <select name="courseId" required defaultValue={editingBatch?.courseId || ""} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all appearance-none">
                   <option value="">Select a Course</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -65,7 +74,7 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Teacher</label>
-                <select name="teacherId" required className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all appearance-none">
+                <select name="teacherId" required defaultValue={editingBatch?.teacherId || ""} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all appearance-none">
                   <option value="">Assign a Teacher</option>
                   {teachers.map(t => <option key={t.id} value={t.id}>{t.user?.name || t.name}</option>)}
                 </select>
@@ -73,39 +82,44 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Time (UTC)</label>
-                <input name="time" required placeholder="E.g. 18:00 UTC" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="time" required defaultValue={editingBatch?.time || ""} placeholder="E.g. 18:00 UTC" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Days of Week (Comma separated)</label>
-                <input name="daysOfWeek" required placeholder="Monday, Wednesday, Friday" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="daysOfWeek" required defaultValue={editingBatch?.daysOfWeek?.join(", ") || ""} placeholder="Monday, Wednesday, Friday" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
               
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Classes per Week</label>
-                <input name="classesPerWeek" type="number" required min="1" max="7" defaultValue="3" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="classesPerWeek" type="number" required min="1" max="7" defaultValue={editingBatch?.classesPerWeek || 3} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
 
               <div className="flex space-x-2">
                 <div className="w-2/3">
                   <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Price</label>
-                  <input name="price" type="number" step="0.01" required defaultValue="35" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                  <input name="price" type="number" step="0.01" required defaultValue={editingBatch?.price || 35} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
                 </div>
                 <div className="w-1/3">
                   <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Curr</label>
-                  <input name="currency" required defaultValue="PKR" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                  <input name="currency" required defaultValue={editingBatch?.currency || "PKR"} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Live Class Link (Optional)</label>
-                <input name="liveClassLink" placeholder="Zoom or Meet link" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="liveClassLink" defaultValue={editingBatch?.liveClassLink || ""} placeholder="Zoom or Meet link" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Free Trial Video URL (Optional)</label>
+                <input name="trialVideoUrl" defaultValue={editingBatch?.trialVideoUrl || ""} placeholder="e.g. YouTube or Drive link" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
             </div>
             
             <div className="flex justify-end pt-4">
               <button disabled={isSubmitting} type="submit" className="px-6 py-2.5 bg-navy-custom hover:bg-navy-900 text-white font-bold text-sm rounded-xl transition-colors">
-                {isSubmitting ? "Creating..." : "Create Batch"}
+                {isSubmitting ? "Saving..." : (editingBatch ? "Save Changes" : "Create Batch")}
               </button>
             </div>
           </form>
@@ -116,6 +130,13 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
         {batches.map((batch) => (
           <div key={batch.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative group">
              <div className="absolute top-4 right-4 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => {
+                     setEditingBatch(batch);
+                     setIsAdding(true);
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                   }} className="text-xs font-bold text-emerald-custom bg-emerald-custom/10 hover:bg-emerald-custom hover:text-white px-2 py-1 rounded transition-colors mr-2">
+                  Edit
+                </button>
                 <button onClick={() => {
                      if(confirm('Delete this batch?')) deleteBatch(batch.id);
                    }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">

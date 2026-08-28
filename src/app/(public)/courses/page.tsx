@@ -4,9 +4,16 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { BookOpen, Search, Clock, Award, Star, Users } from "lucide-react";
 
+import { getActiveCourses } from "@/app/actions/courses";
+
 export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [allCourses, setAllCourses] = useState<any[]>([]);
+
+  useEffect(() => {
+    getActiveCourses().then(setAllCourses);
+  }, []);
 
   const categories = [
     "All",
@@ -19,162 +26,16 @@ export default function CoursesPage() {
     "Female Only"
   ];
 
-  const allCourses = [
-    {
-      id: "noorani-qaida",
-      title: "Noorani Qaida",
-      category: "Quran",
-      desc: "Learn basic Arabic alphabets, letter joints, correct pronunciation, and basic phonics. Essential foundation for reading the Quran.",
-      duration: "3-4 Months",
-      level: "Beginner",
-      rating: 4.9,
-      students: 840,
-      price: "$35/mo",
-      teacher: "Mufti Ibrahim",
-      imageBg: "bg-emerald-50 text-emerald-custom",
-    },
-    {
-      id: "quran-reading",
-      title: "Quran Reading",
-      category: "Quran",
-      desc: "Practice reading the full Quran with flow, correct pronunciation, and breathing pauses. Suitable for those who completed Noorani Qaida.",
-      duration: "6-8 Months",
-      level: "Beginner",
-      rating: 4.8,
-      students: 1100,
-      price: "$40/mo",
-      teacher: "Sheikh Mahmoud",
-      imageBg: "bg-emerald-50 text-emerald-custom",
-    },
-    {
-      id: "quran-tajweed",
-      title: "Quran with Tajweed",
-      category: "Tajweed",
-      desc: "Learn the formal rules of Tajweed (Makharij, Sifaat, Madd, Noon Sakinah) to recite beautifully with rules like a professional Qari.",
-      duration: "6-12 Months",
-      level: "Intermediate",
-      rating: 4.9,
-      students: 680,
-      price: "$45/mo",
-      teacher: "Qari Ahmad Raza",
-      imageBg: "bg-teal-50 text-teal-700",
-    },
-    {
-      id: "hifz-quran",
-      title: "Hifz-ul-Quran Memorization",
-      category: "Hifz",
-      desc: "Structured, 1-on-1 memorization program designed for students wanting to memorize specific Juz or become a complete Hafiz/Hafiza.",
-      duration: "2-3 Years",
-      level: "Advanced",
-      rating: 5.0,
-      students: 230,
-      price: "$60/mo",
-      teacher: "Hafiz Abdullah",
-      imageBg: "bg-amber-50 text-amber-700",
-    },
-    {
-      id: "arabic-language",
-      title: "Arabic Language Grammar",
-      category: "Arabic",
-      desc: "Build comprehensive skills in Classical and Modern Arabic. Focuses on vocabulary, verb conjugation, and direct translation of Quran verses.",
-      duration: "12 Months",
-      level: "Intermediate",
-      rating: 4.7,
-      students: 190,
-      price: "$50/mo",
-      teacher: "Ustadha Fatima Noor",
-      imageBg: "bg-blue-50 text-blue-700",
-    },
-    {
-      id: "islamic-studies",
-      title: "Islamic Studies & Fiqh",
-      category: "Islamic Studies",
-      desc: "Study pillars of Islam, Hadith, Seerah, Islamic history, and jurisprudence (Fiqh) relative to daily acts of worship.",
-      duration: "6 Months",
-      level: "Beginner",
-      rating: 4.9,
-      students: 340,
-      price: "$35/mo",
-      teacher: "Dr. Sajid Rehman",
-      imageBg: "bg-purple-50 text-purple-700",
-    },
-    {
-      id: "tafseer-quran",
-      title: "Tafseer (Quran Explanation)",
-      category: "Islamic Studies",
-      desc: "Understand the deep historical contexts, background reasons for revelation, and theological interpretations of Quranic verses.",
-      duration: "12 Months",
-      level: "Advanced",
-      rating: 4.8,
-      students: 150,
-      price: "$55/mo",
-      teacher: "Mufti Muhammad Ibrahim",
-      imageBg: "bg-indigo-50 text-indigo-700",
-    },
-    {
-      id: "hadith-studies",
-      title: "Hadith Studies (Riyadhus Saliheen)",
-      category: "Islamic Studies",
-      desc: "Analysis of prophetic traditions (Hadith), learning their context, authenticity, and practical application in everyday life.",
-      duration: "6 Months",
-      level: "Intermediate",
-      rating: 4.9,
-      students: 120,
-      price: "$45/mo",
-      teacher: "Dr. Sajid Rehman",
-      imageBg: "bg-rose-50 text-rose-700",
-    },
-    {
-      id: "quran-for-kids",
-      title: "Quran Classes for Kids",
-      category: "Kids",
-      desc: "Fun, engaging, and gamified Quran learning customized to capture children's focus. Combines reading, short Surah memorization, and Islamic manners.",
-      duration: "Flexible",
-      level: "Beginner",
-      rating: 4.9,
-      students: 790,
-      price: "$35/mo",
-      teacher: "Ustadha Ayesha Siddiqua",
-      imageBg: "bg-rose-50 text-rose-700",
-    },
-    {
-      id: "quran-for-females",
-      title: "Quran Classes for Females",
-      category: "Female Only",
-      desc: "1-on-1 private lessons conducted exclusively by certified, native female scholars in a secure online setting. Covers Tajweed, Hifz, or Fiqh.",
-      duration: "Flexible",
-      level: "All Levels",
-      rating: 5.0,
-      students: 540,
-      price: "$45/mo",
-      teacher: "Ustadha Fatima Noor",
-      imageBg: "bg-pink-50 text-pink-700",
-    },
-    {
-      id: "hajj-information",
-      title: "Hajj Information",
-      category: "Islamic Studies",
-      desc: "Complete guide on Hajj and Umrah performance. Includes step-by-step procedures, practical rules, supplications, and spiritual guidelines.",
-      duration: "1 Month",
-      level: "Beginner",
-      rating: 4.9,
-      students: 95,
-      price: "$25/mo",
-      teacher: "Mufti Muhammad Ibrahim",
-      imageBg: "bg-amber-50 text-amber-700",
-    },
-  ];
-
   const filteredCourses = allCourses.filter((course) => {
     const matchesSearch =
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.teacher.toLowerCase().includes(searchQuery.toLowerCase());
+      course.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.teacher?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
       selectedCategory === "All" ||
-      course.category.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-      selectedCategory.toLowerCase().includes(course.category.toLowerCase());
+      course.category?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+      selectedCategory.toLowerCase().includes(course.category?.toLowerCase() || "");
 
     return matchesSearch && matchesCategory;
   });
@@ -240,39 +101,42 @@ export default function CoursesPage() {
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col justify-between hover-lift"
               >
                 <div>
-                  <div className={`p-8 ${course.imageBg} relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
+                  <div className="p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                    <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
+                      <BookOpen className="h-32 w-32" />
+                    </div>
                     <span className="px-3 py-1 rounded-full bg-white/70 text-[10px] font-extrabold uppercase w-fit tracking-wide shadow-sm">
                       {course.category}
                     </span>
-                    <h2 className="text-xl font-extrabold text-navy-custom mt-4">
-                      {course.title}
-                    </h2>
+                    <h3 className="text-xl font-extrabold text-navy-custom mt-4">
+                      {course.name}
+                    </h3>
                   </div>
 
-                  <div className="p-6 space-y-4">
-                    <p className="text-xs text-gray-500 font-semibold leading-relaxed line-clamp-3">
-                      {course.desc}
+                  <div className="p-6 space-y-4 flex-grow flex flex-col">
+                    <p className="text-xs text-gray-500 font-semibold line-clamp-2 leading-relaxed flex-grow">
+                      {course.description || "Learn the Quran with our expert scholars."}
                     </p>
 
-                    <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-y border-gray-50 py-3">
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-y border-gray-50 py-3 mt-auto">
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4 text-emerald-custom-light" />
-                        <span>{course.duration}</span>
+                        <span>{course.batches?.length || 0} Batches Available</span>
                       </div>
                       <div className="flex items-center space-x-1 text-gold-custom">
                         <Star className="h-4 w-4 fill-gold-custom text-gold-custom" />
-                        <span>{course.rating}</span>
+                        <span>{course.rating || 5.0}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Users className="h-4 w-4 text-emerald-custom" />
-                        <span>{course.students} Students</span>
+                        <span>{course.students || 0} Students</span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center text-xs">
-                      <div>
-                        <span className="block text-gray-400 font-semibold">Tutor:</span>
-                        <span className="block font-bold text-navy-custom">{course.teacher}</span>
+                    <div className="flex items-center justify-between text-xs mt-2">
+                      <div className="space-y-1">
+                        <span className="block text-gray-400 font-medium">Lead Scholar:</span>
+                        <span className="block font-bold text-navy-custom">{course.batches?.[0]?.teacher?.user?.name || "Various Scholars"}</span>
                       </div>
                       <div className="text-right">
                         <span className="block font-bold text-emerald-custom text-xs">Varies by Batch</span>
@@ -281,18 +145,19 @@ export default function CoursesPage() {
                   </div>
                 </div>
 
-                <div className="p-6 pt-0 flex gap-3">
+                {/* Action buttons */}
+                <div className="p-6 pt-0 flex gap-3 mt-auto">
                   <Link
                     href={`/courses/${course.id}`}
-                    className="flex-grow text-center py-2.5 rounded-lg border border-gray-200 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom transition-all"
+                    className="flex-1 text-center py-2.5 rounded-lg border border-gray-200 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom transition-all"
                   >
-                    Curriculum Details
+                    View Details
                   </Link>
                   <Link
-                    href="/register"
-                    className="flex-grow text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow"
+                    href={`/courses/${course.id}`}
+                    className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow flex items-center justify-center space-x-1"
                   >
-                    Start Free Trial
+                    <span>View Batches & Trial</span>
                   </Link>
                 </div>
               </div>
