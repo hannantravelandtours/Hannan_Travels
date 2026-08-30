@@ -2,12 +2,13 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CheckCircle, XCircle } from "lucide-react";
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
+export const dynamic = "force-dynamic";
+
+export default async function VerifyEmailPage(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const token = searchParams.token as string;
+  const searchParams = await props.searchParams;
+  const token = searchParams?.token as string;
 
   if (!token) {
     return (
