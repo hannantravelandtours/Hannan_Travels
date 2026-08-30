@@ -6,7 +6,9 @@ import { FeesClient } from "./FeesClient";
 export default async function FeesPage() {
   const [activeRegistrations, teachers, feeRecords, salaryPayments] = await Promise.all([
     prisma.registration.findMany({
-      where: { status: "ACTIVE" },
+      where: { 
+        status: { in: ["ACTIVE", "PENDING_EMAIL_VERIFICATION"] } 
+      },
       include: { student: { include: { user: true } }, course: true }
     }),
     prisma.teacherProfile.findMany({

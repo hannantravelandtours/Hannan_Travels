@@ -3,7 +3,10 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(email: string, token: string) {
-  const baseUrl = process.env.NEXTAUTH_URL || "https://alhannanquraninstitute.com";
+  // Use the main custom domain directly instead of relying on NEXTAUTH_URL
+  const baseUrl = process.env.NODE_ENV === "development" 
+    ? "http://localhost:3000" 
+    : "https://alhannanquraninstitute.com";
   const confirmLink = `${baseUrl}/verify-email?token=${token}`;
 
   try {

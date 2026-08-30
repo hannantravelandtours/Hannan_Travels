@@ -29,16 +29,25 @@ export const Navbar: React.FC = () => {
     { name: "About Us", path: "/about" },
   ];
 
-  const coursesList = [
+  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>([
     { name: "Noorani Qaida", path: "/courses/noorani-qaida" },
     { name: "Quran Reading", path: "/courses/quran-reading" },
     { name: "Quran with Tajweed", path: "/courses/quran-tajweed" },
     { name: "Arabic Language Grammar", path: "/courses/arabic-language" },
     { name: "Islamic Studies & Fiqh", path: "/courses/islamic-studies" },
     { name: "Tafseer (Quran Explanation)", path: "/courses/tafseer-quran" },
-    { name: "Hadith Studies (Riyadhus Saliheen)", path: "/courses/hadith-studies" },
-    { name: "Hajj Information", path: "/courses/hajj-information" },
-  ];
+  ]);
+
+  useEffect(() => {
+    // Dynamically fetch courses for the dropdown
+    import("@/app/actions/courses").then((module) => {
+      module.getActiveCourses().then((courses) => {
+        if (courses && courses.length > 0) {
+          setCoursesList(courses.map((c) => ({ name: c.name, path: `/courses/${c.id}` })));
+        }
+      });
+    });
+  }, []);
 
   const bottomLinks = [
     { name: "Hadya/Fee", path: "/fee" },
