@@ -479,7 +479,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       <section 
         className="relative bg-navy-custom text-white py-24 overflow-hidden min-h-[400px] flex items-center"
         style={dbCourse.bannerImage ? { 
-          backgroundImage: `url(${dbCourse.bannerImage})`, 
+          backgroundImage: `url('${dbCourse.bannerImage}')`, 
           backgroundSize: 'cover', 
           backgroundPosition: 'center' 
         } : {}}
