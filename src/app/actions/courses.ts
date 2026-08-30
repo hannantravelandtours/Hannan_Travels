@@ -13,6 +13,8 @@ export async function getActiveCourses(category?: CourseCategory) {
       select: {
         id: true,
         name: true,
+        subtitle: true,
+        bannerImage: true,
         category: true,
         description: true,
         batches: {
@@ -78,6 +80,8 @@ export async function getCourseDetails(courseId: string) {
       select: {
         id: true,
         name: true,
+        subtitle: true,
+        bannerImage: true,
         category: true,
         description: true,
         isActive: true,
