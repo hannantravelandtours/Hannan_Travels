@@ -15,13 +15,19 @@ export function CoursesClient({ courses }: { courses: any[] }) {
     setIsSubmitting(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
-    const res = await createCourse(formData);
-    if (res.error) {
-      setError(res.error);
-    } else {
-      setIsAdding(false);
+    try {
+      const res = await createCourse(formData);
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setIsAdding(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("A critical error occurred. Please check your Supabase API keys in the .env file.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
