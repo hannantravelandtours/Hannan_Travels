@@ -476,44 +476,48 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-16 pb-20">
       {/* Course Hero Banner */}
-      <section className="bg-[#0b1221] text-white py-16 sm:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        {/* Glow Effect */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[100px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
+      <section 
+        className="relative bg-navy-custom text-white py-24 overflow-hidden min-h-[400px] flex items-center"
+        style={dbCourse.bannerImage ? { 
+          backgroundImage: `url(${dbCourse.bannerImage})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center' 
+        } : {}}
+      >
+        {/* Subtle gradient overlay to ensure text legibility against any uploaded banner image */}
+        {dbCourse.bannerImage && (
+          <div className="absolute inset-0 bg-gradient-to-r from-navy-custom/95 via-navy-custom/80 to-transparent pointer-events-none" />
+        )}
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-6 space-y-8">
-              <Link href="/courses" className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
-                <span className="mr-2">←</span> Back to Services
-              </Link>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
-                {courseTitle}
-              </h1>
-              
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="max-w-2xl space-y-6">
+            <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
+              <span className="mr-2">←</span> Back to Services
+            </Link>
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
+              {dbCourse.name || courseTitle}
+            </h1>
+            
+            {dbCourse.subtitle && (
+              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed">
+                {dbCourse.subtitle}
+              </p>
+            )}
+
+            {!dbCourse.subtitle && courseDesc && (
               <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
                 {courseDesc.substring(0, 100)}...
               </p>
+            )}
 
-              <div className="pt-2">
-                <Link
-                  href="/register"
-                  className="inline-block bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg transition-transform hover:scale-105 text-sm"
-                >
-                  Start 3-Class Free Trial
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Image */}
-            <div className="lg:col-span-6 relative h-[350px] lg:h-[420px] flex items-center justify-center">
-              {mockCourse.image ? (
-                <img src={mockCourse.image} className="w-full h-full object-contain drop-shadow-2xl" alt={courseTitle} />
-              ) : (
-                <div className="w-full h-full bg-gray-800 animate-pulse rounded-[30px]" />
-              )}
+            <div className="pt-4">
+              <Link
+                href="/register"
+                className="inline-block bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg transition-transform hover:scale-105 text-sm"
+              >
+                Start Free Trial
+              </Link>
             </div>
           </div>
         </div>

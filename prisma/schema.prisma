@@ -82,6 +82,8 @@ model StudentProfile {
 model Course {
   id             String         @id @default(cuid())
   name           String
+  subtitle       String?
+  bannerImage    String?
   category       CourseCategory
   timingNote     String?        // e.g. "Mon/Wed/Fri 6-7 PM"
   description    String?

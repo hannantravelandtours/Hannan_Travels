@@ -55,6 +55,14 @@ export function CoursesClient({ courses }: { courses: any[] }) {
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Course Name</label>
                 <input name="name" required placeholder="E.g. Advanced Tajweed" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Subtitle</label>
+                <input name="subtitle" placeholder="E.g. Learn to read Quran with perfect pronunciation" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+              </div>
+              <div className="md:col-span-1">
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Banner Image</label>
+                <input type="file" name="bannerImage" accept="image/*" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2 px-4 text-sm outline-none transition-all" />
+              </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Category</label>
                 <select name="category" required className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all appearance-none">
@@ -113,8 +121,17 @@ export function CoursesClient({ courses }: { courses: any[] }) {
                 </div>
              </div>
              
-             <h3 className="text-lg font-bold text-navy-custom">{course.name}</h3>
-             <p className="text-sm text-gray-500 mt-2 line-clamp-2 flex-grow">{course.description || "No description provided."}</p>
+             <div className="flex items-center space-x-4 mb-4">
+                {course.bannerImage && (
+                  <img src={course.bannerImage} alt={course.name} className="w-16 h-16 rounded-lg object-cover bg-gray-100 flex-shrink-0" />
+                )}
+                <div>
+                  <h3 className="font-bold text-navy-custom text-lg">{course.name}</h3>
+                  {course.subtitle && <p className="text-xs text-gray-500 mt-0.5">{course.subtitle}</p>}
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-500 mb-6 line-clamp-2 flex-grow">{course.description || "No description provided."}</p>
              
              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-end">
                 <div className="flex items-center text-xs font-bold text-gray-400">

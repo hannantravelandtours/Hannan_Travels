@@ -101,17 +101,33 @@ export default function CoursesPage() {
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col justify-between hover-lift"
               >
                 <div>
-                  <div className="p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]">
-                    <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
-                      <BookOpen className="h-32 w-32" />
+                  {course.bannerImage ? (
+                    <div className="relative h-40 w-full overflow-hidden">
+                      <img src={course.bannerImage} alt={course.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+                      <div className="absolute top-4 left-4">
+                        <span className="px-3 py-1 rounded-full bg-white/90 text-navy-custom text-[10px] font-extrabold uppercase tracking-wide shadow-sm backdrop-blur-sm">
+                          {course.category}
+                        </span>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 className="text-lg font-extrabold text-white">
+                          {course.name}
+                        </h3>
+                      </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-white/70 text-[10px] font-extrabold uppercase w-fit tracking-wide shadow-sm">
-                      {course.category}
-                    </span>
-                    <h3 className="text-xl font-extrabold text-navy-custom mt-4">
-                      {course.name}
-                    </h3>
-                  </div>
+                  ) : (
+                    <div className="p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                      <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
+                        <BookOpen className="h-32 w-32" />
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-white/70 text-[10px] font-extrabold uppercase w-fit tracking-wide shadow-sm">
+                        {course.category}
+                      </span>
+                      <h3 className="text-xl font-extrabold text-navy-custom mt-4">
+                        {course.name}
+                      </h3>
+                    </div>
+                  )}
 
                   <div className="p-6 space-y-4 flex-grow flex flex-col">
                     <p className="text-xs text-gray-500 font-semibold line-clamp-2 leading-relaxed flex-grow">
