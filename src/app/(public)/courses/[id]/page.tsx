@@ -484,23 +484,21 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           backgroundPosition: 'center' 
         } : {}}
       >
-        {/* Subtle gradient overlay to ensure text legibility against any uploaded banner image */}
-        {dbCourse.bannerImage && (
-          <div className="absolute inset-0 bg-gradient-to-r from-navy-custom/95 via-navy-custom/80 to-transparent pointer-events-none" />
-        )}
+        {/* Dark overlay was explicitly requested to be removed by user */}
+        {/* If text is hard to read on bright images, consider adding a text-shadow class to the heading instead */}
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="max-w-2xl space-y-6">
-            <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
+            <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors drop-shadow-md">
               <span className="mr-2">←</span> Back to Services
             </Link>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white drop-shadow-lg">
               {dbCourse.name || courseTitle}
             </h1>
             
             {dbCourse.subtitle && (
-              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed">
+              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed drop-shadow-md">
                 {dbCourse.subtitle}
               </p>
             )}
