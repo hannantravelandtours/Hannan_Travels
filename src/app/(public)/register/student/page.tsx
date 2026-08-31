@@ -79,8 +79,8 @@ function StudentRegistrationForm() {
   return (
     <div className="min-h-screen bg-stone-950 text-white flex flex-col md:flex-row">
       <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16 z-10 overflow-y-auto">
-        <Link href="/register" className="inline-flex items-center space-x-2 text-xs text-gray-400 hover:text-white transition-colors mb-8">
-          <span>← Back to options</span>
+        <Link href="/" className="inline-flex items-center space-x-2 text-xs text-gray-400 hover:text-white transition-colors mb-8">
+          <span>← Back to Home</span>
         </Link>
 
         <div className="max-w-xl w-full mx-auto">
@@ -224,17 +224,12 @@ function StudentRegistrationForm() {
       </div>
       
       {/* Right side Visual (hidden on small) */}
-      <div className="hidden lg:block w-1/3 relative border-l border-stone-900 bg-stone-900">
+      <div className="hidden lg:block w-1/2 xl:w-7/12 relative border-l border-stone-900 bg-stone-900">
          <img
           src="https://i.pinimg.com/736x/d6/0b/64/d60b64962c79859c6b3a02eade1dc714.jpg"
           alt="Al-Quran"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center text-gray-300">
-           <BookOpen className="w-16 h-16 text-emerald-custom-light mb-6 opacity-80" />
-           <h3 className="text-2xl font-bold text-white mb-2">Knowledge is Light</h3>
-           <p className="text-sm">Start your journey of learning the Holy Quran with expert teachers from around the globe.</p>
-        </div>
       </div>
     </div>
   );

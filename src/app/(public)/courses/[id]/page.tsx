@@ -476,47 +476,59 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-16 pb-20">
       {/* Course Hero Banner */}
-      <section 
-        className="relative bg-navy-custom text-white py-24 overflow-hidden min-h-[400px] flex items-center"
-        style={dbCourse.bannerImage ? { 
-          backgroundImage: `url('${dbCourse.bannerImage}')`, 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center' 
-        } : {}}
-      >
-        {/* Dark overlay was explicitly requested to be removed by user */}
-        {/* If text is hard to read on bright images, consider adding a text-shadow class to the heading instead */}
-        
+      <section className="relative bg-navy-custom text-white py-16 sm:py-24 overflow-hidden min-h-[400px] flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <div className="max-w-2xl space-y-6">
-            <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors drop-shadow-md">
-              <span className="mr-2">←</span> Back to Services
-            </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white drop-shadow-lg">
-              {dbCourse.name || courseTitle}
-            </h1>
-            
-            {dbCourse.subtitle && (
-              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed drop-shadow-md">
-                {dbCourse.subtitle}
-              </p>
-            )}
-
-            {!dbCourse.subtitle && courseDesc && (
-              <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
-                {courseDesc.substring(0, 100)}...
-              </p>
-            )}
-
-            <div className="pt-4">
-              <Link
-                href="/register"
-                className="inline-block bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg transition-transform hover:scale-105 text-sm"
-              >
-                Start Free Trial
+            {/* Left side: Text Content */}
+            <div className="space-y-6 max-w-2xl">
+              <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
+                <span className="mr-2">←</span> Back to Services
               </Link>
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
+                {dbCourse.name || courseTitle}
+              </h1>
+              
+              {dbCourse.subtitle && (
+                <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed">
+                  {dbCourse.subtitle}
+                </p>
+              )}
+
+              {!dbCourse.subtitle && courseDesc && (
+                <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
+                  {courseDesc.substring(0, 100)}...
+                </p>
+              )}
+
+              <div className="pt-4">
+                <Link
+                  href="/register"
+                  className="inline-block bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg transition-transform hover:scale-105 text-sm"
+                >
+                  Start Free Trial
+                </Link>
+              </div>
             </div>
+
+            {/* Right side: Banner Image */}
+            <div className="w-full h-full flex justify-center lg:justify-end">
+              {dbCourse.bannerImage ? (
+                <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                  <img 
+                    src={dbCourse.bannerImage} 
+                    alt={dbCourse.name} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl bg-navy-light/20 flex items-center justify-center">
+                  <span className="text-gray-500 font-medium">No banner image uploaded</span>
+                </div>
+              )}
+            </div>
+            
           </div>
         </div>
       </section>
