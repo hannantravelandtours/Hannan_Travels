@@ -102,13 +102,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span className="block text-[10px] text-gray-500">ID: HC-98231</span>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-2 rtl:space-x-reverse text-gray-400 hover:text-red-400 font-bold transition-colors w-full p-1 cursor-pointer"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out Portal</span>
-          </button>
         </div>
       </aside>
 
@@ -216,11 +209,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {profileOpen && (
                 <div className={`absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 rounded-xl bg-white shadow-xl border border-gray-100 p-1 z-50`}>
                   <Link
-                    href="/"
+                    href={`/${role}/settings`}
                     className="flex items-center space-x-2 rtl:space-x-reverse px-3 py-2 text-xs rounded-lg hover:bg-gray-50 text-navy-custom"
                   >
-                    <Globe className="h-4 w-4" />
-                    <span>Academy Website</span>
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
                   </Link>
                   <button
                     onClick={handleLogout}
