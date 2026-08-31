@@ -223,13 +223,14 @@ function StudentRegistrationForm() {
         </div>
       </div>
       
-      {/* Right side Visual (hidden on small) */}
-      <div className="hidden lg:block w-1/2 xl:w-7/12 relative border-l border-stone-900 bg-stone-900">
+      {/* Right side Visual Column */}
+      <div className="hidden md:flex flex-1 relative overflow-hidden border-l border-stone-900">
          <img
           src="https://i.pinimg.com/736x/d6/0b/64/d60b64962c79859c6b3a02eade1dc714.jpg"
           alt="Al-Quran"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover select-none"
         />
+        <div className="absolute inset-0 bg-stone-950/20 mix-blend-multiply z-10" />
       </div>
     </div>
   );

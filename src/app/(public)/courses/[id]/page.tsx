@@ -513,13 +513,13 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Right side: Banner Image */}
-            <div className="w-full h-full flex justify-center lg:justify-end">
+            <div className="w-full flex justify-center lg:justify-end">
               {dbCourse.bannerImage ? (
-                <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative w-full max-w-[500px] rounded-2xl overflow-hidden shadow-2xl bg-navy-light/20 flex items-center justify-center">
                   <img 
                     src={dbCourse.bannerImage} 
                     alt={dbCourse.name} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto max-h-[500px] object-contain"
                   />
                 </div>
               ) : (
