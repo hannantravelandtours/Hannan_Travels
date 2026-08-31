@@ -29,14 +29,7 @@ export const Navbar: React.FC = () => {
     { name: "About Us", path: "/about" },
   ];
 
-  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>([
-    { name: "Noorani Qaida", path: "/courses/noorani-qaida" },
-    { name: "Quran Reading", path: "/courses/quran-reading" },
-    { name: "Quran with Tajweed", path: "/courses/quran-tajweed" },
-    { name: "Arabic Language Grammar", path: "/courses/arabic-language" },
-    { name: "Islamic Studies & Fiqh", path: "/courses/islamic-studies" },
-    { name: "Tafseer (Quran Explanation)", path: "/courses/tafseer-quran" },
-  ]);
+  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>([]);
 
   useEffect(() => {
     // Dynamically fetch courses for the dropdown
@@ -131,21 +124,27 @@ export const Navbar: React.FC = () => {
 
               {coursesDropdownOpen && (
                 <div className="absolute left-0 mt-0 w-64 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-2 transition-all text-navy-custom border border-gray-100 z-50">
-                  {coursesList.map((course) => {
-                    const isCourseActive = pathname === course.path;
-                    return (
-                      <Link
-                        key={course.path}
-                        href={course.path}
-                        onClick={() => setCoursesDropdownOpen(false)}
-                        className={`block px-3 py-2 text-xs font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-custom transition-all ${
-                          isCourseActive ? "bg-emerald-50 text-emerald-custom" : ""
-                        }`}
-                      >
-                        {course.name}
-                      </Link>
-                    );
-                  })}
+                  {coursesList.length === 0 ? (
+                    <div className="px-3 py-4 text-xs font-semibold text-gray-400 text-center">
+                      No courses available yet
+                    </div>
+                  ) : (
+                    coursesList.map((course) => {
+                      const isCourseActive = pathname === course.path;
+                      return (
+                        <Link
+                          key={course.path}
+                          href={course.path}
+                          onClick={() => setCoursesDropdownOpen(false)}
+                          className={`block px-3 py-2 text-xs font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-custom transition-all ${
+                            isCourseActive ? "bg-emerald-50 text-emerald-custom" : ""
+                          }`}
+                        >
+                          {course.name}
+                        </Link>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </div>
@@ -231,23 +230,29 @@ export const Navbar: React.FC = () => {
               </button>
               {mobileCoursesOpen && (
                 <div className="pl-4 pt-2 space-y-2 flex flex-col text-xs">
-                  {coursesList.map((course) => (
-                    <Link
-                      key={course.path}
-                      href={course.path}
-                      onClick={() => {
-                        setMobileCoursesOpen(false);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`py-1 font-semibold transition-all border-b ${
-                        isHome 
-                          ? "border-emerald-950/30 text-white/70 hover:text-gold-custom-light" 
-                          : "border-gray-50/50 text-navy-custom/75 hover:text-emerald-custom"
-                      }`}
-                    >
-                      {course.name}
-                    </Link>
-                  ))}
+                  {coursesList.length === 0 ? (
+                    <div className="py-2 font-medium text-gray-400 text-sm">
+                      No courses available yet
+                    </div>
+                  ) : (
+                    coursesList.map((course) => (
+                      <Link
+                        key={course.path}
+                        href={course.path}
+                        onClick={() => {
+                          setMobileCoursesOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`py-1 font-semibold transition-all border-b ${
+                          isHome 
+                            ? "border-emerald-950/30 text-white/70 hover:text-gold-custom-light" 
+                            : "border-gray-50/50 text-navy-custom/75 hover:text-emerald-custom"
+                        }`}
+                      >
+                        {course.name}
+                      </Link>
+                    ))
+                  )}
                 </div>
               )}
             </div>

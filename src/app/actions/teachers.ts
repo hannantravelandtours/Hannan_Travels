@@ -12,6 +12,7 @@ export async function createTeacher(formData: FormData) {
     const phone = formData.get("phone") as string;
     const qualification = formData.get("qualification") as string;
     const bio = formData.get("bio") as string;
+    const description = formData.get("description") as string;
 
     if (!name || !email || !password) {
       return { error: "Name, email, and password are required." };
@@ -40,6 +41,7 @@ export async function createTeacher(formData: FormData) {
           userId: user.id,
           qualification: qualification || null,
           bio: bio || null,
+          description: description || null,
         },
       });
     });
@@ -62,5 +64,44 @@ export async function deleteTeacher(id: string) {
     return { success: true };
   } catch (error) {
     return { error: "Failed to delete teacher." };
+  }
+}
+
+export async function updateTeacher(id: string, formData: FormData) {
+  try {
+    const name = formData.get("name") as string;
+    const phone = formData.get("phone") as string;
+    const qualification = formData.get("qualification") as string;
+    const bio = formData.get("bio") as string;
+    const description = formData.get("description") as string;
+
+    if (!name) {
+      return { error: "Name is required." };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id },
+        data: {
+          name,
+          phone: phone || null,
+        },
+      });
+
+      await tx.teacherProfile.update({
+        where: { userId: id },
+        data: {
+          qualification: qualification || null,
+          bio: bio || null,
+          description: description || null,
+        },
+      });
+    });
+
+    revalidatePath("/admin/teachers");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating teacher:", error);
+    return { error: "Failed to update teacher." };
   }
 }
