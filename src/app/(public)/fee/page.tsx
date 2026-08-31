@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle, Info, PhoneCall, Gift, ShieldCheck } from "lucide-react";
+import { CheckCircle, Info, PhoneCall, Gift, ShieldCheck, BookOpen, Clock } from "lucide-react";
+import { getCoursesWithBatchPrices } from "@/app/actions/feeData";
 
 export default function FeePage() {
   const [currency, setCurrency] = useState<"USD" | "GBP" | "PKR">("USD");
+  const [courses, setCourses] = useState<any[]>([]);
+
+  useEffect(() => {
+    getCoursesWithBatchPrices().then(setCourses);
+  }, []);
 
   const exchangeRates = {
     USD: { symbol: "$", scale: 1 },
@@ -13,65 +19,16 @@ export default function FeePage() {
     PKR: { symbol: "Rs.", scale: 280 }
   };
 
-  const packages = [
-    {
-      name: "Starter Plan",
-      classesPerWeek: 2,
-      totalClasses: 8,
-      basePrice: 35,
-      desc: "Perfect for young kids or busy adults starting their foundation studies (e.g. Noorani Qaida).",
-      features: [
-        "1-on-1 Personalized Classes",
-        "30 Minutes Class Duration",
-        "Male & Female Certified Scholars",
-        "Flexible Portal Scheduling",
-        "Monthly Progress Reports",
-        "No Obligation / Cancel Anytime"
-      ],
-      popular: false
-    },
-    {
-      name: "Standard Plan",
-      classesPerWeek: 3,
-      totalClasses: 12,
-      basePrice: 45,
-      desc: "Recommended for steady progress in Tajweed, Hifz, or Arabic translation.",
-      features: [
-        "Everything in Starter Plan",
-        "Recitation Certificate Eligibility",
-        "24/7 Scheduling Adaptability",
-        "Complimentary Virtual Portals access",
-        "Quarterly Live Supervisor Audits",
-        "Priority Support Assistance"
-      ],
-      popular: true
-    },
-    {
-      name: "Intensive Plan",
-      classesPerWeek: 5,
-      totalClasses: 20,
-      basePrice: 65,
-      desc: "Designed for serious students focusing on fast-track Hifz-ul-Quran (memorization).",
-      features: [
-        "Everything in Standard Plan",
-        "Accelerated Learning Tracker",
-        "Direct Line to Academy Scholars",
-        "Custom Course Modules Plan",
-        "Personalized Tajweed Correction Audits",
-        "Annual Ijazah Evaluation Track"
-      ],
-      popular: false
-    }
-  ];
-
   const getPrice = (basePrice: number) => {
     const { symbol, scale } = exchangeRates[currency];
-    const computedPrice = Math.round(basePrice * scale);
+    const computedPrice = Math.round(Number(basePrice) * scale);
     if (currency === "PKR") {
       return `${symbol} ${computedPrice.toLocaleString()}`;
     }
     return `${symbol}${computedPrice}`;
   };
+
+  const coursesWithBatches = courses.filter(c => c.batches && c.batches.length > 0);
 
   return (
     <div className="space-y-16 pb-20">
@@ -113,65 +70,95 @@ export default function FeePage() {
           </div>
         </div>
 
-        {/* Package Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {packages.map((pkg, idx) => (
-            <div
-              key={idx}
-              className={`relative rounded-3xl p-8 bg-white border flex flex-col justify-between transition-all ${
-                pkg.popular
-                  ? "border-emerald-custom shadow-xl scale-102 ring-4 ring-emerald-custom/5"
-                  : "border-gray-200 hover:border-emerald-custom/20 hover:shadow-lg"
-              }`}
-            >
-              {pkg.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-emerald-custom text-white text-[10px] uppercase font-bold tracking-widest">
-                  Most Popular
-                </span>
-              )}
-              
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-navy-custom">{pkg.name}</h3>
-                  <p className="text-xs text-gray-400 font-semibold mt-1">{pkg.desc}</p>
-                </div>
-
-                <div className="border-t border-gray-100 pt-6">
-                  <div className="flex items-baseline space-x-2">
-                    <span className="text-4xl font-black text-emerald-custom">{getPrice(pkg.basePrice)}</span>
-                    <span className="text-xs text-gray-500 font-semibold">/ month</span>
+        {/* Dynamic Courses with Batches */}
+        {coursesWithBatches.length > 0 ? (
+          <div className="space-y-12">
+            {coursesWithBatches.map((course) => (
+              <div key={course.id} className="space-y-6">
+                {/* Course Header */}
+                <div className="flex items-center space-x-3 border-b border-gray-200 pb-4">
+                  <div className="p-2.5 bg-emerald-custom/10 rounded-xl">
+                    <BookOpen className="w-5 h-5 text-emerald-custom" />
                   </div>
-                  <span className="text-[10px] text-gray-400 block mt-1">
-                    {pkg.classesPerWeek} Classes per week ({pkg.totalClasses} sessions monthly)
-                  </span>
+                  <div>
+                    <h2 className="text-xl font-bold text-navy-custom">{course.name}</h2>
+                    {course.subtitle && <p className="text-xs text-gray-500 font-medium">{course.subtitle}</p>}
+                  </div>
                 </div>
 
-                {/* Features List */}
-                <ul className="space-y-3.5 border-t border-gray-100 pt-6">
-                  {pkg.features.map((feat, fIdx) => (
-                    <li key={fIdx} className="flex items-start space-x-2.5 text-xs text-navy-custom/90 font-medium">
-                      <CheckCircle className="h-4.5 w-4.5 text-gold-custom shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {/* Batch Cards for this course */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {course.batches.map((batch: any) => (
+                    <div
+                      key={batch.id}
+                      className="relative rounded-2xl p-6 bg-white border border-gray-200 hover:border-emerald-custom/30 hover:shadow-lg flex flex-col justify-between transition-all"
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-navy-custom">{batch.name}</h3>
+                          <p className="text-xs text-gray-400 font-semibold mt-1">
+                            Teacher: {batch.teacher?.user?.name || "TBD"}
+                          </p>
+                        </div>
 
-              <div className="pt-8 mt-6 border-t border-gray-100 space-y-3">
-                <Link
-                  href="/register"
-                  className={`block w-full text-center py-3 rounded-full text-xs font-bold transition-all ${
-                    pkg.popular
-                      ? "bg-emerald-custom text-white hover:bg-emerald-950 shadow-md hover:shadow-lg"
-                      : "bg-navy-custom text-white hover:bg-navy-900"
-                  }`}
-                >
-                  Start Free Trial
-                </Link>
+                        <div className="border-t border-gray-100 pt-4">
+                          <div className="flex items-baseline space-x-2">
+                            <span className="text-3xl font-black text-emerald-custom">{getPrice(batch.price)}</span>
+                            <span className="text-xs text-gray-500 font-semibold">/ month</span>
+                          </div>
+                          <span className="text-[10px] text-gray-400 block mt-1">
+                            {batch.classesPerWeek} Classes per week
+                          </span>
+                        </div>
+
+                        {/* Batch Details */}
+                        <ul className="space-y-2.5 border-t border-gray-100 pt-4">
+                          <li className="flex items-center space-x-2.5 text-xs text-navy-custom/90 font-medium">
+                            <Clock className="h-4 w-4 text-emerald-custom shrink-0" />
+                            <span>Schedule: {batch.daysOfWeek?.join(", ")}</span>
+                          </li>
+                          <li className="flex items-center space-x-2.5 text-xs text-navy-custom/90 font-medium">
+                            <Clock className="h-4 w-4 text-emerald-custom shrink-0" />
+                            <span>Time: {batch.time}</span>
+                          </li>
+                          <li className="flex items-center space-x-2.5 text-xs text-navy-custom/90 font-medium">
+                            <CheckCircle className="h-4 w-4 text-gold-custom shrink-0" />
+                            <span>1-on-1 Personalized Classes</span>
+                          </li>
+                          <li className="flex items-center space-x-2.5 text-xs text-navy-custom/90 font-medium">
+                            <CheckCircle className="h-4 w-4 text-gold-custom shrink-0" />
+                            <span>Male & Female Certified Scholars</span>
+                          </li>
+                          <li className="flex items-center space-x-2.5 text-xs text-navy-custom/90 font-medium">
+                            <CheckCircle className="h-4 w-4 text-gold-custom shrink-0" />
+                            <span>Cancel Anytime</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="pt-6 mt-4 border-t border-gray-100">
+                        <Link
+                          href="/register"
+                          className="block w-full text-center py-3 rounded-full bg-navy-custom text-white text-xs font-bold hover:bg-navy-900 transition-all"
+                        >
+                          Start Free Trial
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 space-y-4">
+            <BookOpen className="h-16 w-16 text-gray-300 mx-auto" />
+            <h3 className="text-lg font-bold text-navy-custom">No Fee Plans Available</h3>
+            <p className="text-sm text-gray-400 max-w-xs mx-auto">
+              Course batches with fee information will appear here once created by admin.
+            </p>
+          </div>
+        )}
       </section>
 
       {/* Sibling & Family Discounts Banner */}

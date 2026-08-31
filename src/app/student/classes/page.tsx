@@ -55,62 +55,71 @@ export default async function StudentClassesPage() {
             
             <h3 className="text-xl font-bold text-navy-custom">{reg.batch?.name}</h3>
             
-            <div className="mt-6 space-y-3 flex-grow">
-               <div className="flex items-center text-sm">
-                  <Calendar className="w-4 h-4 mr-3 text-emerald-custom" />
-                  <span className="font-semibold text-gray-700 w-24">Days:</span> 
-                  <span className="text-gray-600">{reg.batch?.daysOfWeek.join(", ")}</span>
-               </div>
-               <div className="flex items-center text-sm">
-                  <Clock className="w-4 h-4 mr-3 text-emerald-custom" />
-                  <span className="font-semibold text-gray-700 w-24">Time:</span> 
-                  <span className="text-gray-600">{reg.batch?.time} (UTC)</span>
-               </div>
-               <div className="flex items-center text-sm">
-                  <BookOpen className="w-4 h-4 mr-3 text-emerald-custom" />
-                  <span className="font-semibold text-gray-700 w-24">Teacher:</span> 
-                  <span className="text-gray-600">{reg.batch?.teacher.user.name}</span>
-               </div>
-            </div>
-
-            {reg.batch?.linkHistory && reg.batch.linkHistory.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-gray-100 space-y-2">
-                <span className="text-xs font-bold text-gray-500 uppercase flex items-center mb-1">
-                  <Clock className="w-3 h-3 mr-1.5" /> Previous Links
-                </span>
-                <div className="space-y-1.5 max-h-24 overflow-y-auto pr-2 custom-scrollbar">
-                  {reg.batch.linkHistory.map((historyItem: any) => (
-                    <div key={historyItem.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-[10px]">
-                       <a href={historyItem.url} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-[60%]">
-                         {historyItem.url}
-                       </a>
-                       <span className="text-gray-400 whitespace-nowrap">
-                         {new Date(historyItem.createdAt).toLocaleDateString()} {new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                       </span>
-                    </div>
-                  ))}
-                </div>
+            {reg.accessEnabled === false ? (
+              <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <p className="text-sm font-bold text-amber-700">Access Restricted</p>
+                <p className="text-xs text-amber-600 mt-1">Kindly process your fee to continue with this batch.</p>
               </div>
-            )}
+            ) : (
+              <>
+                <div className="mt-6 space-y-3 flex-grow">
+                   <div className="flex items-center text-sm">
+                      <Calendar className="w-4 h-4 mr-3 text-emerald-custom" />
+                      <span className="font-semibold text-gray-700 w-24">Days:</span> 
+                      <span className="text-gray-600">{reg.batch?.daysOfWeek.join(", ")}</span>
+                   </div>
+                   <div className="flex items-center text-sm">
+                      <Clock className="w-4 h-4 mr-3 text-emerald-custom" />
+                      <span className="font-semibold text-gray-700 w-24">Time:</span> 
+                      <span className="text-gray-600">{reg.batch?.time} (UTC)</span>
+                   </div>
+                   <div className="flex items-center text-sm">
+                      <BookOpen className="w-4 h-4 mr-3 text-emerald-custom" />
+                      <span className="font-semibold text-gray-700 w-24">Teacher:</span> 
+                      <span className="text-gray-600">{reg.batch?.teacher.user.name}</span>
+                   </div>
+                </div>
 
-            <div className="mt-6 pt-4 border-t border-gray-100">
-               {reg.batch?.liveClassLink ? (
-                 <a 
-                   href={reg.batch.liveClassLink}
-                   target="_blank"
-                   rel="noreferrer"
-                   className="w-full py-3 bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition-colors shadow flex items-center justify-center space-x-2"
-                 >
-                   <Video className="w-4 h-4" />
-                   <span>Join Live Class</span>
-                 </a>
-               ) : (
-                 <button disabled className="w-full py-3 bg-gray-100 text-gray-400 font-bold text-sm rounded-xl flex items-center justify-center space-x-2 cursor-not-allowed">
-                   <Video className="w-4 h-4" />
-                   <span>No Link Provided Yet</span>
-                 </button>
-               )}
-            </div>
+                {reg.batch?.linkHistory && reg.batch.linkHistory.length > 0 && (
+                  <div className="mt-6 pt-4 border-t border-gray-100 space-y-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase flex items-center mb-1">
+                      <Clock className="w-3 h-3 mr-1.5" /> Previous Links
+                    </span>
+                    <div className="space-y-1.5 max-h-24 overflow-y-auto pr-2 custom-scrollbar">
+                      {reg.batch.linkHistory.map((historyItem: any) => (
+                        <div key={historyItem.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-[10px]">
+                           <a href={historyItem.url} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-[60%]">
+                             {historyItem.url}
+                           </a>
+                           <span className="text-gray-400 whitespace-nowrap">
+                             {new Date(historyItem.createdAt).toLocaleDateString()} {new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                           </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                   {reg.batch?.liveClassLink ? (
+                     <a 
+                       href={reg.batch.liveClassLink}
+                       target="_blank"
+                       rel="noreferrer"
+                       className="w-full py-3 bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition-colors shadow flex items-center justify-center space-x-2"
+                     >
+                       <Video className="w-4 h-4" />
+                       <span>Join Live Class</span>
+                     </a>
+                   ) : (
+                     <button disabled className="w-full py-3 bg-gray-100 text-gray-400 font-bold text-sm rounded-xl flex items-center justify-center space-x-2 cursor-not-allowed">
+                       <Video className="w-4 h-4" />
+                       <span>No Link Provided Yet</span>
+                     </button>
+                   )}
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>

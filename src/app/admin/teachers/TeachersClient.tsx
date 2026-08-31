@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { createTeacher, deleteTeacher } from "@/app/actions/teachers";
-import { UserPlus, Trash2, Mail, Phone, BookOpen, AlertCircle, Edit2 } from "lucide-react";
+import { UserPlus, Trash2, Mail, Phone, BookOpen, AlertCircle, Edit2, Eye, EyeOff, Key } from "lucide-react";
 
 export function TeachersClient({ teachers }: { teachers: any[] }) {
   const [isAdding, setIsAdding] = useState(false);
@@ -10,6 +10,7 @@ export function TeachersClient({ teachers }: { teachers: any[] }) {
   const [error, setError] = useState<string | null>(null);
   const [editingTeacher, setEditingTeacher] = useState<any | null>(null);
   const [teacherToDelete, setTeacherToDelete] = useState<string | null>(null);
+  const [viewingCredentials, setViewingCredentials] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -134,8 +135,12 @@ export function TeachersClient({ teachers }: { teachers: any[] }) {
                 <input name="name" required defaultValue={editingTeacher.name} placeholder="Full Name" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Email (Cannot be changed)</label>
-                <input name="email" type="email" disabled defaultValue={editingTeacher.email} className="w-full bg-gray-100 border border-gray-200 rounded-xl py-2.5 px-4 text-sm text-gray-500 outline-none cursor-not-allowed" />
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Email</label>
+                <input name="email" type="email" defaultValue={editingTeacher.email} placeholder="teacher@quranacademy.com" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">New Password <span className="text-gray-300 normal-case">(leave blank to keep current)</span></label>
+                <input name="password" type="password" placeholder="Enter new password (optional)" minLength={6} className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Phone</label>
@@ -184,44 +189,66 @@ export function TeachersClient({ teachers }: { teachers: any[] }) {
                 </tr>
               )}
               {teachers.map((teacher) => (
-                <tr key={teacher.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-navy-custom">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                        {teacher.name.charAt(0)}
+                <React.Fragment key={teacher.id}>
+                  <tr className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-navy-custom">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                          {teacher.name.charAt(0)}
+                        </div>
+                        <span>{teacher.name}</span>
                       </div>
-                      <span>{teacher.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 space-y-1">
-                    <div className="flex items-center text-xs"><Mail className="w-3 h-3 mr-1.5" /> {teacher.email}</div>
-                    {teacher.phone && (
-                      <div className="flex items-center text-xs"><Phone className="w-3 h-3 mr-1.5" /> {teacher.phone}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-xs max-w-[200px] truncate" title={teacher.teacherProfile?.bio}>
-                    {teacher.teacherProfile?.qualification ? <div className="font-bold text-gray-700">{teacher.teacherProfile.qualification}</div> : null}
-                    <div className="text-gray-500">{teacher.teacherProfile?.bio || "-"}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md w-fit">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>{teacher.teacherProfile?.batches?.length || 0} Batches</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => {
-                      setEditingTeacher(teacher);
-                      setIsAdding(false);
-                      setError(null);
-                    }} className="text-gray-400 hover:text-emerald-500 transition-colors p-1">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => setTeacherToDelete(teacher.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-6 py-4 space-y-1">
+                      <div className="flex items-center text-xs"><Mail className="w-3 h-3 mr-1.5" /> {teacher.email}</div>
+                      {teacher.phone && (
+                        <div className="flex items-center text-xs"><Phone className="w-3 h-3 mr-1.5" /> {teacher.phone}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-xs max-w-[200px] truncate" title={teacher.teacherProfile?.bio}>
+                      {teacher.teacherProfile?.qualification ? <div className="font-bold text-gray-700">{teacher.teacherProfile.qualification}</div> : null}
+                      <div className="text-gray-500">{teacher.teacherProfile?.bio || "-"}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md w-fit">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span>{teacher.teacherProfile?.batches?.length || 0} Batches</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => setViewingCredentials(viewingCredentials === teacher.id ? null : teacher.id)} className="text-gray-400 hover:text-blue-500 transition-colors p-1" title="View Credentials">
+                        <Key className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => {
+                        setEditingTeacher(teacher);
+                        setIsAdding(false);
+                        setError(null);
+                      }} className="text-gray-400 hover:text-emerald-500 transition-colors p-1">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setTeacherToDelete(teacher.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                  {viewingCredentials === teacher.id && (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-3 bg-blue-50/50 border-t border-blue-100">
+                        <div className="flex items-center space-x-6 text-xs">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-gray-500 uppercase">Login Email:</span>
+                            <span className="font-semibold text-navy-custom bg-white px-3 py-1 rounded-lg border border-gray-200">{teacher.email}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-gray-500 uppercase">Password:</span>
+                            <span className="font-semibold text-gray-400 bg-white px-3 py-1 rounded-lg border border-gray-200">••••••••</span>
+                            <span className="text-gray-400 italic">(Use edit to change)</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -237,7 +264,7 @@ export function TeachersClient({ teachers }: { teachers: any[] }) {
             </div>
             <h3 className="text-xl font-bold text-center text-navy-custom mb-2">Delete Teacher?</h3>
             <p className="text-sm text-gray-500 text-center mb-6">
-              Are you sure you want to delete this teacher? This action cannot be undone.
+              Are you sure you want to delete this teacher and all associated data? This action cannot be undone.
             </p>
             <div className="flex space-x-3">
               <button

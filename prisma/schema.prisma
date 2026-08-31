@@ -112,6 +112,7 @@ model Batch {
   recordings  ClassRecording[]
   attendance  AttendanceRecord[]
   linkHistory LiveLinkHistory[]
+  classLinks  ClassLink[]
 }
 
 model Registration {
@@ -124,6 +125,7 @@ model Registration {
   batch        Batch?   @relation(fields: [batchId], references: [id], onDelete: SetNull)
   preferredTeacherId String?  // teacher selected at registration time
   status       RegistrationStatus @default(PENDING_EMAIL_VERIFICATION)
+  accessEnabled Boolean @default(true)
   registeredAt DateTime @default(now())
   feeRecords   FeeRecord[]
 }
@@ -176,6 +178,36 @@ model LiveLinkHistory {
   batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
   url       String
   createdAt DateTime @default(now())
+}
+
+model ClassLink {
+  id        String   @id @default(cuid())
+  batchId   String
+  batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  url       String
+  sentBy    String
+  sentAt    DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email, token])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  targetType  String   // "ALL_TEACHERS" | "ALL_BATCHES" | "TEACHER" | "BATCH"
+  targetId    String?  // specific teacher or batch ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String   // admin userId
 }
 
 model VerificationToken {

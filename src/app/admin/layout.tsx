@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { LayoutDashboard, Users, BookOpen, Clock, Settings, GraduationCap, DollarSign } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, Clock, Settings, GraduationCap, DollarSign, Bell } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const sidebarItems = [
@@ -12,6 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Batches", path: "/admin/batches", icon: Clock },
     { name: "Students", path: "/admin/students", icon: Users },
     { name: "Fees & Finances", path: "/admin/fees", icon: DollarSign },
+    { name: "Announcements", path: "/admin/announcements", icon: Bell },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 

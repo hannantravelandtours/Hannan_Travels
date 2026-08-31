@@ -70,7 +70,9 @@ export async function deleteTeacher(id: string) {
 export async function updateTeacher(id: string, formData: FormData) {
   try {
     const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
+    const password = formData.get("password") as string;
     const qualification = formData.get("qualification") as string;
     const bio = formData.get("bio") as string;
     const description = formData.get("description") as string;
@@ -79,13 +81,31 @@ export async function updateTeacher(id: string, formData: FormData) {
       return { error: "Name is required." };
     }
 
+    // Check if email is being changed and if it's unique
+    if (email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser && existingUser.id !== id) {
+        return { error: "Another user with this email already exists." };
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
+      const updateData: any = {
+        name,
+        phone: phone || null,
+      };
+
+      if (email) {
+        updateData.email = email;
+      }
+
+      if (password && password.trim().length >= 6) {
+        updateData.password = await bcrypt.hash(password, 10);
+      }
+
       await tx.user.update({
         where: { id },
-        data: {
-          name,
-          phone: phone || null,
-        },
+        data: updateData,
       });
 
       await tx.teacherProfile.update({

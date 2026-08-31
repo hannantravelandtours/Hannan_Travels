@@ -383,11 +383,16 @@ export default function HomePage() {
             >
               <div>
                 {/* Visual Header */}
-                <div className={`p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
+                <div className={`p-8 relative overflow-hidden flex flex-col justify-between min-h-[140px] ${
+                  course.category.toLowerCase().includes('arabic') ? 'bg-blue-50 text-blue-600' :
+                  course.category.toLowerCase().includes('islamic') ? 'bg-amber-50 text-amber-600' :
+                  course.category.toLowerCase().includes('tajweed') ? 'bg-purple-50 text-purple-600' :
+                  'bg-emerald-50 text-emerald-custom'
+                }`}>
                   <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
                     <BookOpen className="h-32 w-32" />
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-white/70 text-[10px] font-extrabold uppercase w-fit tracking-wide shadow-sm">
+                  <span className="px-3 py-1 rounded-full bg-white/70 text-[10px] font-extrabold uppercase w-fit tracking-wide shadow-sm text-navy-custom">
                     {course.category}
                   </span>
                   <h3 className="text-xl font-extrabold text-navy-custom mt-4">

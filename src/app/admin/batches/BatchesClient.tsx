@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { createBatch, deleteBatch, editBatch } from "@/app/actions/batchesAdmin";
 import { Clock, Plus, Trash2, Video, Users, Calendar, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export function BatchesClient({ batches, courses, teachers }: { batches: any[], courses: any[], teachers: any[] }) {
   const [isAdding, setIsAdding] = useState(false);
@@ -188,7 +189,7 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
                   </div>
                 )}
                 
-                <div className="flex items-center">
+                <div className="flex items-center justify-between w-full">
                   {batch.liveClassLink ? (
                     <a href={batch.liveClassLink} target="_blank" rel="noreferrer" className="flex items-center text-xs font-bold text-emerald-custom hover:text-emerald-600 transition-colors">
                       <Video className="w-4 h-4 mr-1" />
@@ -200,6 +201,11 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
                       No link provided
                     </span>
                   )}
+                  
+                  <Link href={`/admin/batches/${batch.id}`} className="flex items-center text-xs font-bold text-navy-custom hover:text-navy-700 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">
+                    <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                    View Attendance
+                  </Link>
                 </div>
              </div>
           </div>

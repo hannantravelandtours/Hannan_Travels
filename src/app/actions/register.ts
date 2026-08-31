@@ -17,6 +17,7 @@ const studentRegisterSchema = z.object({
   address: z.string().optional(),
   age: z.coerce.number().min(4, "Age must be at least 4"),
   courseId: z.string().min(1, "Please select a course"),
+  batchId: z.string().min(1, "Please select a batch"),
   preferredTeacherId: z.string().optional(),
 });
 
@@ -37,7 +38,7 @@ export async function registerStudent(formData: FormData) {
     const { 
       name, email, phone, password, 
       fatherName, country, address, age, 
-      courseId, preferredTeacherId 
+      courseId, batchId, preferredTeacherId 
     } = result.data;
 
     // Check if user exists
@@ -82,6 +83,7 @@ export async function registerStudent(formData: FormData) {
         data: {
           studentId: studentProfile.id,
           courseId,
+          batchId,
           preferredTeacherId: preferredTeacherId || null,
           status: "PENDING_EMAIL_VERIFICATION",
         }

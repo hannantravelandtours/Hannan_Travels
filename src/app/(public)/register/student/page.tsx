@@ -16,8 +16,10 @@ function StudentRegistrationForm() {
 
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
   
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedBatch, setSelectedBatch] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,11 +34,16 @@ function StudentRegistrationForm() {
   useEffect(() => {
     if (selectedCourse) {
       getTeachersForCourse(selectedCourse).then(setTeachers);
+      // Filter batches for the selected course
+      const course = courses.find(c => c.id === selectedCourse);
+      setBatches(course?.batches || []);
     } else {
       setTeachers([]);
+      setBatches([]);
     }
     setSelectedTeacher("");
-  }, [selectedCourse]);
+    setSelectedBatch("");
+  }, [selectedCourse, courses]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -190,6 +197,37 @@ function StudentRegistrationForm() {
                 </select>
               </div>
             </div>
+
+            {/* Batch Selection (Required) */}
+            {selectedCourse && batches.length > 0 && (
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Batch <span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <select 
+                    name="batchId" 
+                    required 
+                    value={selectedBatch} 
+                    onChange={(e) => setSelectedBatch(e.target.value)}
+                    className="w-full bg-stone-900 border border-stone-850 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
+                  >
+                    <option value="" disabled>Choose a batch</option>
+                    {batches.map((b: any) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} — {b.daysOfWeek?.join(", ")} {b.time} — {b.price} {b.currency}/mo — Teacher: {b.teacher?.user?.name || "TBD"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {selectedCourse && batches.length === 0 && (
+              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm p-4 rounded-xl flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <span>No batches are available for this course yet. Please select a different course or contact us.</span>
+              </div>
+            )}
 
             {/* Teacher Selection (Optional) */}
             {selectedCourse && teachers.length > 0 && (

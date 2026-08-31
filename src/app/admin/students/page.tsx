@@ -10,7 +10,10 @@ export default async function StudentsPage() {
       studentProfile: {
         include: {
           registrations: {
-            include: { course: true }
+            include: { 
+              course: true,
+              batch: true
+            }
           }
         }
       }

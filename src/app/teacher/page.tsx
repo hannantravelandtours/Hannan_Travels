@@ -2,8 +2,9 @@ import React from "react";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { Users, BookOpen, Clock, Calendar, Video } from "lucide-react";
+import { Users, BookOpen, Clock, Calendar, Video, Bell } from "lucide-react";
 import Link from "next/link";
+import { getAnnouncementsForTeacher } from "@/app/actions/announcements";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +36,31 @@ export default async function TeacherDashboardPage() {
 
   const totalStudents = teacher.batches.reduce((acc, batch) => acc + batch._count.registrations, 0);
 
+  const announcements = await getAnnouncementsForTeacher(teacher.id);
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-navy-custom">Teacher Dashboard</h2>
         <p className="text-sm text-gray-500">Welcome back, {session.user.name}</p>
       </div>
+
+      {announcements.length > 0 && (
+        <div className="space-y-4 mb-8">
+          {announcements.map((a: any) => (
+            <div key={a.id} className="bg-purple-50/50 border border-purple-100 rounded-2xl p-5 flex items-start space-x-4">
+              <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl shrink-0 mt-0.5">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-navy-custom">{a.title}</h4>
+                <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap">{a.message}</p>
+                <p className="text-[10px] text-gray-400 mt-2 font-medium">{new Date(a.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center space-x-4">
