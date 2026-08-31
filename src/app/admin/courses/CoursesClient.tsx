@@ -9,6 +9,7 @@ export function CoursesClient({ courses }: { courses: any[] }) {
   const [isAdding, setIsAdding] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -120,7 +121,7 @@ export function CoursesClient({ courses }: { courses: any[] }) {
                       {course.isActive ? 'Active' : 'Inactive'}
                    </button>
                    <button onClick={() => {
-                     if(confirm('Delete this course?')) deleteCourse(course.id);
+                     setCourseToDelete(course.id);
                    }} className="text-gray-400 hover:text-red-500 transition-colors">
                      <Trash2 className="w-4 h-4" />
                    </button>
@@ -148,6 +149,38 @@ export function CoursesClient({ courses }: { courses: any[] }) {
           </div>
         ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {courseToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-in zoom-in-95">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mb-4 mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-center text-navy-custom mb-2">Delete Course?</h3>
+            <p className="text-sm text-gray-500 text-center mb-6">
+              Are you sure you want to delete this course? This action cannot be undone and will remove it permanently.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setCourseToDelete(null)}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  deleteCourse(courseToDelete);
+                  setCourseToDelete(null);
+                }}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
