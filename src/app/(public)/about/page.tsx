@@ -24,7 +24,7 @@ export default function AboutPage() {
       {/* Page Hero */}
       <section 
         className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-24 bg-cover bg-center text-white"
-        style={{ backgroundImage: "url('/HeroSection.png')" }}
+        style={{ backgroundImage: "url('/aboutpagebanner.webp')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/70 rtl:to-black/30" />

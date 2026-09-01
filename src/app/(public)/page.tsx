@@ -18,10 +18,10 @@ import {
   TrendingUp,
   Bookmark,
   ChevronRight,
-  ChevronLeft
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 import { getActiveCourses } from "@/app/actions/courses";
+import { staticCoursesData } from "@/data/staticCourses";
 
 export default function HomePage() {
   const { t, direction } = useLanguage();
@@ -130,7 +130,7 @@ export default function HomePage() {
       {/* HERO SECTION */}
       <section 
         className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
-        style={{ backgroundImage: "url('/HeroSection.png')" }}
+        style={{ backgroundImage: "url('/homebanner.webp')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         {/* Subtle gradient overlay to darken background behind left-aligned text, keeping right side fully visible and sharp */}
@@ -391,30 +391,6 @@ export default function HomePage() {
               Enroll in specialized, structured courses tailored for all age groups.
             </p>
           </div>
-          <Link
-            href="/courses"
-            className="text-sm font-bold text-emerald-custom hover:text-emerald-900 flex items-center space-x-1 rtl:space-x-reverse"
-          >
-            <span>Explore All 10+ Courses</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        {/* Tab Filters */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {courseCategories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveTab(cat)}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                activeTab === cat
-                  ? "bg-emerald-custom text-white shadow-md"
-                  : "bg-gray-100 hover:bg-gray-200 text-navy-custom"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
         </div>
 
         {/* Courses Grid */}
@@ -438,20 +414,12 @@ export default function HomePage() {
                       <h3 className="text-2xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
                         {course.name}
                       </h3>
-                      {course.subtitle && (
-                        <span className="block text-[10px] font-bold tracking-widest text-white uppercase mt-1">
-                          {course.subtitle}
-                        </span>
-                      )}
+                      <span className="block text-[10px] font-bold tracking-widest text-white uppercase mt-1">
+                        {course.subtitle || staticCoursesData[course.id]?.tagline || course.category}
+                      </span>
                     </div>
                   </div>
                 ) : (
-                  <div className={`p-8 relative overflow-hidden flex flex-col justify-between min-h-[140px] ${
-                    course.category.toLowerCase().includes('arabic') ? 'bg-blue-50 text-blue-600' :
-                    course.category.toLowerCase().includes('islamic') ? 'bg-amber-50 text-amber-600' :
-                    course.category.toLowerCase().includes('tajweed') ? 'bg-purple-50 text-purple-600' :
-                    'bg-emerald-50 text-emerald-custom'
-                  }`}>
                     <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
                       <BookOpen className="h-32 w-32" />
                     </div>
