@@ -39,7 +39,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       {/* Course Hero Banner */}
       <section 
         className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-28 bg-cover bg-center text-white min-h-[600px] lg:min-h-[800px] flex items-center"
-        style={{ backgroundImage: `url('${course.bannerImage || courseStaticInfo?.image || "/HeroSection.png"}')` }}
+        style={{ backgroundImage: `url('${course.bannerImage || courseStaticInfo?.bannerImage || "/HeroSection.png"}')` }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
@@ -223,7 +223,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="space-y-4 pt-8">
               <h3 className="text-lg font-bold text-navy-custom">Course FAQs</h3>
               <div className="space-y-3 text-xs">
-                {mockCourse.faqs.map((faq, idx) => (
+                {courseStaticInfo?.faqs?.map((faq, idx) => (
                   <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-1">
                     <h4 className="font-bold text-navy-custom flex items-center gap-1">
                       <HelpCircle className="h-4 w-4 text-gold-custom shrink-0" />

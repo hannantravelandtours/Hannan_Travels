@@ -421,6 +421,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ) : (
+                  <div className="p-8 bg-emerald-50 text-emerald-custom relative overflow-hidden flex flex-col justify-between min-h-[140px]">
                     <div className="absolute top-0 right-0 translate-x-4 -translate-y-4 opacity-5">
                       <BookOpen className="h-32 w-32" />
                     </div>
@@ -432,7 +433,6 @@ export default function HomePage() {
                     </h3>
                   </div>
                 )}
-
                 {/* Details list */}
                 <div className="p-6 space-y-4">
                   <p className="text-xs text-gray-500 font-semibold line-clamp-2 leading-relaxed">
