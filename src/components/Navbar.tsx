@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <img src="/logo.webp" alt="Hannan Consultants Quran Academy" className="h-12 sm:h-14 w-auto object-contain drop-shadow-md" />
+            <img src="/logo.webp" alt="Hannan Consultants Quran Academy" className="h-12 sm:h-14 w-auto object-contain drop-shadow-md rounded-lg" />
           </Link>
 
           {/* Desktop Navigation */}
