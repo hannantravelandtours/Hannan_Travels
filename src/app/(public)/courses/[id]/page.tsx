@@ -707,7 +707,16 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className="aspect-video w-full bg-black">
               {/* Note: This handles basic iframe embedding for YouTube/Vimeo. Adjust if necessary. */}
               <iframe 
-                src={trialVideo.replace("watch?v=", "embed/")} 
+                src={(() => {
+                  if (!trialVideo) return "";
+                  let videoId = "";
+                  if (trialVideo.includes("youtu.be/")) videoId = trialVideo.split("youtu.be/")[1]?.split("?")[0];
+                  else if (trialVideo.includes("watch?v=")) videoId = trialVideo.split("watch?v=")[1]?.split("&")[0];
+                  else if (trialVideo.includes("shorts/")) videoId = trialVideo.split("shorts/")[1]?.split("?")[0];
+                  else if (trialVideo.includes("embed/")) return trialVideo;
+                  
+                  return videoId ? `https://www.youtube.com/embed/${videoId}` : trialVideo;
+                })()} 
                 className="w-full h-full" 
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
