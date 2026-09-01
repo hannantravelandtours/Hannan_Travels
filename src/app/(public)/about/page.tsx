@@ -23,22 +23,27 @@ export default function AboutPage() {
     <div className="space-y-20 pb-20">
       {/* Page Hero */}
       <section 
-        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-24 bg-cover bg-center text-white"
+        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
         style={{ backgroundImage: "url('/aboutpagebanner.webp')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/70 rtl:to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
         
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 text-center">
-          <span className="inline-block text-xs font-bold text-gold-custom-light uppercase tracking-widest bg-gold-custom/20 border border-gold-custom/30 px-3 py-1 rounded-full backdrop-blur-sm">
-            Who We Are
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-            Nurturing Quranic Literacy & Islamic Character
-          </h1>
-          <p className="text-sm sm:text-base text-gray-300 font-medium max-w-xl mx-auto leading-relaxed">
-            Hannan Consultants is an international online Quran academy dedicated to providing structured Tajweed, Arabic, and Islamic education to families worldwide.
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+          <div className="space-y-6 max-w-2xl">
+            <div className="space-y-1">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
+                Who We Are
+              </h1>
+              <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
+                Nurturing Quranic Literacy
+              </span>
+            </div>
+            
+            <p className="text-base sm:text-lg text-gray-200 font-serif leading-relaxed italic max-w-lg">
+              Hannan Consultants is an international online Quran academy dedicated to providing structured Tajweed, Arabic, and Islamic education to families worldwide.
+            </p>
+          </div>
         </div>
       </section>
 
