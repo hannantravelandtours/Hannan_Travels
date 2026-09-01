@@ -32,19 +32,31 @@ export default function FeePage() {
 
   return (
     <div className="space-y-16 pb-20">
-      {/* Header banner */}
-      <section className="bg-emerald-custom/5 py-16 text-center space-y-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'multiply', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 relative z-10">
-          <span className="text-xs font-bold text-emerald-custom uppercase tracking-widest bg-emerald-custom/10 px-3.5 py-1 rounded-full">
-            Transparent Tuition Hadya
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-navy-custom leading-tight">
-            Hadya & Fee Structures
+      {/* Header */}
+      <section 
+        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-24 bg-cover bg-center text-white"
+        style={{ backgroundImage: "url('/HeroSection.png')" }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/70 rtl:to-black/30" />
+        
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 text-center">
+          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
+            Hadya / Tuition Fees
           </h1>
-          <p className="text-sm sm:text-base text-gray-500 font-medium max-w-xl mx-auto">
-            Affordable monthly packages for 1-on-1 live classes. Start with our 3-Class Free Trial. No contracts, cancel anytime.
+          <p className="text-xs sm:text-sm text-gray-300 font-semibold uppercase tracking-wide">
+            Simple, affordable, and flexible monthly plans for all courses.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-gray-300">
+              <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
+              <span>No Registration Fee</span>
+            </span>
+            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-gray-300">
+              <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
+              <span>Cancel Anytime</span>
+            </span>
+          </div>
         </div>
       </section>
 

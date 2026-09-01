@@ -477,7 +477,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     <div className="space-y-16 pb-20">
       {/* Course Hero Banner */}
       <section 
-        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white min-h-[550px] lg:min-h-[650px] flex items-center"
+        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-28 bg-cover bg-center text-white min-h-[600px] lg:min-h-[800px] flex items-center"
         style={{ backgroundImage: `url('${dbCourse.bannerImage || mockCourse.image || "/HeroSection.png"}')` }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />

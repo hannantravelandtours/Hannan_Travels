@@ -22,16 +22,21 @@ export default function AboutPage() {
   return (
     <div className="space-y-20 pb-20">
       {/* Page Hero */}
-      <section className="bg-emerald-custom/5 py-16 text-center space-y-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'multiply', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
-          <span className="text-xs font-bold text-emerald-custom uppercase tracking-widest bg-emerald-custom/10 px-3 py-1 rounded-full">
+      <section 
+        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-24 bg-cover bg-center text-white"
+        style={{ backgroundImage: "url('/HeroSection.png')" }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/70 rtl:to-black/30" />
+        
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 text-center">
+          <span className="inline-block text-xs font-bold text-gold-custom-light uppercase tracking-widest bg-gold-custom/20 border border-gold-custom/30 px-3 py-1 rounded-full backdrop-blur-sm">
             Who We Are
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-navy-custom leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
             Nurturing Quranic Literacy & Islamic Character
           </h1>
-          <p className="text-sm sm:text-base text-gray-500 font-medium max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-300 font-medium max-w-xl mx-auto leading-relaxed">
             Hannan Consultants is an international online Quran academy dedicated to providing structured Tajweed, Arabic, and Islamic education to families worldwide.
           </p>
         </div>
