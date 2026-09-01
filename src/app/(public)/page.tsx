@@ -230,7 +230,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Ticker Flex container */}
+        {/* Ticker Flex container (Moving Left) */}
         <div className="w-full overflow-hidden flex relative select-none">
           <div className="animate-marquee flex whitespace-nowrap">
             {[
@@ -267,6 +267,49 @@ export default function HomePage() {
                 className="mx-6 text-sm sm:text-base font-extrabold tracking-wider uppercase text-navy-custom shrink-0 flex items-center"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-custom mr-6 opacity-40"></span>
+                {topic}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Ticker Flex container 2 (Moving Right) */}
+        <div className="w-full overflow-hidden flex relative select-none mt-4">
+          <div className="animate-marquee-reverse flex whitespace-nowrap">
+            {[
+              "Advanced Memorization",
+              "Dua & Supplications",
+              "Seerah of Prophet (PBUH)",
+              "Hadith Studies",
+              "Qira'at & Maqamat",
+              "Online Ijaza Program",
+              "Daily Sunnah"
+            ].map((topic, i) => (
+              <div
+                key={i}
+                className="mx-6 text-sm sm:text-base font-extrabold tracking-wider uppercase text-navy-custom shrink-0 flex items-center"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-custom mr-6 opacity-60"></span>
+                {topic}
+              </div>
+            ))}
+          </div>
+          {/* Duplicate of the identical items list to build seamless infinite loop */}
+          <div className="animate-marquee-reverse flex whitespace-nowrap" aria-hidden="true">
+            {[
+              "Advanced Memorization",
+              "Dua & Supplications",
+              "Seerah of Prophet (PBUH)",
+              "Hadith Studies",
+              "Qira'at & Maqamat",
+              "Online Ijaza Program",
+              "Daily Sunnah"
+            ].map((topic, i) => (
+              <div
+                key={`dup2-${i}`}
+                className="mx-6 text-sm sm:text-base font-extrabold tracking-wider uppercase text-navy-custom shrink-0 flex items-center"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-custom mr-6 opacity-60"></span>
                 {topic}
               </div>
             ))}

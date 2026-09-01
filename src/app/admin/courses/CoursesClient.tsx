@@ -16,6 +16,22 @@ export function CoursesClient({ courses }: { courses: any[] }) {
     setIsSubmitting(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
+    
+    // Validate image format and size
+    const file = formData.get("bannerImage") as File;
+    if (file && file.size > 0) {
+      if (file.type !== "image/webp") {
+        setError("Image must be in WEBP format.");
+        setIsSubmitting(false);
+        return;
+      }
+      if (file.size > 100 * 1024) { // 100 KB
+        setError("Image size must be less than 100 KB.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     try {
       const res = await createCourse(formData);
       if (res.error) {
@@ -68,7 +84,7 @@ export function CoursesClient({ courses }: { courses: any[] }) {
               </div>
               <div className="md:col-span-1">
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Banner Image</label>
-                <input type="file" name="bannerImage" accept="image/*" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2 px-4 text-sm outline-none transition-all" />
+                <input type="file" name="bannerImage" accept="image/webp" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2 px-4 text-sm outline-none transition-all" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Category</label>
