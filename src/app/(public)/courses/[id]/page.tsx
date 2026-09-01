@@ -501,7 +501,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 </h1>
                 
                 {dbCourse.subtitle && (
-                  <span className="block text-xl sm:text-2xl font-bold tracking-widest text-gold-custom uppercase">
+                  <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
                     {dbCourse.subtitle}
                   </span>
                 )}
