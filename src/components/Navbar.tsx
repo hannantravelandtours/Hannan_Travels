@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
     { name: "Register", path: "/register" },
   ];
 
-  const isHome = pathname === "/";
+  const isHome = pathname === "/" || pathname?.startsWith("/courses/");
 
   // Dynamic header styles depending on if it's homepage or secondary pages
   const headerClass = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${

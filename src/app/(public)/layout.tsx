@@ -9,7 +9,7 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const { direction } = useLanguage();
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = pathname === "/" || pathname?.startsWith("/courses/");
   const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register");
   
   if (isAuthPage) {
