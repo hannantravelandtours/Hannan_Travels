@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Bookmark,
   ChevronRight,
-import { ChevronLeft } from "lucide-react";
+  ChevronLeft
+} from "lucide-react";
 
 import { getActiveCourses } from "@/app/actions/courses";
 import { staticCoursesData } from "@/data/staticCourses";
