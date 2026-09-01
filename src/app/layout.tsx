@@ -16,6 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hannan Consultants — Advanced Online Quran Academy",
   description: "Learn Quran, Tajweed, Arabic and Islamic Studies from experienced teachers through personalized online classes.",
+  icons: {
+    icon: "/logo.webp",
+    apple: "/logo.webp",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

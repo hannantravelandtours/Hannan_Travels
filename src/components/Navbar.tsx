@@ -84,18 +84,8 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-            <div className="p-2 bg-emerald-custom rounded-lg flex items-center justify-center text-white shadow-md">
-              <BookOpen className="h-6 w-6 text-gold-custom-light" />
-            </div>
-            <div>
-              <span className={`block text-lg font-bold tracking-tight leading-tight ${isHome ? "text-white" : "text-navy-custom"}`}>
-                Hannan Consultants
-              </span>
-              <span className={`block text-xs font-semibold tracking-wider uppercase ${isHome ? "text-gold-custom-light" : "text-emerald-custom"}`}>
-                Quran Academy
-              </span>
-            </div>
+          <Link href="/" className="flex items-center">
+            <img src="/logo.webp" alt="Hannan Consultants Quran Academy" className="h-12 sm:h-14 w-auto object-contain drop-shadow-md" />
           </Link>
 
           {/* Desktop Navigation */}
