@@ -476,14 +476,23 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-16 pb-20">
       {/* Course Hero Banner */}
-      <section className="relative bg-navy-custom text-white py-16 sm:py-24 overflow-hidden min-h-[400px] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section 
+        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white min-h-[400px] flex items-center"
+        style={{ backgroundImage: `url('${dbCourse.bannerImage || mockCourse.image || "/HeroSection.png"}')` }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        {/* Subtle gradient overlay to darken background behind left-aligned text, keeping right side fully visible and sharp */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+          <div className="grid grid-cols-1 gap-12 items-center w-full">
             
-            {/* Left side: Text Content */}
+            {/* Text Content */}
             <div className="space-y-6 max-w-2xl">
               <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-                <span className="mr-2">←</span> Back to Services
+                <span className="mr-2 rtl:hidden">←</span>
+                <span className="mr-2 hidden rtl:inline">→</span>
+                Back to Services
               </Link>
               
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
@@ -498,35 +507,18 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
               {!dbCourse.subtitle && courseDesc && (
                 <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
-                  {courseDesc.substring(0, 100)}...
+                  {courseDesc.substring(0, 150)}...
                 </p>
               )}
 
-              <div className="pt-4">
+              <div className="pt-4 flex flex-wrap items-center justify-start rtl:justify-end gap-4">
                 <Link
                   href="/register"
-                  className="inline-block bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg transition-transform hover:scale-105 text-sm"
+                  className="px-8 py-3.5 rounded-full text-sm font-bold text-white bg-emerald-custom hover:bg-emerald-900 transition-all shadow-lg hover-lift flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   Start Free Trial
                 </Link>
               </div>
-            </div>
-
-            {/* Right side: Banner Image */}
-            <div className="w-full flex justify-center lg:justify-end">
-              {dbCourse.bannerImage ? (
-                <div className="relative w-full max-w-[500px] rounded-2xl overflow-hidden shadow-2xl bg-navy-light/20 flex items-center justify-center">
-                  <img 
-                    src={dbCourse.bannerImage} 
-                    alt={dbCourse.name} 
-                    className="w-full h-auto max-h-[500px] object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl bg-navy-light/20 flex items-center justify-center">
-                  <span className="text-gray-500 font-medium">No banner image uploaded</span>
-                </div>
-              )}
             </div>
             
           </div>
