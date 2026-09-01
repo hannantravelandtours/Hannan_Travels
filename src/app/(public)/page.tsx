@@ -434,10 +434,15 @@ export default function HomePage() {
                         {course.category}
                       </span>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                      <h3 className="text-lg font-extrabold text-white">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+                      <h3 className="text-2xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
                         {course.name}
                       </h3>
+                      {course.subtitle && (
+                        <span className="block text-[10px] font-bold tracking-widest text-white uppercase mt-1">
+                          {course.subtitle}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ) : (
