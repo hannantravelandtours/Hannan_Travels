@@ -495,19 +495,21 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 Back to Services
               </Link>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.1] text-white">
-                {dbCourse.name || courseTitle}
-              </h1>
-              
-              {dbCourse.subtitle && (
-                <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed">
-                  {dbCourse.subtitle}
-                </p>
-              )}
+              <div className="space-y-1">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
+                  {dbCourse.name || courseTitle}
+                </h1>
+                
+                {dbCourse.subtitle && (
+                  <span className="block text-xl sm:text-2xl font-bold tracking-widest text-gold-custom uppercase">
+                    {dbCourse.subtitle}
+                  </span>
+                )}
+              </div>
 
               {!dbCourse.subtitle && courseDesc && (
-                <p className="text-lg text-gray-300 font-medium max-w-lg leading-relaxed">
-                  {courseDesc.substring(0, 150)}...
+                <p className="text-base sm:text-lg text-gray-200 font-serif leading-relaxed italic max-w-lg">
+                  "{courseDesc.substring(0, 150)}..."
                 </p>
               )}
 
