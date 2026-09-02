@@ -210,10 +210,20 @@ export function TeachersClient({ teachers }: { teachers: any[] }) {
                       <div className="text-gray-500">{teacher.teacherProfile?.bio || "-"}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md w-fit">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>{teacher.teacherProfile?.batches?.length || 0} Batches</span>
-                      </div>
+                      {teacher.teacherProfile?.batches && teacher.teacherProfile.batches.length > 0 ? (
+                        <div className="flex flex-col gap-1.5">
+                          {teacher.teacherProfile.batches.map((batch: any) => (
+                            <div key={batch.id} className="flex items-center space-x-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md w-fit text-[10px]">
+                              <BookOpen className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate max-w-[150px]" title={`${batch.name} (${batch.course?.name || "Unknown Course"})`}>
+                                {batch.name} <span className="text-emerald-500 font-normal">({batch.course?.name || "Unknown Course"})</span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-gray-400 italic">No batches assigned</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button onClick={() => setViewingCredentials(viewingCredentials === teacher.id ? null : teacher.id)} className="text-gray-400 hover:text-blue-500 transition-colors p-1" title="View Credentials">

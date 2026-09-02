@@ -9,7 +9,11 @@ export default async function TeachersPage() {
     include: {
       teacherProfile: {
         include: {
-          batches: true
+          batches: {
+            include: {
+              course: true
+            }
+          }
         }
       }
     },
