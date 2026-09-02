@@ -20,7 +20,7 @@ export default function CoursesPage() {
     <div className="space-y-16 pb-20">
       {/* Header banner */}
       <section 
-        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
+        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-28 bg-cover bg-center text-white min-h-[400px] lg:min-h-[500px] flex items-center"
         style={{ backgroundImage: "url('/HeroSection.png')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />

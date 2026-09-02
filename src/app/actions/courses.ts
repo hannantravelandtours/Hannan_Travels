@@ -5,6 +5,35 @@ import { CourseCategory } from "@prisma/client";
 
 export async function getActiveCourses(category?: CourseCategory) {
   try {
+    // 1. Auto-seed logic to ensure 4 static courses always exist
+    const staticIds = ["qaida", "nazra", "hifz", "hajj-umrah"];
+    const existingCount = await prisma.course.count({
+      where: { id: { in: staticIds } }
+    });
+
+    if (existingCount !== 4) {
+      const staticCourses = [
+        { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/Qaidabanner.webp" },
+        { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
+        { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
+        { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp" },
+      ];
+
+      for (const c of staticCourses) {
+        await prisma.course.upsert({
+          where: { id: c.id },
+          update: { name: c.name, category: c.category, bannerImage: c.bannerImage, isActive: true },
+          create: { id: c.id, name: c.name, category: c.category, bannerImage: c.bannerImage, description: "Static Course", isActive: true },
+        });
+      }
+
+      // Cleanup old dynamic courses
+      await prisma.course.deleteMany({
+        where: { id: { notIn: staticIds } }
+      });
+    }
+
+    // 2. Fetch courses
     const courses = await prisma.course.findMany({
       where: {
         isActive: true,
