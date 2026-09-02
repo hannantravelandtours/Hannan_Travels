@@ -28,6 +28,7 @@ export interface CourseDetails {
     a: string;
   }[];
   bannerImage: string;
+  thumbnailImage: string;
 }
 
 export const staticCoursesData: Record<string, CourseDetails> = {
@@ -35,7 +36,8 @@ export const staticCoursesData: Record<string, CourseDetails> = {
     id: "qaida",
     title: "Noorani Qaida",
     category: "QAIDA",
-    bannerImage: "/qaida_banner_ai.png",
+    bannerImage: "/Qaidabanner.webp",
+    thumbnailImage: "/qaida_banner_ai.png",
     tagline: "Build a strong foundation for fluent, beautiful Arabic recitation from day one.",
     desc: "This course is the vital first step for children and adult beginners. It focuses on the letters of the Arabic alphabet, correct pronunciation points (Makharij), phonetic joints, and vowel markings. Under the 1-on-1 guidance of our patient tutors, you will master the rules of joining letters to confidently read full Arabic words and verses.",
     duration: "3-4 Months (36 Sessions)",
@@ -85,7 +87,8 @@ export const staticCoursesData: Record<string, CourseDetails> = {
     id: "nazra",
     title: "Nazra Quran",
     category: "NAZRA",
-    bannerImage: "/nazra_banner_ai.png",
+    bannerImage: "/Nazra_Hifzbanner.webp",
+    thumbnailImage: "/nazra_banner_ai.png",
     tagline: "Read the Holy Quran fluently with correct pronunciation.",
     desc: "Designed for students who can recognize Arabic letters but struggle with flowing word joints or breathing pauses. We focus on daily reading practice directly from the Mus'haf, fixing pronunciation mistakes on the go and establishing natural, confident recitation habits.",
     duration: "6-8 Months (72 Sessions)",
@@ -132,7 +135,8 @@ export const staticCoursesData: Record<string, CourseDetails> = {
     id: "hifz",
     title: "Hifz Quran",
     category: "HIFZ",
-    bannerImage: "/hifz_banner_ai.png",
+    bannerImage: "/Nazra_Hifzbanner.webp",
+    thumbnailImage: "/hifz_banner_ai.png",
     tagline: "Memorize the Holy Quran with a structured and proven methodology.",
     desc: "A dedicated memorization program combining new daily lessons (Sabaq), recent revision (Sabaqi), and old revision (Manzil). Our expert instructors ensure your memorization is solid and your Tajweed is uncompromised.",
     duration: "2-3 Years",
@@ -179,6 +183,7 @@ export const staticCoursesData: Record<string, CourseDetails> = {
     title: "Hajj & Umrah Guide",
     category: "ISLAMIC_STUDIES",
     bannerImage: "/hajj_umrahGuide.webp",
+    thumbnailImage: "/hajj_umrahGuide.webp",
     tagline: "Comprehensive spiritual and practical guidance for the sacred journey.",
     desc: "Prepare for your pilgrimage with our expert scholars. This course covers the Fiqh, rituals, duas, and historical significance of Hajj and Umrah, ensuring you perform your obligations with confidence and spiritual presence.",
     duration: "1 Month (12 Sessions)",

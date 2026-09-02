@@ -60,7 +60,8 @@ export async function getActiveCourses(category?: CourseCategory) {
     const { staticCoursesData } = await import("@/data/staticCourses");
     const mappedCourses = courses.map((course) => ({
       ...course,
-      bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage
+      bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage,
+      thumbnailImage: staticCoursesData[course.id]?.thumbnailImage || course.bannerImage
     }));
 
     return mappedCourses;

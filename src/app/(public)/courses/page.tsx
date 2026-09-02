@@ -70,7 +70,7 @@ export default function CoursesPage() {
                 <div>
                   {course.bannerImage ? (
                     <div className="relative h-40 w-full overflow-hidden">
-                      <img src={course.bannerImage} alt={course.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+                      <img src={(course as any).thumbnailImage || course.bannerImage} alt={course.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
                       <div className="absolute top-4 left-4">
                         <span className="px-3 py-1 rounded-full bg-white/90 text-navy-custom text-[10px] font-extrabold uppercase tracking-wide shadow-sm backdrop-blur-sm">
                           {course.category}
