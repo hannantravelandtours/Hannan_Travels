@@ -6,6 +6,7 @@ import { Users, Clock, Calendar, Video, Edit2, CheckCircle } from "lucide-react"
 import Link from "next/link";
 
 export function TeacherClassesClient({ batches }: { batches: any[] }) {
+  const [editingLink, setEditingLink] = useState<string | null>(null);
   const [linkInput, setLinkInput] = useState("");
   const [titleInput, setTitleInput] = useState("");
   const [dateInput, setDateInput] = useState("");
