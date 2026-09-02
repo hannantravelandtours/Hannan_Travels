@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { CourseCategory } from "@prisma/client";
+import { staticCoursesData } from "@/data/staticCourses";
 
 export async function getActiveCourses(category?: CourseCategory) {
   try {
@@ -57,7 +58,6 @@ export async function getActiveCourses(category?: CourseCategory) {
     });
 
     // 3. Override DB banner images with static source of truth to ensure instant updates
-    const { staticCoursesData } = await import("@/data/staticCourses");
     const mappedCourses = courses.map((course) => ({
       ...course,
       bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage,
@@ -133,7 +133,6 @@ export async function getCourseDetails(courseId: string) {
       }
     });
     if (course) {
-      const { staticCoursesData } = await import("@/data/staticCourses");
       course.bannerImage = staticCoursesData[course.id]?.bannerImage || course.bannerImage;
     }
     return course;
