@@ -45,32 +45,49 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full bg-emerald-custom/20 text-white font-semibold text-xs border border-emerald-custom/30">
+            <BookOpen className="h-4 w-4 text-gold-custom-light" />
+            <span>Curated Islamic Education Pathways</span>
+          </div>
 
-            <div className="space-y-6 max-w-2xl">
-              <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
-                <span className="mr-2 rtl:hidden">←</span>
-                <span className="mr-2 hidden rtl:inline">→</span>
-                Back to Services
-              </Link>
-              
-              <div className="space-y-1">
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
-                  {course.name}
-                </h1>
-                <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
-                  {course.subtitle || courseStaticInfo?.tagline || course.category}
-                </span>
-              </div>
-
-              <div className="pt-4 flex flex-wrap items-center justify-start rtl:justify-end gap-4">
-                <Link
-                  href="/register"
-                  className="px-8 py-3.5 rounded-full text-sm font-bold text-white bg-emerald-custom hover:bg-emerald-900 transition-all shadow-lg hover-lift flex items-center space-x-2 rtl:space-x-reverse"
-                >
-                  Start Free Trial
-                </Link>
-              </div>
+          <div className="space-y-6 max-w-2xl">
+            <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
+              <span className="mr-2 rtl:hidden">←</span>
+              <span className="mr-2 hidden rtl:inline">→</span>
+              Back to Services
+            </Link>
+            
+            <div className="space-y-1">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
+                {course.name}
+              </h1>
+              <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
+                {course.subtitle || courseStaticInfo?.tagline || course.category}
+              </span>
             </div>
+
+            <div className="py-6 border-y border-white/10 my-6 space-y-4 text-left rtl:text-right">
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gold-custom leading-normal font-medium drop-shadow-sm text-left rtl:text-right" dir="rtl">
+                إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ
+              </p>
+              <p className="text-base sm:text-lg text-gray-200 font-serif leading-relaxed italic">
+                "Indeed, this Qur'an guides to that which is most suitable and correct."
+              </p>
+              <p className="text-xs text-gold-custom-light font-bold uppercase tracking-widest">
+                Surah Al-Isra (17:9)
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center justify-start rtl:justify-end gap-4">
+              <Link
+                href="/register"
+                className="px-8 py-3.5 rounded-full text-sm font-bold text-white bg-emerald-custom hover:bg-emerald-900 transition-all shadow-lg hover-lift flex items-center space-x-2 rtl:space-x-reverse"
+              >
+                Start Free Trial
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
