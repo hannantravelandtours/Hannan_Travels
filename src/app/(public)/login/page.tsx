@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, Check, AlertCircle } from "lucide-react";
 import { signIn, getSession } from "next-auth/react";
 import { Suspense } from "react";
+import { resendVerificationEmail } from "@/app/actions/register";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,15 +15,33 @@ function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  const handleResend = async () => {
+    if (!email) return;
+    setIsResending(true);
+    setResendMessage("");
+    const res = await resendVerificationEmail(email);
+    if (res?.error) {
+      setResendMessage(res.error);
+    } else {
+      setResendMessage("Verification email sent! Please check your inbox.");
+    }
+    setIsResending(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     
     setError("");
+    setResendMessage("");
     setIsSubmitting(true);
 
     const res = await signIn("credentials", {
@@ -75,9 +94,32 @@ function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-lg flex items-center space-x-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-lg flex flex-col space-y-2">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+                {error.includes("verify your email") && (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={isResending}
+                    className="self-start text-xs font-bold text-emerald-custom-light hover:underline bg-transparent border-none p-0 cursor-pointer pl-6"
+                  >
+                    {isResending ? "Sending..." : "Resend Verification Email"}
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {resendMessage && (
+              <div className={`text-xs p-3 rounded-lg flex items-center space-x-2 border ${
+                resendMessage.includes("sent") 
+                  ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-500" 
+                  : "bg-red-500/10 border-red-500/50 text-red-500"
+              }`}>
+                <Check className="w-4 h-4 shrink-0" />
+                <span>{resendMessage}</span>
               </div>
             )}
             

@@ -112,3 +112,41 @@ export async function registerStudent(formData: FormData) {
     return { error: "Something went wrong during registration. Please try again." };
   }
 }
+
+export async function resendVerificationEmail(emailStr: string) {
+  try {
+    const email = emailStr.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return { error: "Account not found." };
+    }
+
+    if (user.emailVerified) {
+      return { error: "Email is already verified." };
+    }
+
+    // Delete existing tokens for this email to prevent confusion
+    await prisma.verificationToken.deleteMany({
+      where: { email }
+    });
+
+    // Generate new Verification Token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.verificationToken.create({
+      data: {
+        email,
+        token,
+        expires,
+      }
+    });
+
+    await sendVerificationEmail(email, token);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to resend email:", error);
+    return { error: "Something went wrong. Please try again." };
+  }
+}
