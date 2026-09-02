@@ -3,7 +3,13 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function sendClassLink(batchId: string, url: string, teacherUserId: string) {
+export async function sendClassLink(
+  batchId: string, 
+  url: string, 
+  teacherUserId: string,
+  title?: string,
+  date?: string
+) {
   try {
     if (!batchId || !url) return { error: "Batch and URL are required." };
 
@@ -16,7 +22,12 @@ export async function sendClassLink(batchId: string, url: string, teacherUserId:
 
       // Create link history entry
       await tx.liveLinkHistory.create({
-        data: { batchId, url },
+        data: { 
+          batchId, 
+          url,
+          title: title || null,
+          date: date ? new Date(date) : null
+        },
       });
 
       // Create class link record

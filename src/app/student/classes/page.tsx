@@ -87,12 +87,18 @@ export default async function StudentClassesPage() {
                     </span>
                     <div className="space-y-1.5 max-h-24 overflow-y-auto pr-2 custom-scrollbar">
                       {reg.batch.linkHistory.map((historyItem: any) => (
-                        <div key={historyItem.id} className="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-[10px]">
-                           <a href={historyItem.url} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-[60%]">
-                             {historyItem.url}
-                           </a>
-                           <span className="text-gray-400 whitespace-nowrap">
-                             {new Date(historyItem.createdAt).toLocaleDateString()} {new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div key={historyItem.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 p-3 rounded-lg text-xs gap-2">
+                           <div className="flex flex-col">
+                             {historyItem.title && <span className="font-bold text-gray-800">{historyItem.title}</span>}
+                             <a href={historyItem.url} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-full sm:max-w-[200px]">
+                               {historyItem.url}
+                             </a>
+                           </div>
+                           <span className="text-gray-400 whitespace-nowrap font-medium text-[10px] sm:text-xs">
+                             {historyItem.date 
+                               ? new Date(historyItem.date).toLocaleDateString() + ' ' + new Date(historyItem.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                               : new Date(historyItem.createdAt).toLocaleDateString() + ' ' + new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                             }
                            </span>
                         </div>
                       ))}

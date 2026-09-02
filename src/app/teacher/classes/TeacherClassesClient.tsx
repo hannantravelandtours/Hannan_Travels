@@ -6,16 +6,19 @@ import { Users, Clock, Calendar, Video, Edit2, CheckCircle } from "lucide-react"
 import Link from "next/link";
 
 export function TeacherClassesClient({ batches }: { batches: any[] }) {
-  const [editingLink, setEditingLink] = useState<string | null>(null);
   const [linkInput, setLinkInput] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  const [dateInput, setDateInput] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSaveLink = async (batchId: string) => {
     if (!linkInput.trim()) return;
-    await updateLiveLink(batchId, linkInput);
+    await updateLiveLink(batchId, linkInput, titleInput, dateInput);
     setEditingLink(null);
     setSuccessMessage("Link sent successfully to all students and admin!");
     setTimeout(() => setSuccessMessage(null), 3000);
+    setTitleInput("");
+    setDateInput("");
   };
 
   return (
@@ -69,13 +72,19 @@ export function TeacherClassesClient({ batches }: { batches: any[] }) {
                       <Clock className="w-4 h-4 mr-1.5" /> Previous Links
                     </label>
                     <div className="space-y-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                      {batch.linkHistory.map((historyItem: any) => (
-                        <div key={historyItem.id} className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-100 shadow-sm text-xs">
-                           <a href={historyItem.url} target="_blank" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-[60%]">
-                             {historyItem.url}
-                           </a>
-                           <span className="text-gray-400 whitespace-nowrap">
-                             {new Date(historyItem.createdAt).toLocaleDateString()} {new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                       {batch.linkHistory.map((historyItem: any) => (
+                        <div key={historyItem.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm text-xs gap-2">
+                           <div className="flex flex-col">
+                             {historyItem.title && <span className="font-bold text-gray-800">{historyItem.title}</span>}
+                             <a href={historyItem.url} target="_blank" className="text-emerald-600 hover:text-emerald-700 font-semibold truncate max-w-full sm:max-w-[200px]">
+                               {historyItem.url}
+                             </a>
+                           </div>
+                           <span className="text-gray-400 whitespace-nowrap text-[10px] sm:text-xs font-medium">
+                             {historyItem.date 
+                               ? new Date(historyItem.date).toLocaleDateString() + ' ' + new Date(historyItem.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                               : new Date(historyItem.createdAt).toLocaleDateString() + ' ' + new Date(historyItem.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                             }
                            </span>
                         </div>
                       ))}
@@ -92,21 +101,37 @@ export function TeacherClassesClient({ batches }: { batches: any[] }) {
                   </div>
                   
                   {editingLink === batch.id ? (
-                    <div className="flex flex-col sm:flex-row gap-2">
-                       <input 
-                         autoFocus
-                         value={linkInput}
-                         onChange={(e) => setLinkInput(e.target.value)}
-                         className="flex-1 bg-white border border-emerald-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2 text-sm outline-none"
-                         placeholder="Paste Google Meet or Zoom link here..."
-                       />
-                       <div className="flex space-x-2">
-                         <button onClick={() => setEditingLink(null)} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
-                            Cancel
-                         </button>
-                         <button onClick={() => handleSaveLink(batch.id)} className="px-4 py-2 bg-emerald-custom hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-colors whitespace-nowrap flex items-center">
-                            <CheckCircle className="w-4 h-4 mr-1.5" /> Send Link
-                         </button>
+                    <div className="flex flex-col gap-2">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                         <input 
+                           placeholder="Class Title (Optional)"
+                           value={titleInput}
+                           onChange={(e) => setTitleInput(e.target.value)}
+                           className="flex-1 bg-white border border-emerald-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2 text-sm outline-none"
+                         />
+                         <input 
+                           type="datetime-local"
+                           value={dateInput}
+                           onChange={(e) => setDateInput(e.target.value)}
+                           className="flex-1 bg-white border border-emerald-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2 text-sm outline-none"
+                         />
+                       </div>
+                       <div className="flex flex-col sm:flex-row gap-2">
+                         <input 
+                           autoFocus
+                           value={linkInput}
+                           onChange={(e) => setLinkInput(e.target.value)}
+                           className="flex-1 bg-white border border-emerald-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-2 text-sm outline-none"
+                           placeholder="Paste Google Meet or Zoom link here..."
+                         />
+                         <div className="flex space-x-2">
+                           <button onClick={() => { setEditingLink(null); setTitleInput(""); setDateInput(""); }} className="px-3 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                              Cancel
+                           </button>
+                           <button onClick={() => handleSaveLink(batch.id)} className="px-4 py-2 bg-emerald-custom hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-colors whitespace-nowrap flex items-center">
+                              <CheckCircle className="w-4 h-4 mr-1.5" /> Send Link
+                           </button>
+                         </div>
                        </div>
                     </div>
                   ) : (

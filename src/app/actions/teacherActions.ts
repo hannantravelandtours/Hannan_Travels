@@ -3,14 +3,18 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function updateLiveLink(batchId: string, link: string) {
+export async function updateLiveLink(batchId: string, link: string, title?: string, date?: string) {
   try {
     await prisma.batch.update({
       where: { id: batchId },
       data: { 
         liveClassLink: link,
         linkHistory: {
-          create: { url: link }
+          create: { 
+            url: link,
+            title: title || null,
+            date: date ? new Date(date) : null
+          }
         }
       }
     });

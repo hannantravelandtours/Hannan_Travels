@@ -177,6 +177,8 @@ model LiveLinkHistory {
   batchId   String
   batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
   url       String
+  title     String?
+  date      DateTime?
   createdAt DateTime @default(now())
 }
 
