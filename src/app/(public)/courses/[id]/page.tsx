@@ -38,14 +38,14 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     <div className="space-y-16 pb-20">
       {/* Course Hero Banner */}
       <section 
-        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-28 bg-cover bg-center text-white min-h-[400px] lg:min-h-[500px] flex items-center"
+        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
         style={{ backgroundImage: `url('${course.bannerImage || courseStaticInfo?.bannerImage || "/HeroSection.png"}')` }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
-          <div className="grid grid-cols-1 gap-12 items-center w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+
             <div className="space-y-6 max-w-2xl">
               <Link href="/courses" className="inline-flex items-center text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors">
                 <span className="mr-2 rtl:hidden">←</span>
@@ -71,7 +71,6 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 </Link>
               </div>
             </div>
-          </div>
         </div>
       </section>
 

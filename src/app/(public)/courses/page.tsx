@@ -20,13 +20,19 @@ export default function CoursesPage() {
     <div className="space-y-16 pb-20">
       {/* Header banner */}
       <section 
-        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-28 bg-cover bg-center text-white min-h-[400px] lg:min-h-[500px] flex items-center"
+        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
         style={{ backgroundImage: "url('/HeroSection.png')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full bg-emerald-custom/20 text-white font-semibold text-xs border border-emerald-custom/30">
+            <BookOpen className="h-4 w-4 text-gold-custom-light" />
+            <span>Curated Islamic Education Pathways</span>
+          </div>
+
           <div className="space-y-6 max-w-2xl">
             <div className="space-y-1">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
@@ -35,6 +41,18 @@ export default function CoursesPage() {
               <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
                 Select a specialized course matching your goals
               </span>
+            </div>
+            
+            <div className="py-6 border-y border-white/10 my-6 space-y-4 text-left rtl:text-right">
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gold-custom leading-normal font-medium drop-shadow-sm text-left rtl:text-right" dir="rtl">
+                إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ
+              </p>
+              <p className="text-base sm:text-lg text-gray-200 font-serif leading-relaxed italic">
+                "Indeed, this Qur'an guides to that which is most suitable and correct."
+              </p>
+              <p className="text-xs text-gold-custom-light font-bold uppercase tracking-widest">
+                Surah Al-Isra (17:9)
+              </p>
             </div>
           </div>
         </div>
