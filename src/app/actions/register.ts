@@ -36,10 +36,11 @@ export async function registerStudent(formData: FormData) {
     }
 
     const { 
-      name, email, phone, password, 
+      name, phone, password, 
       fatherName, country, address, age, 
       courseId, batchId, preferredTeacherId 
     } = result.data;
+    const email = result.data.email.toLowerCase().trim();
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({

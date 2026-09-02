@@ -47,6 +47,12 @@ function StudentRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (selectedCourse && batches.length === 0) {
+      alert("Is course mein koi batch abi start nhi hua to kindly wo course select karein jis mein batch start hua hai.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -56,6 +62,7 @@ function StudentRegistrationForm() {
     if (result?.error) {
       setError(result.error);
     } else if (result?.success) {
+      alert("Registration Successful! Kindly verify your email before logging in. A verification link has been sent to your inbox.");
       setSuccess(true);
       setTimeout(() => {
         router.push("/login");

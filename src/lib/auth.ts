@@ -16,10 +16,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing email or password");
         }
 
+        const email = credentials.email.toLowerCase().trim();
+
         if (
           process.env.ADMIN_USERNAME &&
           process.env.ADMIN_PASSWORD &&
-          credentials.email === process.env.ADMIN_USERNAME &&
+          email === process.env.ADMIN_USERNAME.toLowerCase().trim() &&
           credentials.password === process.env.ADMIN_PASSWORD
         ) {
           return {
@@ -32,9 +34,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
+          where: { email }
         });
 
         if (!user || !user.password) {

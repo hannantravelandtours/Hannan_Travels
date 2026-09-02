@@ -67,13 +67,57 @@ export const staticCoursesData: Record<string, CourseDetails> = {
     curriculum: [
       {
         week: "Module 1",
-        title: "Arabic Alphabets & Articulation",
-        details: ["Recognition of individual letters", "Proper articulation points from throat and mouth"]
+        title: "Alphabets & Articulation (Makharij)",
+        details: [
+          "Recognition of individual Arabic letters in their isolated forms.",
+          "Mastering proper articulation points from the throat, tongue, and lips.",
+          "Differentiating between similar sounding letters (e.g., Sin vs Saad, Haa vs Khaa)."
+        ]
       },
       {
         week: "Module 2",
-        title: "Vowel Movements",
-        details: ["Fathah, Kasrah, and Dammah movements", "Double vowels (Tanween)"]
+        title: "Compound Letters & Joint Forms",
+        details: [
+          "Identifying letters in their beginning, middle, and end positions.",
+          "Reading joined words and understanding visual variations in script.",
+          "Building familiarity with the standard Quranic script style."
+        ]
+      },
+      {
+        week: "Module 3",
+        title: "Short Vowels (Harakat)",
+        details: [
+          "Understanding the three basic vowels: Fathah, Kasrah, and Dammah.",
+          "Practicing precise timing to avoid unwanted stretching of sounds.",
+          "Double vowels (Tanween) and their distinct nasal sounds (Ghunnah)."
+        ]
+      },
+      {
+        week: "Module 4",
+        title: "Elongation Rules (Madd & Standing Vowels)",
+        details: [
+          "Standing Fathah, Standing Kasrah, and Standing Dammah.",
+          "The rules of Huroof-e-Maddah (Alif, Waw, Yaa).",
+          "Introduction to proper elongation (Madd) and its timing scales."
+        ]
+      },
+      {
+        week: "Module 5",
+        title: "Sukoon & Tashdeed (Jazm & Shaddah)",
+        details: [
+          "Stopping on letters (Sukoon) and the rules of echoing (Qalqalah).",
+          "Pronouncing emphasized letters with Tashdeed (Shaddah).",
+          "Combining Harakat with Sukoon and Tashdeed for fluent word construction."
+        ]
+      },
+      {
+        week: "Module 6",
+        title: "Advanced Rules & Reading Fluency",
+        details: [
+          "Rules of Noon Sakinah and Tanween (Izhar, Idgham, Iqlab, Ikhfa).",
+          "Rules of Meem Sakinah and the word 'Allah'.",
+          "Final practice bridging isolated words into full verses."
+        ]
       }
     ],
     faqs: [

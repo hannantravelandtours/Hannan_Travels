@@ -32,56 +32,78 @@ export default function FeePage() {
 
   return (
     <div className="space-y-16 pb-20">
-      {/* Header */}
+      {/* Header banner */}
       <section 
-        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-24 bg-cover bg-center text-white"
+        className="relative overflow-hidden pt-20 pb-16 lg:pt-24 lg:pb-28 bg-cover bg-center text-white"
         style={{ backgroundImage: "url('/HeroSection.png')" }}
       >
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/hero.png')", opacity: 0.4, mixBlendMode: 'screen', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/70 rtl:to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10 rtl:bg-gradient-to-l rtl:from-black/90 rtl:via-black/60 rtl:to-black/10" />
         
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 text-center">
-          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-            Hadya / Tuition Fees
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-300 font-semibold uppercase tracking-wide">
-            Simple, affordable, and flexible monthly plans for all courses.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-gray-300">
-              <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
-              <span>No Registration Fee</span>
-            </span>
-            <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse text-xs font-bold text-gray-300">
-              <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
-              <span>Cancel Anytime</span>
-            </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-left rtl:text-right flex flex-col items-start rtl:items-end space-y-8">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full bg-emerald-custom/20 text-white font-semibold text-xs border border-emerald-custom/30">
+            <Gift className="h-4 w-4 text-gold-custom-light" />
+            <span>Transparent & Affordable Education</span>
+          </div>
+
+          <div className="space-y-6 max-w-2xl">
+            <div className="space-y-1">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-sans text-gold-custom-light font-bold tracking-wide drop-shadow-md">
+                Hadya / Tuition Fees
+              </h1>
+              <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
+                Simple, affordable, and flexible monthly plans
+              </span>
+            </div>
+            
+            <div className="py-6 border-y border-white/10 my-6 space-y-4 text-left rtl:text-right">
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gold-custom leading-normal font-medium drop-shadow-sm text-left rtl:text-right" dir="rtl">
+                إِنَّ أَحَقَّ مَا أَخَذْتُمْ عَلَيْهِ أَجْرًا كِتَابُ اللَّهِ
+              </p>
+              <p className="text-base sm:text-lg text-gray-200 font-serif leading-relaxed italic">
+                "The most deserving of things for which you take a wage is the Book of Allah."
+              </p>
+              <p className="text-xs text-gold-custom-light font-bold uppercase tracking-widest">
+                Sahih al-Bukhari (5737)
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center justify-start rtl:justify-end gap-6 text-sm font-semibold text-gray-200">
+              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse">
+                <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
+                <span>No Registration Fee</span>
+              </span>
+              <span className="inline-flex items-center space-x-1.5 rtl:space-x-reverse">
+                <ShieldCheck className="h-4 w-4 text-gold-custom-light" />
+                <span>Cancel Anytime</span>
+              </span>
+            </div>
+
+            {/* Currency Switcher */}
+            <div className="pt-4 flex flex-wrap items-center justify-start rtl:justify-end gap-4">
+              <div className="flex bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20">
+                {(["USD", "GBP", "PKR"] as const).map((curr) => (
+                  <button
+                    key={curr}
+                    onClick={() => setCurrency(curr)}
+                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+                      currency === curr 
+                        ? "bg-emerald-custom text-white shadow-lg" 
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    {curr}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main pricing structure */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Currency Switcher */}
-        <div className="flex justify-center items-center space-x-3 rtl:space-x-reverse">
-          <span className="text-xs font-bold text-navy-custom uppercase tracking-wide">Select Currency:</span>
-          <div className="bg-gray-100 p-1 rounded-full inline-flex border border-gray-200">
-            {(["USD", "GBP", "PKR"] as const).map((curr) => (
-              <button
-                key={curr}
-                onClick={() => setCurrency(curr)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  currency === curr
-                    ? "bg-emerald-custom text-white shadow-md"
-                    : "text-navy-custom/70 hover:text-navy-custom"
-                }`}
-              >
-                {curr}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Dynamic Courses with Batches */}
         {coursesWithBatches.length > 0 ? (
           <div className="space-y-12">
