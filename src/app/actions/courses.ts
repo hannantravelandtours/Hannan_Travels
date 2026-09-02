@@ -13,9 +13,9 @@ export async function getActiveCourses(category?: CourseCategory) {
 
     if (existingCount !== 4) {
       const staticCourses = [
-        { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/Qaidabanner.webp" },
-        { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
-        { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
+        { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/qaida_banner_ai.png" },
+        { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/nazra_banner_ai.png" },
+        { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/hifz_banner_ai.png" },
         { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp" },
       ];
 
@@ -55,7 +55,15 @@ export async function getActiveCourses(category?: CourseCategory) {
         }
       }
     });
-    return courses;
+
+    // 3. Override DB banner images with static source of truth to ensure instant updates
+    const { staticCoursesData } = await import("@/data/staticCourses");
+    const mappedCourses = courses.map((course) => ({
+      ...course,
+      bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage
+    }));
+
+    return mappedCourses;
   } catch (error) {
     console.error("Failed to get courses:", error);
     return [];
@@ -123,6 +131,10 @@ export async function getCourseDetails(courseId: string) {
         }
       }
     });
+    if (course) {
+      const { staticCoursesData } = await import("@/data/staticCourses");
+      course.bannerImage = staticCoursesData[course.id]?.bannerImage || course.bannerImage;
+    }
     return course;
   } catch (error) {
     console.error("Failed to get course details:", error);

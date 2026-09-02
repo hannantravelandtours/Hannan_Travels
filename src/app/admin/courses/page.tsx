@@ -6,9 +6,9 @@ import { CoursesClient } from "./CoursesClient";
 export default async function CoursesPage() {
   // Ensure the 4 static courses exist in the DB
   const staticCourses = [
-    { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/Qaidabanner.webp" },
-    { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
-    { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/Nazra_Hifzbanner.webp" },
+    { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/qaida_banner_ai.png" },
+    { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/nazra_banner_ai.png" },
+    { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/hifz_banner_ai.png" },
     { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp" },
   ];
 
