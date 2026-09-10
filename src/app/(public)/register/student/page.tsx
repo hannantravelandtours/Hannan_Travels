@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Lock, Mail, Phone, MapPin, Calendar, BookOpen, AlertCircle, Check, Clock, Users, UserCheck } from "lucide-react";
+import { User, Lock, Mail, Phone, MapPin, Calendar, BookOpen, AlertCircle, Check, Clock, Users, UserCheck, Sparkles } from "lucide-react";
 import { getActiveCourses, getTeachersForCourse } from "@/app/actions/courses";
+import { getAllTeachers } from "@/app/actions/teachers";
 import { registerStudent } from "@/app/actions/register";
 import { getAvailableSlotsForTeacher } from "@/app/actions/oneOnOne";
 import { CourseCategory } from "@prisma/client";
@@ -14,10 +15,14 @@ function StudentRegistrationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") as CourseCategory | null;
+  const initialMode = searchParams.get("mode") || searchParams.get("type");
 
-  const [isOneOnOne, setIsOneOnOne] = useState(false);
+  const [isOneOnOne, setIsOneOnOne] = useState(
+    initialMode === "1-on-1" || initialMode === "one-on-one"
+  );
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [allTeachers, setAllTeachers] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
   const [slots, setSlots] = useState<any[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -32,8 +37,9 @@ function StudentRegistrationForm() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Fetch courses on load, optionally filtered by category from URL
+    // Fetch courses & all academy teachers on load
     getActiveCourses(initialCategory || undefined).then(setCourses);
+    getAllTeachers().then(setAllTeachers);
   }, [initialCategory]);
 
   useEffect(() => {
@@ -73,7 +79,7 @@ function StudentRegistrationForm() {
     e.preventDefault();
 
     if (!isOneOnOne && selectedCourse && batches.length === 0) {
-      alert("Is course mein koi batch abi start nhi hua. Kindly Select a different course or 1-on-1 private class.");
+      alert("Is course mein koi batch abi start nhi hua. Kindly select a different course or switch to 1-on-1 private class mode.");
       return;
     }
 
@@ -116,6 +122,11 @@ function StudentRegistrationForm() {
     );
   }
 
+  // Available teachers list: for 1-on-1, use all academy teachers so it's NEVER empty!
+  const availableTeachersList = isOneOnOne
+    ? allTeachers.length > 0 ? allTeachers : teachers
+    : teachers.length > 0 ? teachers : allTeachers;
+
   return (
     <div className="min-h-screen bg-stone-950 text-white flex flex-col md:flex-row">
       <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16 z-10 overflow-y-auto">
@@ -123,8 +134,8 @@ function StudentRegistrationForm() {
           <span>← Back to Home</span>
         </Link>
 
-        <div className="max-w-xl w-full mx-auto">
-          <div className="space-y-2 mb-6">
+        <div className="max-w-xl w-full mx-auto space-y-6">
+          <div className="space-y-2">
             <span className="text-xs font-bold text-emerald-custom-light uppercase tracking-widest">
               Student Portal
             </span>
@@ -132,44 +143,60 @@ function StudentRegistrationForm() {
               Register as a Student
             </h1>
             <p className="text-sm text-gray-400">
-              Join Al-Hannan Academy to start your Quran learning journey.
+              Join Al-Hannan Academy for Group Batches or 1-on-1 Private Classes.
             </p>
           </div>
 
-          {/* Mode Selection Tabs: Group vs 1-on-1 */}
-          <div className="grid grid-cols-2 gap-3 p-1.5 bg-stone-900 border border-stone-800 rounded-2xl mb-8">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOneOnOne(false);
-                setSelectedSlot("");
-              }}
-              className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                !isOneOnOne
-                  ? "bg-emerald-custom text-white shadow-md"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Group Batch Class</span>
-            </button>
+          {/* Registration Mode Selector */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+              Select Registration Mode
+            </label>
+            <div className="grid grid-cols-2 gap-3 p-1.5 bg-stone-900 border border-stone-800 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOneOnOne(false);
+                  setSelectedSlot("");
+                }}
+                className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  !isOneOnOne
+                    ? "bg-emerald-custom text-white shadow-lg shadow-emerald-custom/20 border border-emerald-500"
+                    : "text-gray-400 hover:text-white hover:bg-stone-850"
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>Group Batch Class</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setIsOneOnOne(true);
-                setSelectedBatch("");
-              }}
-              className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                isOneOnOne
-                  ? "bg-emerald-custom text-white shadow-md"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              <UserCheck className="w-4 h-4 text-gold-custom-light" />
-              <span>1-on-1 Private Class</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOneOnOne(true);
+                  setSelectedBatch("");
+                }}
+                className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  isOneOnOne
+                    ? "bg-emerald-custom text-white shadow-lg shadow-emerald-custom/20 border border-emerald-500"
+                    : "text-gray-400 hover:text-white hover:bg-stone-850"
+                }`}
+              >
+                <UserCheck className="w-4 h-4 text-gold-custom-light" />
+                <span>1-on-1 Private Class</span>
+              </button>
+            </div>
           </div>
+
+          {/* Active Mode Banner */}
+          {isOneOnOne && (
+            <div className="bg-emerald-950/60 border border-emerald-500/40 p-4 rounded-xl text-emerald-300 text-xs flex items-center space-x-3 shadow-inner">
+              <Sparkles className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="font-bold block text-white text-sm">1-on-1 Private Class Mode Active</span>
+                <span>Select your course, choose a personal teacher, and pick your preferred free time slot below!</span>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <input type="hidden" name="isOneOnOne" value={isOneOnOne ? "true" : "false"} />
@@ -299,23 +326,23 @@ function StudentRegistrationForm() {
               </div>
             )}
 
-            {/* Teacher Selection */}
-            {selectedCourse && (
+            {/* Teacher Selection (Always visible in 1-on-1 mode!) */}
+            {(isOneOnOne || selectedCourse) && (
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
-                  {isOneOnOne ? "Select Teacher (Required for 1-on-1)" : "Preferred Teacher (Optional)"}
+                <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+                  {isOneOnOne ? "Select Personal Teacher (Required for 1-on-1)" : "Preferred Teacher (Optional)"}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
                   <select
                     name="preferredTeacherId"
                     required={isOneOnOne}
                     value={selectedTeacher}
                     onChange={(e) => setSelectedTeacher(e.target.value)}
-                    className="w-full bg-stone-900 border border-stone-850 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
+                    className="w-full bg-stone-900 border border-stone-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
                   >
-                    <option value="">{isOneOnOne ? "Choose a Teacher" : "Any Available Teacher"}</option>
-                    {teachers.map((t) => (
+                    <option value="">{isOneOnOne ? "Choose a Teacher from Academy" : "Any Available Teacher"}</option>
+                    {availableTeachersList.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name} {t.qualification ? `- ${t.qualification}` : ''} {t.bio ? `(${t.bio})` : ''}
                       </option>
@@ -325,11 +352,11 @@ function StudentRegistrationForm() {
               </div>
             )}
 
-            {/* 1-on-1 Teacher Free Slot Selection */}
-            {isOneOnOne && selectedTeacher && (
+            {/* 1-on-1 Free Time Slot Selection (Always visible when 1-on-1 mode is active!) */}
+            {isOneOnOne && (
               <div className="space-y-1">
                 <label className="text-xs font-bold text-emerald-custom-light uppercase tracking-wider block flex items-center justify-between">
-                  <span>Available Teacher Time Slots</span>
+                  <span>Teacher Free Time Slot</span>
                   {loadingSlots && <span className="text-[10px] text-gray-400">Loading slots...</span>}
                 </label>
 
@@ -339,18 +366,25 @@ function StudentRegistrationForm() {
                     name="teacherSlotId"
                     value={selectedSlot}
                     onChange={(e) => setSelectedSlot(e.target.value)}
-                    className="w-full bg-stone-900 border border-emerald-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
+                    disabled={!selectedTeacher}
+                    className="w-full bg-stone-900 border border-emerald-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none disabled:opacity-50"
                   >
-                    <option value="">Choose a free time slot (Optional / Admin can assign)</option>
-                    {slots.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.dayOfWeek} ({s.startTime} - {s.endTime})
-                      </option>
-                    ))}
+                    {!selectedTeacher ? (
+                      <option value="">← Please select a teacher above first</option>
+                    ) : (
+                      <>
+                        <option value="">Choose a free slot (Optional / Admin can assign)</option>
+                        {slots.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.dayOfWeek} ({s.startTime} - {s.endTime})
+                          </option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
 
-                {slots.length === 0 && !loadingSlots && (
+                {selectedTeacher && slots.length === 0 && !loadingSlots && (
                   <p className="text-xs text-amber-400/90 pt-1">
                     This teacher has no custom free time slots listed right now. You can still submit and Admin will assign your timetable!
                   </p>

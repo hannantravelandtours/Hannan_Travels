@@ -125,3 +125,29 @@ export async function updateTeacher(id: string, formData: FormData) {
     return { error: "Failed to update teacher." };
   }
 }
+
+export async function getAllTeachers() {
+  try {
+    const teachers = await prisma.teacherProfile.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return teachers.map((t) => ({
+      id: t.id,
+      name: t.user.name,
+      qualification: t.qualification,
+      bio: t.bio,
+    }));
+  } catch (error) {
+    console.error("Failed to get all teachers:", error);
+    return [];
+  }
+}
+
