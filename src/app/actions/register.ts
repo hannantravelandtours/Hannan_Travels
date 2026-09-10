@@ -20,6 +20,8 @@ const studentRegisterSchema = z.object({
   batchId: z.string().optional(),
   preferredTeacherId: z.string().optional(),
   teacherSlotId: z.string().optional(),
+  oneOnOnePlanId: z.string().optional(),
+  teacherSlotIds: z.union([z.string(), z.array(z.string())]).optional(),
   isOneOnOne: z.preprocess((val) => val === "true" || val === true, z.boolean()).optional(),
 }).refine((data) => {
   if (data.isOneOnOne) {
@@ -34,7 +36,12 @@ const studentRegisterSchema = z.object({
 export async function registerStudent(formData: FormData) {
   try {
     const data = Object.fromEntries(formData.entries());
-    const result = studentRegisterSchema.safeParse(data);
+    const rawSlotIds = formData.getAll("teacherSlotIds");
+    
+    const result = studentRegisterSchema.safeParse({
+      ...data,
+      teacherSlotIds: rawSlotIds.length > 0 ? rawSlotIds as string[] : data.teacherSlotIds,
+    });
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
@@ -49,9 +56,20 @@ export async function registerStudent(formData: FormData) {
       name, phone, password, 
       fatherName, country, address, age, 
       courseId, batchId, preferredTeacherId,
-      teacherSlotId, isOneOnOne 
+      teacherSlotId, oneOnOnePlanId, teacherSlotIds, isOneOnOne 
     } = result.data;
     const email = result.data.email.toLowerCase().trim();
+
+    // Parse array of slot IDs
+    let slotIdList: string[] = [];
+    if (Array.isArray(teacherSlotIds)) {
+      slotIdList = teacherSlotIds.filter(Boolean);
+    } else if (typeof teacherSlotIds === "string" && teacherSlotIds.trim()) {
+      slotIdList = teacherSlotIds.split(",").map(s => s.trim()).filter(Boolean);
+    }
+    if (teacherSlotId && !slotIdList.includes(teacherSlotId)) {
+      slotIdList.push(teacherSlotId);
+    }
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -97,9 +115,17 @@ export async function registerStudent(formData: FormData) {
           courseId,
           batchId: isOneOnOne ? null : (batchId || null),
           preferredTeacherId: preferredTeacherId || null,
-          teacherSlotId: isOneOnOne ? (teacherSlotId || null) : null,
+          teacherSlotId: isOneOnOne ? (slotIdList[0] || teacherSlotId || null) : null,
+          oneOnOnePlanId: isOneOnOne ? (oneOnOnePlanId || null) : null,
           isOneOnOne: !!isOneOnOne,
           status: "PENDING_EMAIL_VERIFICATION",
+          ...(isOneOnOne && slotIdList.length > 0
+            ? {
+                teacherSlots: {
+                  connect: slotIdList.map((id) => ({ id })),
+                },
+              }
+            : {}),
         }
       });
     });

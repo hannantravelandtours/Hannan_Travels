@@ -3,11 +3,27 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Lock, Mail, Phone, MapPin, Calendar, BookOpen, AlertCircle, Check, Clock, Users, UserCheck, Sparkles } from "lucide-react";
+import {
+  User,
+  Lock,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  BookOpen,
+  AlertCircle,
+  Check,
+  Clock,
+  Users,
+  UserCheck,
+  Sparkles,
+  DollarSign,
+  Layers,
+} from "lucide-react";
 import { getActiveCourses, getTeachersForCourse } from "@/app/actions/courses";
 import { getAllTeachers } from "@/app/actions/teachers";
 import { registerStudent } from "@/app/actions/register";
-import { getAvailableSlotsForTeacher } from "@/app/actions/oneOnOne";
+import { getAvailableSlotsForTeacher, getOneOnOnePlans } from "@/app/actions/oneOnOne";
 import { CourseCategory } from "@prisma/client";
 import { Suspense } from "react";
 
@@ -20,26 +36,39 @@ function StudentRegistrationForm() {
   const [isOneOnOne, setIsOneOnOne] = useState(
     initialMode === "1-on-1" || initialMode === "one-on-one"
   );
+
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [allTeachers, setAllTeachers] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
+
+  // 1-on-1 Plans & Slots State
+  const [plans, setPlans] = useState<any[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [slots, setSlots] = useState<any[]>([]);
+  const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedBatch, setSelectedBatch] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
-  const [selectedSlot, setSelectedSlot] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Fetch courses & all academy teachers on load
+    // Fetch courses, all teachers, and 1-on-1 plans on load
     getActiveCourses(initialCategory || undefined).then(setCourses);
     getAllTeachers().then(setAllTeachers);
+    getOneOnOnePlans().then((res) => {
+      if (res.success && res.plans) {
+        setPlans(res.plans);
+        if (res.plans.length > 0) {
+          setSelectedPlanId(res.plans[0].id);
+        }
+      }
+    });
   }, [initialCategory]);
 
   useEffect(() => {
@@ -53,7 +82,7 @@ function StudentRegistrationForm() {
     }
     setSelectedTeacher("");
     setSelectedBatch("");
-    setSelectedSlot("");
+    setSelectedSlotIds([]);
     setSlots([]);
   }, [selectedCourse, courses]);
 
@@ -71,9 +100,44 @@ function StudentRegistrationForm() {
       });
     } else {
       setSlots([]);
-      setSelectedSlot("");
+      setSelectedSlotIds([]);
     }
   }, [isOneOnOne, selectedTeacher]);
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+
+  // Dynamic pricing calculation (Teacher custom rate or package default price)
+  const computePrice = () => {
+    if (!selectedPlan) return { price: 0, isCustom: false };
+    if (!selectedTeacher) return { price: selectedPlan.defaultPrice, isCustom: false };
+
+    const customFeeObj = selectedPlan.teacherFees?.find(
+      (tf: any) => tf.teacherId === selectedTeacher
+    );
+
+    if (customFeeObj) {
+      return { price: customFeeObj.monthlyFee, isCustom: true };
+    }
+    return { price: selectedPlan.defaultPrice, isCustom: false };
+  };
+
+  const { price: currentPrice, isCustom: isCustomRate } = computePrice();
+
+  const toggleSlotSelection = (slotId: string) => {
+    const maxAllowed = selectedPlan ? selectedPlan.classesPerWeek : 3;
+
+    setSelectedSlotIds((prev) => {
+      if (prev.includes(slotId)) {
+        return prev.filter((id) => id !== slotId);
+      } else {
+        if (prev.length >= maxAllowed) {
+          alert(`You can select up to ${maxAllowed} slots for the "${selectedPlan?.title}" package.`);
+          return prev;
+        }
+        return [...prev, slotId];
+      }
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,6 +152,11 @@ function StudentRegistrationForm() {
 
     const formData = new FormData(e.currentTarget);
     formData.set("isOneOnOne", isOneOnOne ? "true" : "false");
+
+    if (isOneOnOne) {
+      formData.set("oneOnOnePlanId", selectedPlanId);
+      selectedSlotIds.forEach((id) => formData.append("teacherSlotIds", id));
+    }
 
     const result = await registerStudent(formData);
 
@@ -122,7 +191,6 @@ function StudentRegistrationForm() {
     );
   }
 
-  // Available teachers list: for 1-on-1, use all academy teachers so it's NEVER empty!
   const availableTeachersList = isOneOnOne
     ? allTeachers.length > 0 ? allTeachers : teachers
     : teachers.length > 0 ? teachers : allTeachers;
@@ -157,7 +225,7 @@ function StudentRegistrationForm() {
                 type="button"
                 onClick={() => {
                   setIsOneOnOne(false);
-                  setSelectedSlot("");
+                  setSelectedSlotIds([]);
                 }}
                 className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   !isOneOnOne
@@ -187,13 +255,13 @@ function StudentRegistrationForm() {
             </div>
           </div>
 
-          {/* Active Mode Banner */}
+          {/* Active 1-on-1 Banner */}
           {isOneOnOne && (
             <div className="bg-emerald-950/60 border border-emerald-500/40 p-4 rounded-xl text-emerald-300 text-xs flex items-center space-x-3 shadow-inner">
               <Sparkles className="w-5 h-5 text-emerald-400 shrink-0" />
               <div>
                 <span className="font-bold block text-white text-sm">1-on-1 Private Class Mode Active</span>
-                <span>Select your course, choose a personal teacher, and pick your preferred free time slot below!</span>
+                <span>Select your course, choose a package plan, pick your teacher, and select your 30-minute time slots!</span>
               </div>
             </div>
           )}
@@ -319,14 +387,45 @@ function StudentRegistrationForm() {
               </div>
             )}
 
-            {!isOneOnOne && selectedCourse && batches.length === 0 && (
-              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm p-4 rounded-xl flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                <span>No group batches available for this course. Try switching to <strong>1-on-1 Private Class</strong> mode above.</span>
+            {/* 1-on-1 Frequency Package Plan Selection */}
+            {isOneOnOne && plans.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-emerald-custom-light uppercase tracking-wider block flex items-center justify-between">
+                  <span>Select 1-on-1 Class Frequency Package</span>
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {plans.map((p) => {
+                    const isSelected = selectedPlanId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPlanId(p.id);
+                          setSelectedSlotIds([]);
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-emerald-950/80 border-emerald-500 text-white shadow-md"
+                            : "bg-stone-900 border-stone-800 text-gray-400 hover:border-stone-700"
+                        }`}
+                      >
+                        <div className="text-xs font-bold flex justify-between items-center">
+                          <span>{p.title}</span>
+                          <span className="text-emerald-400 font-extrabold">${p.defaultPrice}/mo</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 block mt-0.5">
+                          {p.classesPerWeek} classes per week
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Teacher Selection (Always visible in 1-on-1 mode!) */}
+            {/* Teacher Selection */}
             {(isOneOnOne || selectedCourse) && (
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
@@ -349,45 +448,69 @@ function StudentRegistrationForm() {
                     ))}
                   </select>
                 </div>
+
+                {/* Display Calculated Fee */}
+                {isOneOnOne && selectedTeacher && selectedPlan && (
+                  <div className="mt-2 p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-xl flex items-center justify-between text-xs">
+                    <span className="text-gray-300 font-semibold">
+                      Monthly Fee Rate ({selectedPlan.title}):
+                    </span>
+                    <span className="text-emerald-300 font-extrabold text-sm flex items-center">
+                      <DollarSign className="w-4 h-4 text-emerald-400" />
+                      <span>${currentPrice} / month</span>
+                      {isCustomRate && <span className="ml-1 text-[9px] bg-emerald-800 px-1.5 py-0.5 rounded text-white font-normal">Custom Teacher Rate</span>}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* 1-on-1 Free Time Slot Selection (Always visible when 1-on-1 mode is active!) */}
+            {/* 1-on-1 Multi-Slot Selector (30-min intervals between 2:00 PM & 11:59 PM) */}
             {isOneOnOne && (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <label className="text-xs font-bold text-emerald-custom-light uppercase tracking-wider block flex items-center justify-between">
-                  <span>Teacher Free Time Slot</span>
+                  <span>
+                    Select 30-Min Time Slots ({selectedSlotIds.length} / {selectedPlan ? selectedPlan.classesPerWeek : 3} Selected)
+                  </span>
                   {loadingSlots && <span className="text-[10px] text-gray-400">Loading slots...</span>}
                 </label>
 
-                <div className="relative">
-                  <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
-                  <select
-                    name="teacherSlotId"
-                    value={selectedSlot}
-                    onChange={(e) => setSelectedSlot(e.target.value)}
-                    disabled={!selectedTeacher}
-                    className="w-full bg-stone-900 border border-emerald-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none disabled:opacity-50"
-                  >
-                    {!selectedTeacher ? (
-                      <option value="">← Please select a teacher above first</option>
-                    ) : (
-                      <>
-                        <option value="">Choose a free slot (Optional / Admin can assign)</option>
-                        {slots.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.dayOfWeek} ({s.startTime} - {s.endTime})
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
-                </div>
+                {!selectedTeacher ? (
+                  <div className="bg-stone-900 border border-stone-800 p-4 rounded-xl text-center text-xs text-gray-500">
+                    ← Please select a teacher above first to view their 30-minute free time slots (2 PM - 11:59 PM).
+                  </div>
+                ) : (
+                  <div className="space-y-3 bg-stone-900 border border-stone-800 p-4 rounded-xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                      {slots.map((s) => {
+                        const isSelected = selectedSlotIds.includes(s.id);
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => toggleSlotSelection(s.id)}
+                            className={`p-2.5 rounded-lg border text-left transition-all text-xs font-semibold flex items-center justify-between cursor-pointer ${
+                              isSelected
+                                ? "bg-emerald-600 text-white border-emerald-400 shadow-md"
+                                : "bg-stone-850 text-gray-300 border-stone-750 hover:border-emerald-700"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Clock className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                              <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                            </div>
+                            {isSelected && <Check className="w-4 h-4 shrink-0 text-white" />}
+                          </button>
+                        );
+                      })}
 
-                {selectedTeacher && slots.length === 0 && !loadingSlots && (
-                  <p className="text-xs text-amber-400/90 pt-1">
-                    This teacher has no custom free time slots listed right now. You can still submit and Admin will assign your timetable!
-                  </p>
+                      {slots.length === 0 && !loadingSlots && (
+                        <p className="col-span-full text-xs text-amber-400/90 text-center py-2">
+                          This teacher has no custom 30-minute time slots listed right now. You can still register and Admin will assign your timetable!
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -397,7 +520,7 @@ function StudentRegistrationForm() {
               disabled={isSubmitting}
               className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer"
             >
-              <span>{isSubmitting ? "Registering..." : isOneOnOne ? "Register for 1-on-1 Class" : "Complete Registration"}</span>
+              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class ($${currentPrice}/mo)` : "Complete Registration"}</span>
             </button>
           </form>
         </div>

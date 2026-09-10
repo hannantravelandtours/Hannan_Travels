@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Trash2, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, RefreshCw, UserCheck } from "lucide-react";
+import { Plus, Trash2, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, UserCheck } from "lucide-react";
 import { createTeacherSlot, deleteTeacherSlot } from "@/app/actions/oneOnOne";
 
 interface SlotItem {
@@ -27,11 +27,36 @@ interface RegistrationItem {
     name: string;
     category: string;
   };
-  teacherSlot: {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
+  oneOnOnePlan?: {
+    title: string;
+    classesPerWeek: number;
   } | null;
+  teacherSlot?: SlotItem | null;
+  allSlots?: SlotItem[];
+}
+
+// Generate 30-minute interval options between 14:00 (2:00 PM) and 23:30 (11:30 PM)
+const THIRTY_MIN_SLOTS: { start: string; end: string; label: string }[] = [];
+for (let hour = 14; hour <= 23; hour++) {
+  const hStr = hour < 10 ? `0${hour}` : `${hour}`;
+
+  // Slot 1: :00 to :30
+  const endHour1 = hour;
+  const endHStr1 = endHour1 < 10 ? `0${endHour1}` : `${endHour1}`;
+  THIRTY_MIN_SLOTS.push({
+    start: `${hStr}:00`,
+    end: `${endHStr1}:30`,
+    label: `${hStr}:00 - ${endHStr1}:30`,
+  });
+
+  // Slot 2: :30 to :00 (next hour)
+  const nextHour = hour + 1;
+  const nextHStr = nextHour < 10 ? `0${nextHour}` : `${nextHour}`;
+  THIRTY_MIN_SLOTS.push({
+    start: `${hStr}:30`,
+    end: `${nextHStr}:00`,
+    label: `${hStr}:30 - ${nextHStr}:00`,
+  });
 }
 
 export function TeacherOneOnOneClient({
@@ -46,38 +71,38 @@ export function TeacherOneOnOneClient({
   initialRegistrations: RegistrationItem[];
 }) {
   const [slots, setSlots] = useState<SlotItem[]>(initialSlots);
-  const [registrations, setRegistrations] = useState<RegistrationItem[]>(initialRegistrations);
+  const [registrations] = useState<RegistrationItem[]>(initialRegistrations);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [dayOfWeek, setDayOfWeek] = useState("Monday");
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("10:00");
+  const [selectedTimeSlotIndex, setSelectedTimeSlotIndex] = useState(0);
 
   const handleAddSlot = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
+    const slotInfo = THIRTY_MIN_SLOTS[selectedTimeSlotIndex];
+
     const formData = new FormData();
     formData.set("teacherId", teacherProfileId);
     formData.set("userId", userId);
     formData.set("dayOfWeek", dayOfWeek);
-    formData.set("startTime", startTime);
-    formData.set("endTime", endTime);
+    formData.set("startTime", slotInfo.start);
+    formData.set("endTime", slotInfo.end);
 
     const res = await createTeacherSlot(formData);
 
     if (res?.error) {
       setError(res.error);
     } else if (res?.success) {
-      // Add slot to local state
       const newSlot: SlotItem = {
         id: Math.random().toString(),
         dayOfWeek,
-        startTime,
-        endTime,
+        startTime: slotInfo.start,
+        endTime: slotInfo.end,
         isBooked: false,
       };
       setSlots((prev) => [...prev, newSlot]);
@@ -105,19 +130,19 @@ export function TeacherOneOnOneClient({
           <UserCheck className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-navy-custom">1-on-1 Private Classes & Time Slots</h1>
+          <h1 className="text-xl font-bold text-navy-custom">1-on-1 Time Slots & Schedule</h1>
           <p className="text-xs text-gray-500">
-            Define your weekly free time slots for 1-on-1 students and view your class timetable.
+            Define your 30-minute free time slots between 2:00 PM and 11:59 PM for student 1-on-1 bookings.
           </p>
         </div>
       </div>
 
-      {/* Section 1: Time Slot Manager */}
+      {/* Section 1: 30-Min Time Slot Generator */}
       <div className="bg-white rounded-2xl border border-gray-150 shadow-sm p-6 space-y-6">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div className="flex items-center space-x-2">
             <Clock className="w-5 h-5 text-emerald-custom" />
-            <h2 className="text-base font-bold text-navy-custom">Manage Available Free Time Slots</h2>
+            <h2 className="text-base font-bold text-navy-custom">Add 30-Min Free Time Slot (2:00 PM - 11:59 PM)</h2>
           </div>
           <span className="text-xs font-semibold text-gray-400">Total Slots: {slots.length}</span>
         </div>
@@ -130,7 +155,7 @@ export function TeacherOneOnOneClient({
         )}
 
         {/* Add Slot Form */}
-        <form onSubmit={handleAddSlot} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
+        <form onSubmit={handleAddSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
           <div>
             <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Day of Week</label>
             <select
@@ -149,25 +174,18 @@ export function TeacherOneOnOneClient({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Start Time</label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
+            <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">30-Min Time Interval</label>
+            <select
+              value={selectedTimeSlotIndex}
+              onChange={(e) => setSelectedTimeSlotIndex(parseInt(e.target.value))}
               className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">End Time</label>
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              required
-              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
-            />
+            >
+              {THIRTY_MIN_SLOTS.map((s, idx) => (
+                <option key={idx} value={idx}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
@@ -176,12 +194,12 @@ export function TeacherOneOnOneClient({
             className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>{isSubmitting ? "Adding..." : "Add Time Slot"}</span>
+            <span>{isSubmitting ? "Adding..." : "Add 30-Min Slot"}</span>
           </button>
         </form>
 
-        {/* Existing Slots List */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        {/* Existing Slots Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {slots.map((slot) => (
             <div
               key={slot.id}
@@ -194,11 +212,11 @@ export function TeacherOneOnOneClient({
               <div>
                 <span className="block text-xs font-bold">{slot.dayOfWeek}</span>
                 <span className="block text-[11px] text-gray-500 font-medium">
-                  {slot.startTime} - {slot.endTime}
+                  {slot.startTime} - {slot.endTime} (30 min)
                 </span>
                 {slot.isBooked ? (
                   <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                    Booked by Student
+                    Booked
                   </span>
                 ) : (
                   <span className="inline-block mt-1 text-[9px] font-black uppercase text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
@@ -222,7 +240,7 @@ export function TeacherOneOnOneClient({
 
           {slots.length === 0 && (
             <div className="col-span-full py-8 text-center text-xs text-gray-400">
-              No time slots added yet. Add your available free hours using the form above!
+              No 30-minute time slots added yet. Choose a day and select a 30-minute slot above!
             </div>
           )}
         </div>
@@ -233,7 +251,7 @@ export function TeacherOneOnOneClient({
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-emerald-custom" />
-            <h2 className="text-base font-bold text-navy-custom">My 1-on-1 Class Timetable (Ordered)</h2>
+            <h2 className="text-base font-bold text-navy-custom">My 1-on-1 Student Timetable</h2>
           </div>
           <span className="text-xs font-semibold text-gray-400">Students: {registrations.length}</span>
         </div>
@@ -243,51 +261,64 @@ export function TeacherOneOnOneClient({
             <thead className="bg-gray-50 uppercase text-[10px] font-bold text-gray-500 border-b border-gray-150">
               <tr>
                 <th className="py-3 px-4">Student</th>
-                <th className="py-3 px-4">Course</th>
-                <th className="py-3 px-4">Scheduled Slot (Earliest First)</th>
+                <th className="py-3 px-4">Course & Package</th>
+                <th className="py-3 px-4">30-Min Slots (Schedule)</th>
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {registrations.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="font-bold text-navy-custom">{item.student?.user?.name}</div>
-                    <div className="text-[11px] text-gray-400">{item.student?.user?.email}</div>
-                  </td>
+              {registrations.map((item) => {
+                const slotsList = item.allSlots && item.allSlots.length > 0
+                  ? item.allSlots
+                  : item.teacherSlot ? [item.teacherSlot] : [];
 
-                  <td className="py-3 px-4 font-semibold text-gray-700">
-                    {item.course?.name}
-                  </td>
+                return (
+                  <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="font-bold text-navy-custom">{item.student?.user?.name}</div>
+                      <div className="text-[11px] text-gray-400">{item.student?.user?.email}</div>
+                    </td>
 
-                  <td className="py-3 px-4">
-                    {item.teacherSlot ? (
-                      <div className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold">
-                        <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>
-                          {item.teacherSlot.dayOfWeek}: {item.teacherSlot.startTime} - {item.teacherSlot.endTime}
+                    <td className="py-3 px-4 font-semibold text-gray-700">
+                      <div>{item.course?.name}</div>
+                      {item.oneOnOnePlan && (
+                        <span className="inline-block mt-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          {item.oneOnOnePlan.title}
                         </span>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 italic">No slot selected</span>
-                    )}
-                  </td>
+                      )}
+                    </td>
 
-                  <td className="py-3 px-4">
-                    {item.status === "ACTIVE" ? (
-                      <span className="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Confirmed / Active</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center space-x-1 bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>Pending Admin Confirmation</span>
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    <td className="py-3 px-4">
+                      {slotsList.length > 0 ? (
+                        <div className="space-y-1">
+                          {slotsList.map((s) => (
+                            <div key={s.id} className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold mr-1">
+                              <Clock className="w-3 h-3 text-emerald-600" />
+                              <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 italic">No slots selected</span>
+                      )}
+                    </td>
+
+                    <td className="py-3 px-4">
+                      {item.status === "ACTIVE" ? (
+                        <span className="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Confirmed / Active</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center space-x-1 bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold text-[10px]">
+                          <AlertCircle className="w-3 h-3" />
+                          <span>Pending Admin Confirmation</span>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
 
               {registrations.length === 0 && (
                 <tr>

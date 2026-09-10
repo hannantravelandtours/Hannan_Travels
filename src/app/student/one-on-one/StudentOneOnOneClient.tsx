@@ -2,7 +2,20 @@
 
 import React from "react";
 import Link from "next/link";
-import { UserCheck, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, Plus } from "lucide-react";
+import { UserCheck, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, Plus, DollarSign } from "lucide-react";
+
+interface SlotItem {
+  id: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  teacher?: {
+    user: {
+      name: string;
+      email?: string;
+    };
+  };
+}
 
 interface RegistrationItem {
   id: string;
@@ -13,17 +26,13 @@ interface RegistrationItem {
     category: string;
     description: string | null;
   };
-  teacherSlot: {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    teacher: {
-      user: {
-        name: string;
-        email: string;
-      };
-    };
+  oneOnOnePlan?: {
+    title: string;
+    classesPerWeek: number;
+    defaultPrice: number;
   } | null;
+  teacherSlot?: SlotItem | null;
+  allSlots?: SlotItem[];
 }
 
 export function StudentOneOnOneClient({ registrations }: { registrations: RegistrationItem[] }) {
@@ -38,13 +47,13 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
           <div>
             <h1 className="text-xl font-bold text-navy-custom">My 1-on-1 Private Classes</h1>
             <p className="text-xs text-gray-500">
-              View your registered 1-on-1 Quran classes, assigned teacher, and weekly timetable slot.
+              View your registered 1-on-1 Quran classes, package plan, assigned teacher, and weekly time slots.
             </p>
           </div>
         </div>
 
         <Link
-          href="/register/student"
+          href="/register/student?type=1-on-1"
           className="inline-flex items-center justify-center space-x-2 px-4 py-2.5 bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" />
@@ -56,7 +65,14 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {registrations.map((item) => {
           const isConfirmed = item.status === "ACTIVE";
-          const teacherName = item.teacherSlot?.teacher?.user?.name || "Teacher to be confirmed";
+          const slotsList = item.allSlots && item.allSlots.length > 0
+            ? item.allSlots
+            : item.teacherSlot ? [item.teacherSlot] : [];
+
+          const teacherName =
+            slotsList[0]?.teacher?.user?.name ||
+            item.teacherSlot?.teacher?.user?.name ||
+            "Teacher to be confirmed";
 
           return (
             <div
@@ -74,6 +90,11 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
                       {item.course?.category}
                     </span>
                     <h3 className="text-lg font-bold text-navy-custom mt-0.5">{item.course?.name}</h3>
+                    {item.oneOnOnePlan && (
+                      <span className="inline-block mt-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        {item.oneOnOnePlan.title} (${item.oneOnOnePlan.defaultPrice}/mo)
+                      </span>
+                    )}
                   </div>
 
                   {isConfirmed ? (
@@ -89,21 +110,31 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
                   )}
                 </div>
 
-                <div className="space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs text-gray-600">
+                <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs text-gray-600">
                   <div className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-emerald-custom shrink-0" />
                     <span className="font-semibold text-navy-custom">Assigned Teacher:</span>
-                    <span className="ml-1 text-gray-800 font-bold">{teacherName}</span>
+                    <span className="ml-1.5 text-gray-800 font-bold">{teacherName}</span>
                   </div>
 
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2 text-emerald-custom shrink-0" />
-                    <span className="font-semibold text-navy-custom">Day & Time:</span>
-                    <span className="ml-1 text-gray-800 font-bold">
-                      {item.teacherSlot
-                        ? `${item.teacherSlot.dayOfWeek} (${item.teacherSlot.startTime} - ${item.teacherSlot.endTime})`
-                        : "Slot pending confirmation by Admin"}
-                    </span>
+                  <div>
+                    <div className="flex items-center mb-1.5">
+                      <Calendar className="w-4 h-4 mr-2 text-emerald-custom shrink-0" />
+                      <span className="font-semibold text-navy-custom">Booked 30-Min Time Slots:</span>
+                    </div>
+
+                    {slotsList.length > 0 ? (
+                      <div className="space-y-1 pl-6">
+                        {slotsList.map((s) => (
+                          <div key={s.id} className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg text-[11px] font-bold mr-1.5 mb-1">
+                            <Clock className="w-3 h-3 text-emerald-600" />
+                            <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="ml-6 text-gray-400 italic">Slots pending assignment by Admin</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -131,10 +162,10 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto" />
             <h3 className="text-base font-bold text-navy-custom">No 1-on-1 Classes Registered</h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto">
-              You haven't enrolled in any 1-on-1 private classes yet. Register now to choose your course, teacher, and free time slot!
+              You haven't enrolled in any 1-on-1 private classes yet. Register now to choose your course, package, teacher, and free time slots!
             </p>
             <Link
-              href="/register/student"
+              href="/register/student?type=1-on-1"
               className="inline-block px-5 py-2.5 bg-emerald-custom text-white rounded-xl font-bold text-xs hover:bg-emerald-600 transition-colors shadow-sm"
             >
               Enroll in 1-on-1 Class

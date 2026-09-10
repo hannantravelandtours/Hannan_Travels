@@ -13,7 +13,168 @@ const DAY_ORDER: Record<string, number> = {
   Sunday: 7,
 };
 
-// Get available (unbooked) time slots for a specific teacher profile
+// --------------------------------------------------------
+// 1. OneOnOne Plans & Packages Management
+// --------------------------------------------------------
+
+export async function getOneOnOnePlans(courseId?: string) {
+  try {
+    const existingCount = await prisma.oneOnOnePlan.count();
+
+    // Auto-seed default packages if none exist yet
+    if (existingCount === 0) {
+      const defaultPlans = [
+        { title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 35 },
+        { title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 50 },
+        { title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 75 },
+        { title: "6 Classes / Week", classesPerWeek: 6, defaultPrice: 85 },
+      ];
+
+      for (const p of defaultPlans) {
+        await prisma.oneOnOnePlan.create({
+          data: {
+            title: p.title,
+            classesPerWeek: p.classesPerWeek,
+            defaultPrice: p.defaultPrice,
+            currency: "USD",
+          },
+        });
+      }
+    }
+
+    const plans = await prisma.oneOnOnePlan.findMany({
+      where: courseId
+        ? { OR: [{ courseId }, { courseId: null }] }
+        : {},
+      include: {
+        course: true,
+        teacherFees: {
+          include: {
+            teacher: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+      orderBy: { classesPerWeek: "asc" },
+    });
+
+    return { success: true, plans };
+  } catch (error) {
+    console.error("Error fetching 1-on-1 plans:", error);
+    return { success: false, plans: [] };
+  }
+}
+
+export async function createOneOnOnePlan(formData: FormData) {
+  try {
+    const title = formData.get("title") as string;
+    const classesPerWeek = parseInt(formData.get("classesPerWeek") as string);
+    const defaultPrice = parseFloat(formData.get("defaultPrice") as string);
+    const currency = (formData.get("currency") as string) || "USD";
+    const courseId = (formData.get("courseId") as string) || null;
+
+    if (!title || isNaN(classesPerWeek) || isNaN(defaultPrice)) {
+      return { error: "Please fill in Title, Classes Per Week, and Default Monthly Price." };
+    }
+
+    await prisma.oneOnOnePlan.create({
+      data: {
+        title,
+        classesPerWeek,
+        defaultPrice,
+        currency,
+        courseId: courseId === "" ? null : courseId,
+      },
+    });
+
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/register/student");
+    return { success: true };
+  } catch (error) {
+    console.error("Error creating 1-on-1 plan:", error);
+    return { error: "Failed to create package plan." };
+  }
+}
+
+export async function deleteOneOnOnePlan(planId: string) {
+  try {
+    await prisma.oneOnOnePlan.delete({
+      where: { id: planId },
+    });
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/register/student");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting plan:", error);
+    return { error: "Failed to delete plan." };
+  }
+}
+
+// --------------------------------------------------------
+// 2. Teacher Custom 1-on-1 Fee Rates Management
+// --------------------------------------------------------
+
+export async function setTeacherPlanFee(formData: FormData) {
+  try {
+    const teacherId = formData.get("teacherId") as string;
+    const planId = formData.get("planId") as string;
+    const monthlyFee = parseFloat(formData.get("monthlyFee") as string);
+    const currency = (formData.get("currency") as string) || "USD";
+
+    if (!teacherId || !planId || isNaN(monthlyFee)) {
+      return { error: "Teacher, Plan, and Monthly Fee are required." };
+    }
+
+    await prisma.teacherOneOnOneFee.upsert({
+      where: {
+        teacherId_planId: {
+          teacherId,
+          planId,
+        },
+      },
+      update: {
+        monthlyFee,
+        currency,
+      },
+      create: {
+        teacherId,
+        planId,
+        monthlyFee,
+        currency,
+      },
+    });
+
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/register/student");
+    return { success: true };
+  } catch (error) {
+    console.error("Error setting teacher plan fee:", error);
+    return { error: "Failed to update teacher pricing rate." };
+  }
+}
+
+export async function getAllTeacherCustomFees() {
+  try {
+    const fees = await prisma.teacherOneOnOneFee.findMany({
+      include: {
+        teacher: {
+          include: { user: true },
+        },
+        plan: true,
+      },
+    });
+    return { success: true, fees };
+  } catch (error) {
+    console.error("Error fetching teacher fees:", error);
+    return { success: false, fees: [] };
+  }
+}
+
+// --------------------------------------------------------
+// 3. Time Slots Management (2:00 PM - 11:59 PM, 30-min intervals)
+// --------------------------------------------------------
+
 export async function getAvailableSlotsForTeacher(teacherProfileId: string) {
   try {
     const slots = await prisma.teacherSlot.findMany({
@@ -27,7 +188,6 @@ export async function getAvailableSlotsForTeacher(teacherProfileId: string) {
       ],
     });
 
-    // Custom sort by day of week
     slots.sort((a, b) => {
       const dayA = DAY_ORDER[a.dayOfWeek] || 8;
       const dayB = DAY_ORDER[b.dayOfWeek] || 8;
@@ -42,7 +202,6 @@ export async function getAvailableSlotsForTeacher(teacherProfileId: string) {
   }
 }
 
-// Get all slots created by a teacher (both booked and unbooked)
 export async function getTeacherSlotsByUserId(userId: string) {
   try {
     const teacherProfile = await prisma.teacherProfile.findUnique({
@@ -81,7 +240,6 @@ export async function getTeacherSlotsByUserId(userId: string) {
   }
 }
 
-// Create a new time slot for a teacher
 export async function createTeacherSlot(formData: FormData) {
   try {
     const teacherProfileId = formData.get("teacherId") as string;
@@ -105,7 +263,13 @@ export async function createTeacherSlot(formData: FormData) {
       return { error: "All fields are required (Teacher, Day, Start Time, End Time)." };
     }
 
-    // Check overlap or duplicates
+    // Check 2:00 PM to 11:59 PM restriction (14:00 - 23:59)
+    const [startH] = startTime.split(":").map(Number);
+    if (startH < 14) {
+      return { error: "Time slots must be scheduled between 2:00 PM (14:00) and 11:59 PM." };
+    }
+
+    // Check existing
     const existing = await prisma.teacherSlot.findFirst({
       where: {
         teacherId: targetTeacherProfileId,
@@ -139,7 +303,6 @@ export async function createTeacherSlot(formData: FormData) {
   }
 }
 
-// Delete an unbooked time slot
 export async function deleteTeacherSlot(slotId: string) {
   try {
     const slot = await prisma.teacherSlot.findUnique({
@@ -162,7 +325,10 @@ export async function deleteTeacherSlot(slotId: string) {
   }
 }
 
-// Admin: Get all 1-on-1 registrations sorted chronologically by timetable
+// --------------------------------------------------------
+// 4. Timetable & Confirmation Queries
+// --------------------------------------------------------
+
 export async function getOneOnOneAdminTimetable() {
   try {
     const registrations = await prisma.registration.findMany({
@@ -174,7 +340,15 @@ export async function getOneOnOneAdminTimetable() {
           include: { user: true },
         },
         course: true,
+        oneOnOnePlan: true,
         teacherSlot: {
+          include: {
+            teacher: {
+              include: { user: true },
+            },
+          },
+        },
+        teacherSlots: {
           include: {
             teacher: {
               include: { user: true },
@@ -185,28 +359,37 @@ export async function getOneOnOneAdminTimetable() {
       orderBy: { registeredAt: "desc" },
     });
 
-    // Also fetch preferred teachers if teacherSlot is not assigned yet
     const teacherProfiles = await prisma.teacherProfile.findMany({
       include: { user: true },
     });
     const teacherMap = new Map(teacherProfiles.map((t) => [t.id, t.user.name]));
 
     const formatted = registrations.map((r) => {
-      const preferredTeacherName = r.preferredTeacherId ? teacherMap.get(r.preferredTeacherId) || "Any Teacher" : "Not specified";
+      const preferredTeacherName = r.preferredTeacherId
+        ? teacherMap.get(r.preferredTeacherId) || "Any Teacher"
+        : "Not specified";
+
+      const allSlots = r.teacherSlots && r.teacherSlots.length > 0
+        ? r.teacherSlots
+        : r.teacherSlot ? [r.teacherSlot] : [];
+
       return {
         ...r,
         preferredTeacherName,
+        allSlots,
       };
     });
 
-    // Chronological timetable sorting (Monday 00:00 -> Sunday 23:59)
     formatted.sort((a, b) => {
-      const dayA = a.teacherSlot ? DAY_ORDER[a.teacherSlot.dayOfWeek] || 99 : 100;
-      const dayB = b.teacherSlot ? DAY_ORDER[b.teacherSlot.dayOfWeek] || 99 : 100;
+      const firstSlotA = a.allSlots[0];
+      const firstSlotB = b.allSlots[0];
+
+      const dayA = firstSlotA ? DAY_ORDER[firstSlotA.dayOfWeek] || 99 : 100;
+      const dayB = firstSlotB ? DAY_ORDER[firstSlotB.dayOfWeek] || 99 : 100;
       if (dayA !== dayB) return dayA - dayB;
 
-      const timeA = a.teacherSlot ? a.teacherSlot.startTime : "99:99";
-      const timeB = b.teacherSlot ? b.teacherSlot.startTime : "99:99";
+      const timeA = firstSlotA ? firstSlotA.startTime : "99:99";
+      const timeB = firstSlotB ? firstSlotB.startTime : "99:99";
       return timeA.localeCompare(timeB);
     });
 
@@ -217,12 +400,11 @@ export async function getOneOnOneAdminTimetable() {
   }
 }
 
-// Admin action: Confirm/Approve 1-on-1 Registration
 export async function confirmOneOnOneRegistration(registrationId: string) {
   try {
     const registration = await prisma.registration.findUnique({
       where: { id: registrationId },
-      include: { teacherSlot: true },
+      include: { teacherSlot: true, teacherSlots: true },
     });
 
     if (!registration) {
@@ -235,11 +417,22 @@ export async function confirmOneOnOneRegistration(registrationId: string) {
         data: { status: "ACTIVE" },
       });
 
+      // Mark single slot booked if linked
       if (registration.teacherSlotId) {
         await tx.teacherSlot.update({
           where: { id: registration.teacherSlotId },
           data: { isBooked: true },
         });
+      }
+
+      // Mark all multi-slots booked if linked
+      if (registration.teacherSlots && registration.teacherSlots.length > 0) {
+        for (const slot of registration.teacherSlots) {
+          await tx.teacherSlot.update({
+            where: { id: slot.id },
+            data: { isBooked: true },
+          });
+        }
       }
     });
 
@@ -255,7 +448,6 @@ export async function confirmOneOnOneRegistration(registrationId: string) {
   }
 }
 
-// Teacher action: Get 1-on-1 timetable for specific teacher
 export async function getOneOnOneTeacherTimetable(userId: string) {
   try {
     const teacherProfile = await prisma.teacherProfile.findUnique({
@@ -270,6 +462,7 @@ export async function getOneOnOneTeacherTimetable(userId: string) {
       where: {
         isOneOnOne: true,
         OR: [
+          { teacherSlots: { some: { teacherId: teacherProfile.id } } },
           { teacherSlot: { teacherId: teacherProfile.id } },
           { preferredTeacherId: teacherProfile.id },
         ],
@@ -279,28 +472,43 @@ export async function getOneOnOneTeacherTimetable(userId: string) {
           include: { user: true },
         },
         course: true,
+        oneOnOnePlan: true,
         teacherSlot: true,
+        teacherSlots: true,
       },
     });
 
-    registrations.sort((a, b) => {
-      const dayA = a.teacherSlot ? DAY_ORDER[a.teacherSlot.dayOfWeek] || 99 : 100;
-      const dayB = b.teacherSlot ? DAY_ORDER[b.teacherSlot.dayOfWeek] || 99 : 100;
+    const formatted = registrations.map((r) => {
+      const allSlots = r.teacherSlots && r.teacherSlots.length > 0
+        ? r.teacherSlots
+        : r.teacherSlot ? [r.teacherSlot] : [];
+
+      return {
+        ...r,
+        allSlots,
+      };
+    });
+
+    formatted.sort((a, b) => {
+      const firstSlotA = a.allSlots[0];
+      const firstSlotB = b.allSlots[0];
+
+      const dayA = firstSlotA ? DAY_ORDER[firstSlotA.dayOfWeek] || 99 : 100;
+      const dayB = firstSlotB ? DAY_ORDER[firstSlotB.dayOfWeek] || 99 : 100;
       if (dayA !== dayB) return dayA - dayB;
 
-      const timeA = a.teacherSlot ? a.teacherSlot.startTime : "99:99";
-      const timeB = b.teacherSlot ? b.teacherSlot.startTime : "99:99";
+      const timeA = firstSlotA ? firstSlotA.startTime : "99:99";
+      const timeB = firstSlotB ? firstSlotB.startTime : "99:99";
       return timeA.localeCompare(timeB);
     });
 
-    return { success: true, registrations, teacherProfileId: teacherProfile.id };
+    return { success: true, registrations: formatted, teacherProfileId: teacherProfile.id };
   } catch (error) {
     console.error("Error fetching teacher timetable:", error);
     return { success: false, registrations: [] };
   }
 }
 
-// Student action: Get 1-on-1 schedule for specific student
 export async function getOneOnOneStudentSchedule(userId: string) {
   try {
     const studentProfile = await prisma.studentProfile.findUnique({
@@ -318,7 +526,15 @@ export async function getOneOnOneStudentSchedule(userId: string) {
       },
       include: {
         course: true,
+        oneOnOnePlan: true,
         teacherSlot: {
+          include: {
+            teacher: {
+              include: { user: true },
+            },
+          },
+        },
+        teacherSlots: {
           include: {
             teacher: {
               include: { user: true },
@@ -329,7 +545,18 @@ export async function getOneOnOneStudentSchedule(userId: string) {
       orderBy: { registeredAt: "desc" },
     });
 
-    return { success: true, registrations };
+    const formatted = registrations.map((r) => {
+      const allSlots = r.teacherSlots && r.teacherSlots.length > 0
+        ? r.teacherSlots
+        : r.teacherSlot ? [r.teacherSlot] : [];
+
+      return {
+        ...r,
+        allSlots,
+      };
+    });
+
+    return { success: true, registrations: formatted };
   } catch (error) {
     console.error("Error fetching student 1-on-1 schedule:", error);
     return { success: false, registrations: [] };

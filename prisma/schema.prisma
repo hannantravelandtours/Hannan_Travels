@@ -59,22 +59,23 @@ model User {
 }
 
 model TeacherProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio          String?
-  description  String?
-  qualification String?
+  id                  String               @id @default(cuid())
+  userId              String               @unique
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                 String?
+  description         String?
+  qualification       String?
   monthlySalaryAmount Decimal?
-  batches      Batch[]
-  salaryPayments SalaryPayment[]
-  slots        TeacherSlot[]
+  batches             Batch[]
+  salaryPayments      SalaryPayment[]
+  slots               TeacherSlot[]
+  customOneOnOneFees  TeacherOneOnOneFee[]
 }
 
 model StudentProfile {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   fatherName    String?
   address       String?
   country       String?
@@ -93,6 +94,7 @@ model Course {
   isActive       Boolean        @default(true)
   batches        Batch[]
   registrations  Registration[]
+  oneOnOnePlans  OneOnOnePlan[]
   createdAt      DateTime       @default(now())
 }
 
@@ -117,34 +119,65 @@ model Batch {
   classLinks  ClassLink[]
 }
 
+model OneOnOnePlan {
+  id             String               @id @default(cuid())
+  courseId       String?
+  course         Course?              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title          String               // e.g. "3 Classes / Week"
+  classesPerWeek Int                  // e.g. 3, 6, 2
+  defaultPrice   Decimal              @default(50)
+  currency       String               @default("USD")
+  createdAt      DateTime             @default(now())
+
+  teacherFees    TeacherOneOnOneFee[]
+  registrations  Registration[]
+}
+
+model TeacherOneOnOneFee {
+  id         String         @id @default(cuid())
+  teacherId  String
+  teacher    TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  planId     String
+  plan       OneOnOnePlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  monthlyFee Decimal
+  currency   String         @default("USD")
+  createdAt  DateTime       @default(now())
+
+  @@unique([teacherId, planId])
+}
+
 model TeacherSlot {
-  id           String        @id @default(cuid())
-  teacherId    String
-  teacher      TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  dayOfWeek    String        // "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-  startTime    String        // e.g. "09:00"
-  endTime      String        // e.g. "10:00"
-  isBooked     Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  registrations Registration[]
+  id                  String         @id @default(cuid())
+  teacherId           String
+  teacher             TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  dayOfWeek           String         // "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  startTime           String         // e.g. "14:00"
+  endTime             String         // e.g. "14:30"
+  isBooked            Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  singleRegistrations Registration[] @relation("SingleTeacherSlot")
+  registrations       Registration[] @relation("RegistrationSlots")
 }
 
 model Registration {
-  id           String   @id @default(cuid())
-  studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId     String
-  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  batchId      String?
-  batch        Batch?   @relation(fields: [batchId], references: [id], onDelete: SetNull)
-  preferredTeacherId String?  // teacher selected at registration time
-  isOneOnOne   Boolean  @default(false)
-  teacherSlotId String?
-  teacherSlot  TeacherSlot? @relation(fields: [teacherSlotId], references: [id], onDelete: SetNull)
-  status       RegistrationStatus @default(PENDING_EMAIL_VERIFICATION)
-  accessEnabled Boolean @default(true)
-  registeredAt DateTime @default(now())
-  feeRecords   FeeRecord[]
+  id                 String             @id @default(cuid())
+  studentId          String
+  student            StudentProfile     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId           String
+  course             Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  batchId            String?
+  batch              Batch?             @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  preferredTeacherId String?            // teacher selected at registration time
+  isOneOnOne         Boolean            @default(false)
+  oneOnOnePlanId     String?
+  oneOnOnePlan       OneOnOnePlan?      @relation(fields: [oneOnOnePlanId], references: [id], onDelete: SetNull)
+  teacherSlotId      String?
+  teacherSlot        TeacherSlot?       @relation("SingleTeacherSlot", fields: [teacherSlotId], references: [id], onDelete: SetNull)
+  teacherSlots       TeacherSlot[]      @relation("RegistrationSlots")
+  status             RegistrationStatus @default(PENDING_EMAIL_VERIFICATION)
+  accessEnabled      Boolean            @default(true)
+  registeredAt       DateTime           @default(now())
+  feeRecords         FeeRecord[]
 }
 
 model FeeRecord {
