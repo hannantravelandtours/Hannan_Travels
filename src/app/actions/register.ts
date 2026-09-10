@@ -17,8 +17,18 @@ const studentRegisterSchema = z.object({
   address: z.string().optional(),
   age: z.coerce.number().min(4, "Age must be at least 4"),
   courseId: z.string().min(1, "Please select a course"),
-  batchId: z.string().min(1, "Please select a batch"),
+  batchId: z.string().optional(),
   preferredTeacherId: z.string().optional(),
+  teacherSlotId: z.string().optional(),
+  isOneOnOne: z.preprocess((val) => val === "true" || val === true, z.boolean()).optional(),
+}).refine((data) => {
+  if (data.isOneOnOne) {
+    return true;
+  }
+  return !!data.batchId && data.batchId.length > 0;
+}, {
+  message: "Please select a batch for group classes",
+  path: ["batchId"],
 });
 
 export async function registerStudent(formData: FormData) {
@@ -38,7 +48,8 @@ export async function registerStudent(formData: FormData) {
     const { 
       name, phone, password, 
       fatherName, country, address, age, 
-      courseId, batchId, preferredTeacherId 
+      courseId, batchId, preferredTeacherId,
+      teacherSlotId, isOneOnOne 
     } = result.data;
     const email = result.data.email.toLowerCase().trim();
 
@@ -84,8 +95,10 @@ export async function registerStudent(formData: FormData) {
         data: {
           studentId: studentProfile.id,
           courseId,
-          batchId,
+          batchId: isOneOnOne ? null : (batchId || null),
           preferredTeacherId: preferredTeacherId || null,
+          teacherSlotId: isOneOnOne ? (teacherSlotId || null) : null,
+          isOneOnOne: !!isOneOnOne,
           status: "PENDING_EMAIL_VERIFICATION",
         }
       });

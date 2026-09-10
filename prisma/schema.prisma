@@ -28,6 +28,7 @@ enum CourseCategory {
 
 enum RegistrationStatus {
   PENDING_EMAIL_VERIFICATION
+  PENDING_ADMIN_CONFIRMATION
   ACTIVE
   PAUSED
   COMPLETED
@@ -67,6 +68,7 @@ model TeacherProfile {
   monthlySalaryAmount Decimal?
   batches      Batch[]
   salaryPayments SalaryPayment[]
+  slots        TeacherSlot[]
 }
 
 model StudentProfile {
@@ -115,6 +117,18 @@ model Batch {
   classLinks  ClassLink[]
 }
 
+model TeacherSlot {
+  id           String        @id @default(cuid())
+  teacherId    String
+  teacher      TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  dayOfWeek    String        // "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  startTime    String        // e.g. "09:00"
+  endTime      String        // e.g. "10:00"
+  isBooked     Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  registrations Registration[]
+}
+
 model Registration {
   id           String   @id @default(cuid())
   studentId    String
@@ -124,6 +138,9 @@ model Registration {
   batchId      String?
   batch        Batch?   @relation(fields: [batchId], references: [id], onDelete: SetNull)
   preferredTeacherId String?  // teacher selected at registration time
+  isOneOnOne   Boolean  @default(false)
+  teacherSlotId String?
+  teacherSlot  TeacherSlot? @relation(fields: [teacherSlotId], references: [id], onDelete: SetNull)
   status       RegistrationStatus @default(PENDING_EMAIL_VERIFICATION)
   accessEnabled Boolean @default(true)
   registeredAt DateTime @default(now())
