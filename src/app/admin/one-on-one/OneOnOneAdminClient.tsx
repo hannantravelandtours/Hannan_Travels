@@ -404,6 +404,13 @@ export function OneOnOneAdminClient({
           <DollarSign className="w-4 h-4" />
           <span>Teacher Fee Rates ({customFees.length})</span>
         </button>
+          <button
+            onClick={() => setActiveTab("slots")}
+            className={`pb-3 px-4 text-xs font-bold transition-all flex items-center space-x-2 border-b-2 cursor-pointer ${activeTab === "slots" ? "border-emerald-custom text-emerald-custom" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+          >
+            <Clock className="w-4 h-4" />
+            <span>Teacher Time Slots ({slots.length})</span>
+          </button>
       </div>
 
       {/* TAB 1: TIMETABLE & CONFIRMATIONS */}
