@@ -151,6 +151,8 @@ export function OneOnOneAdminClient({
   const [selectedTimeSlotIndex, setSelectedTimeSlotIndex] = useState(0);
   const [slotSubmitting, setSlotSubmitting] = useState(false);
   const [slotError, setSlotError] = useState<string | null>(null);
+  const [slotFilterTeacher, setSlotFilterTeacher] = useState("ALL");
+  const [slotFilterDay, setSlotFilterDay] = useState("ALL");
 
   const THIRTY_MIN_SLOTS: { start: string; end: string; label: string }[] = [];
   for (let hour = 14; hour <= 23; hour++) {
