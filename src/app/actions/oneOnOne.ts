@@ -556,3 +556,17 @@ export async function getAllTeacherSlots() {
     return { success: false, slots: [] };
   }
 }
+export async function toggleTeacherSlotStatus(slotId: string, isBooked: boolean) {
+  try {
+    await prisma.teacherSlot.update({
+      where: { id: slotId },
+      data: { isBooked }
+    });
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/teacher/one-on-one");
+    return { success: true };
+  } catch (error) {
+    console.error("Error toggling slot status:", error);
+    return { success: false, error: "Failed to update slot status" };
+  }
+}

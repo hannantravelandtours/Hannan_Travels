@@ -25,6 +25,7 @@ import {
   setTeacherPlanFee,
   createTeacherSlot,
   deleteTeacherSlot,
+  toggleTeacherSlotStatus,
 } from "@/app/actions/oneOnOne";
 
 interface SlotItem {
@@ -191,6 +192,15 @@ export function OneOnOneAdminClient({
       alert("Slot added successfully! Refresh to see it.");
     }
     setSlotSubmitting(false);
+  };
+
+  const handleToggleSlotStatus = async (slotId: string, isBooked: boolean) => {
+    const res = await toggleTeacherSlotStatus(slotId, isBooked);
+    if (res.success) {
+      setSlots((prev) => prev.map((s) => s.id === slotId ? { ...s, isBooked } : s));
+    } else {
+      alert(res.error || "Failed to update status");
+    }
   };
 
   const handleRemoveSlot = async (slotId: string) => {
@@ -902,48 +912,92 @@ export function OneOnOneAdminClient({
 
             {/* List of existing slots grouped by teacher */}
             <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-sm space-y-6">
-              <h2 className="text-sm font-bold text-navy-custom mb-4 border-b pb-2">Existing Teacher Slots</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {slots.map((slot) => (
-                  <div
-                    key={slot.id}
-                    className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${
-                      slot.isBooked
-                        ? "bg-emerald-50/60 border-emerald-200 text-emerald-900"
-                        : "bg-gray-50/80 border-gray-200 text-gray-700"
-                    }`}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-4">
+                <h2 className="text-sm font-bold text-navy-custom">Existing Teacher Slots</h2>
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={slotFilterTeacher}
+                    onChange={(e) => setSlotFilterTeacher(e.target.value)}
+                    className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-navy-custom font-semibold outline-none"
                   >
-                    <div>
-                      <span className="block text-[10px] uppercase font-bold text-emerald-600">{slot.teacher?.user?.name || "Teacher"}</span>
-                      <span className="block text-xs font-bold mt-1">{slot.dayOfWeek}</span>
-                      <span className="block text-[11px] text-gray-500 font-medium">
-                        {slot.startTime} - {slot.endTime}
-                      </span>
-                      {slot.isBooked ? (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                          Booked
-                        </span>
-                      ) : (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
-                          Available Free Slot
-                        </span>
-                      )}
+                    <option value="ALL">All Teachers</option>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={slotFilterDay}
+                    onChange={(e) => setSlotFilterDay(e.target.value)}
+                    className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-navy-custom font-semibold outline-none"
+                  >
+                    <option value="ALL">All Days</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {Object.entries(
+                  slots
+                    .filter((s) => slotFilterTeacher === "ALL" || s.teacherId === slotFilterTeacher)
+                    .filter((s) => slotFilterDay === "ALL" || s.dayOfWeek === slotFilterDay)
+                    .reduce((acc, slot) => {
+                      const tName = slot.teacher?.user?.name || "Unknown Teacher";
+                      if (!acc[tName]) acc[tName] = {};
+                      if (!acc[tName][slot.dayOfWeek]) acc[tName][slot.dayOfWeek] = [];
+                      acc[tName][slot.dayOfWeek].push(slot);
+                      return acc;
+                    }, {} as Record<string, Record<string, SlotItem[]>>)
+                ).map(([teacherName, days]) => (
+                  <div key={teacherName} className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center">
+                       <span className="font-black text-xs text-emerald-700 uppercase tracking-wider">{teacherName}</span>
                     </div>
-      
-                    {!slot.isBooked && (
-                      <button
-                        onClick={() => handleRemoveSlot(slot.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Slot"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                    <div className="p-4 space-y-4">
+                      {Object.entries(days).map(([day, daySlots]) => (
+                        <div key={day}>
+                          <h3 className="text-xs font-bold text-gray-700 mb-2">{day}</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {daySlots.map((slot) => (
+                              <div
+                                key={slot.id}
+                                className={"flex items-center space-x-2 p-2 rounded-lg border transition-all " + (slot.isBooked ? "bg-emerald-50/60 border-emerald-200 text-emerald-900" : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300")}
+                              >
+                                <div className="text-[11px] font-semibold">
+                                  {slot.startTime} - {slot.endTime}
+                                </div>
+                                <button
+                                  onClick={() => handleToggleSlotStatus(slot.id, !slot.isBooked)}
+                                  className={"px-1.5 py-0.5 rounded text-[9px] font-black uppercase transition-colors " + (slot.isBooked ? "text-emerald-700 bg-emerald-100 hover:bg-emerald-200" : "text-gray-500 bg-gray-200 hover:bg-gray-300")}
+                                  title={slot.isBooked ? "Mark as Free" : "Mark as Booked"}
+                                >
+                                  {slot.isBooked ? "Booked" : "Free"}
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveSlot(slot.id)}
+                                  className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                  title="Delete Slot"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
-                {slots.length === 0 && (
-                  <div className="col-span-full py-8 text-center text-xs text-gray-400">
-                    No time slots have been created yet.
+                
+                {slots.filter((s) => slotFilterTeacher === "ALL" || s.teacherId === slotFilterTeacher).filter((s) => slotFilterDay === "ALL" || s.dayOfWeek === slotFilterDay).length === 0 && (
+                  <div className="py-8 text-center text-xs text-gray-400">
+                    No time slots match the selected filters.
                   </div>
                 )}
               </div>
