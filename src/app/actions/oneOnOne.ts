@@ -19,29 +19,6 @@ const DAY_ORDER: Record<string, number> = {
 
 export async function getOneOnOnePlans(courseId?: string) {
   try {
-    const existingCount = await prisma.oneOnOnePlan.count();
-
-    // Auto-seed default packages if none exist yet
-    if (existingCount === 0) {
-      const defaultPlans = [
-        { title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 35 },
-        { title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 50 },
-        { title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 75 },
-        { title: "6 Classes / Week", classesPerWeek: 6, defaultPrice: 85 },
-      ];
-
-      for (const p of defaultPlans) {
-        await prisma.oneOnOnePlan.create({
-          data: {
-            title: p.title,
-            classesPerWeek: p.classesPerWeek,
-            defaultPrice: p.defaultPrice,
-            currency: "USD",
-          },
-        });
-      }
-    }
-
     const plans = await prisma.oneOnOnePlan.findMany({
       where: courseId
         ? { OR: [{ courseId }, { courseId: null }] }

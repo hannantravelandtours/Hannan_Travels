@@ -58,17 +58,9 @@ function StudentRegistrationForm() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Fetch courses, all teachers, and 1-on-1 plans on load
+    // Fetch courses, all teachers on load
     getActiveCourses(initialCategory || undefined).then(setCourses);
     getAllTeachers().then(setAllTeachers);
-    getOneOnOnePlans().then((res) => {
-      if (res.success && res.plans) {
-        setPlans(res.plans);
-        if (res.plans.length > 0) {
-          setSelectedPlanId(res.plans[0].id);
-        }
-      }
-    });
   }, [initialCategory]);
 
   useEffect(() => {
@@ -80,6 +72,19 @@ function StudentRegistrationForm() {
       setTeachers([]);
       setBatches([]);
     }
+
+    // Fetch plans/packages specific to the selected course (or universal if none)
+    getOneOnOnePlans(selectedCourse || undefined).then((res) => {
+      if (res.success && res.plans) {
+        setPlans(res.plans);
+        if (res.plans.length > 0) {
+          setSelectedPlanId(res.plans[0].id);
+        } else {
+          setSelectedPlanId("");
+        }
+      }
+    });
+
     setSelectedTeacher("");
     setSelectedBatch("");
     setSelectedSlotIds([]);

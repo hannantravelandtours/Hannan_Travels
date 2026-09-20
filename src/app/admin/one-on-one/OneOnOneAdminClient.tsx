@@ -554,7 +554,7 @@ export function OneOnOneAdminClient({
               </div>
             )}
 
-            <form onSubmit={handleCreatePlan} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
+            <form onSubmit={handleCreatePlan} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Package Title</label>
                 <input
@@ -581,7 +581,7 @@ export function OneOnOneAdminClient({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Default Monthly Fee ($)</label>
+                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Monthly Fee ($)</label>
                 <input
                   type="number"
                   min="5"
@@ -591,6 +591,22 @@ export function OneOnOneAdminClient({
                   required
                   className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Course (Optional)</label>
+                <select
+                  value={planCourseId}
+                  onChange={(e) => setPlanCourseId(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
+                >
+                  <option value="">All Courses (Universal)</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button
