@@ -23,6 +23,8 @@ import {
   createOneOnOnePlan,
   deleteOneOnOnePlan,
   setTeacherPlanFee,
+  createTeacherSlot,
+  deleteTeacherSlot,
 } from "@/app/actions/oneOnOne";
 
 interface SlotItem {
@@ -30,6 +32,8 @@ interface SlotItem {
   dayOfWeek: string;
   startTime: string;
   endTime: string;
+  isBooked: boolean;
+  teacherId?: string;
   teacher?: {
     user: {
       name: string;
@@ -103,19 +107,22 @@ export function OneOnOneAdminClient({
   initialTeachers,
   initialCustomFees,
   courses,
+  initialSlots,
 }: {
   initialRegistrations: RegistrationItem[];
   initialPlans: PlanItem[];
   initialTeachers: TeacherItem[];
   initialCustomFees: TeacherFeeItem[];
   courses: any[];
+  initialSlots: SlotItem[];
 }) {
-  const [activeTab, setActiveTab] = useState<"timetable" | "packages" | "pricing">("timetable");
+  const [activeTab, setActiveTab] = useState<"timetable" | "packages" | "pricing" | "slots">("timetable");
 
   const [registrations, setRegistrations] = useState<RegistrationItem[]>(initialRegistrations);
   const [plans, setPlans] = useState<PlanItem[]>(initialPlans);
   const [teachers] = useState<TeacherItem[]>(initialTeachers);
   const [customFees, setCustomFees] = useState<TeacherFeeItem[]>(initialCustomFees);
+  const [slots, setSlots] = useState<SlotItem[]>(initialSlots);
 
   const [search, setSearch] = useState("");
   const [filterDay, setFilterDay] = useState("ALL");
@@ -137,6 +144,62 @@ export function OneOnOneAdminClient({
   const [rateFee, setRateFee] = useState(40);
   const [rateSubmitting, setRateSubmitting] = useState(false);
   const [rateError, setRateError] = useState<string | null>(null);
+
+  // Slot form state
+  const [slotTeacherId, setSlotTeacherId] = useState("");
+  const [slotDayOfWeek, setSlotDayOfWeek] = useState("Monday");
+  const [selectedTimeSlotIndex, setSelectedTimeSlotIndex] = useState(0);
+  const [slotSubmitting, setSlotSubmitting] = useState(false);
+  const [slotError, setSlotError] = useState<string | null>(null);
+
+  const THIRTY_MIN_SLOTS: { start: string; end: string; label: string }[] = [];
+  for (let hour = 14; hour <= 23; hour++) {
+    const hStr = hour < 10 ? `0${hour}` : `${hour}`;
+    const endHour1 = hour;
+    const endHStr1 = endHour1 < 10 ? `0${endHour1}` : `${endHour1}`;
+    THIRTY_MIN_SLOTS.push({
+      start: `${hStr}:00`,
+      end: `${endHStr1}:30`,
+      label: `${hStr}:00 - ${endHStr1}:30`,
+    });
+    const nextHour = hour + 1;
+    const nextHStr = nextHour < 10 ? `0${nextHour}` : `${nextHour}`;
+    THIRTY_MIN_SLOTS.push({
+      start: `${hStr}:30`,
+      end: `${nextHStr}:00`,
+      label: `${hStr}:30 - ${nextHStr}:00`,
+    });
+  }
+
+  const handleCreateSlot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSlotSubmitting(true);
+    setSlotError(null);
+    const slotInfo = THIRTY_MIN_SLOTS[selectedTimeSlotIndex];
+    const formData = new FormData();
+    formData.set("teacherId", slotTeacherId);
+    formData.set("dayOfWeek", slotDayOfWeek);
+    formData.set("startTime", slotInfo.start);
+    formData.set("endTime", slotInfo.end);
+
+    const res = await createTeacherSlot(formData);
+    if (res?.error) {
+      setSlotError(res.error);
+    } else if (res?.success) {
+      alert("Slot added successfully! Refresh to see it.");
+    }
+    setSlotSubmitting(false);
+  };
+
+  const handleRemoveSlot = async (slotId: string) => {
+    if (!confirm("Delete this slot?")) return;
+    const res = await deleteTeacherSlot(slotId);
+    if (res.success) {
+      setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    } else {
+      alert(res.error || "Failed to delete slot");
+    }
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -754,6 +817,130 @@ export function OneOnOneAdminClient({
           </div>
         </div>
       )}
-    </div>
-  );
-}
+        {/* TAB 4: TEACHER TIME SLOTS */}
+        {activeTab === "slots" && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-sm space-y-6">
+              <div className="flex items-center space-x-2 border-b border-gray-100 pb-4">
+                <Clock className="w-5 h-5 text-emerald-custom" />
+                <h2 className="text-base font-bold text-navy-custom">Manage Teacher 30-Min Time Slots</h2>
+              </div>
+  
+              {slotError && (
+                <div className="bg-red-50 text-red-700 text-xs p-3.5 rounded-xl flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{slotError}</span>
+                </div>
+              )}
+  
+              <form onSubmit={handleCreateSlot} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Select Teacher</label>
+                  <select
+                    value={slotTeacherId}
+                    onChange={(e) => setSlotTeacherId(e.target.value)}
+                    required
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
+                  >
+                    <option value="">Choose Teacher</option>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Day of Week</label>
+                  <select
+                    value={slotDayOfWeek}
+                    onChange={(e) => setSlotDayOfWeek(e.target.value)}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
+                  >
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Time Interval (30m)</label>
+                  <select
+                    value={selectedTimeSlotIndex}
+                    onChange={(e) => setSelectedTimeSlotIndex(parseInt(e.target.value))}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
+                  >
+                    {THIRTY_MIN_SLOTS.map((s, idx) => (
+                      <option key={idx} value={idx}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={slotSubmitting}
+                  className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{slotSubmitting ? "Adding..." : "Add Time Slot"}</span>
+                </button>
+              </form>
+            </div>
+
+            {/* List of existing slots grouped by teacher */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-sm space-y-6">
+              <h2 className="text-sm font-bold text-navy-custom mb-4 border-b pb-2">Existing Teacher Slots</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {slots.map((slot) => (
+                  <div
+                    key={slot.id}
+                    className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${
+                      slot.isBooked
+                        ? "bg-emerald-50/60 border-emerald-200 text-emerald-900"
+                        : "bg-gray-50/80 border-gray-200 text-gray-700"
+                    }`}
+                  >
+                    <div>
+                      <span className="block text-[10px] uppercase font-bold text-emerald-600">{slot.teacher?.user?.name || "Teacher"}</span>
+                      <span className="block text-xs font-bold mt-1">{slot.dayOfWeek}</span>
+                      <span className="block text-[11px] text-gray-500 font-medium">
+                        {slot.startTime} - {slot.endTime}
+                      </span>
+                      {slot.isBooked ? (
+                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                          Booked
+                        </span>
+                      ) : (
+                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
+                          Available Free Slot
+                        </span>
+                      )}
+                    </div>
+      
+                    {!slot.isBooked && (
+                      <button
+                        onClick={() => handleRemoveSlot(slot.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Slot"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {slots.length === 0 && (
+                  <div className="col-span-full py-8 text-center text-xs text-gray-400">
+                    No time slots have been created yet.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }

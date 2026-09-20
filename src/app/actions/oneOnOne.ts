@@ -539,3 +539,20 @@ export async function getOneOnOneStudentSchedule(userId: string) {
     return { success: false, registrations: [] };
   }
 }
+export async function getAllTeacherSlots() {
+  try {
+    const slots = await prisma.teacherSlot.findMany({
+      include: {
+        teacher: { include: { user: true } }
+      },
+      orderBy: [
+        { dayOfWeek: 'asc' },
+        { startTime: 'asc' }
+      ]
+    });
+    return { success: true, slots };
+  } catch (error) {
+    console.error("Error fetching all slots:", error);
+    return { success: false, slots: [] };
+  }
+}

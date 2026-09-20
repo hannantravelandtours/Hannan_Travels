@@ -137,12 +137,12 @@ export function TeacherOneOnOneClient({
         </div>
       </div>
 
-      {/* Section 1: 30-Min Time Slot Generator */}
+      {/* Section 1: 30-Min Time Slot Overview */}
       <div className="bg-white rounded-2xl border border-gray-150 shadow-sm p-6 space-y-6">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div className="flex items-center space-x-2">
             <Clock className="w-5 h-5 text-emerald-custom" />
-            <h2 className="text-base font-bold text-navy-custom">Add 30-Min Free Time Slot (2:00 PM - 11:59 PM)</h2>
+            <h2 className="text-base font-bold text-navy-custom">Your 30-Min Free Time Slots</h2>
           </div>
           <span className="text-xs font-semibold text-gray-400">Total Slots: {slots.length}</span>
         </div>
@@ -154,49 +154,9 @@ export function TeacherOneOnOneClient({
           </div>
         )}
 
-        {/* Add Slot Form */}
-        <form onSubmit={handleAddSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end bg-gray-50 p-4 rounded-xl border border-gray-150">
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Day of Week</label>
-            <select
-              value={dayOfWeek}
-              onChange={(e) => setDayOfWeek(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
-            >
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-              <option value="Sunday">Sunday</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">30-Min Time Interval</label>
-            <select
-              value={selectedTimeSlotIndex}
-              onChange={(e) => setSelectedTimeSlotIndex(parseInt(e.target.value))}
-              className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
-            >
-              {THIRTY_MIN_SLOTS.map((s, idx) => (
-                <option key={idx} value={idx}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{isSubmitting ? "Adding..." : "Add 30-Min Slot"}</span>
-          </button>
-        </form>
+        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-100">
+          Note: Time slots can only be added or modified by the Admin.
+        </div>
 
         {/* Existing Slots Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -224,17 +184,6 @@ export function TeacherOneOnOneClient({
                   </span>
                 )}
               </div>
-
-              {!slot.isBooked && (
-                <button
-                  onClick={() => handleDeleteSlot(slot.id)}
-                  disabled={deletingId === slot.id}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                  title="Delete Slot"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
             </div>
           ))}
 
