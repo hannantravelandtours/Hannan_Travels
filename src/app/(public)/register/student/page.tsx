@@ -418,7 +418,7 @@ function StudentRegistrationForm() {
                       >
                         <div className="text-xs font-bold flex justify-between items-center">
                           <span>{p.title}</span>
-                          <span className="text-emerald-400 font-extrabold">${p.defaultPrice}/mo</span>
+                          <span className="text-emerald-400 font-extrabold">Rs {p.defaultPrice}/mo</span>
                         </div>
                         <span className="text-[10px] text-gray-400 block mt-0.5">
                           {p.classesPerWeek} classes per week
@@ -462,7 +462,7 @@ function StudentRegistrationForm() {
                     </span>
                     <span className="text-emerald-300 font-extrabold text-sm flex items-center">
                       <DollarSign className="w-4 h-4 text-emerald-400" />
-                      <span>${currentPrice} / month</span>
+                      <span>Rs {currentPrice} / month</span>
                       {isCustomRate && <span className="ml-1 text-[9px] bg-emerald-800 px-1.5 py-0.5 rounded text-white font-normal">Custom Teacher Rate</span>}
                     </span>
                   </div>
@@ -525,7 +525,7 @@ function StudentRegistrationForm() {
               disabled={isSubmitting}
               className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer"
             >
-              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class ($${currentPrice}/mo)` : "Complete Registration"}</span>
+              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class (Rs {currentPrice}/mo)` : "Complete Registration"}</span>
             </button>
           </form>
         </div>

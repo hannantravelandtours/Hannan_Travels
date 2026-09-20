@@ -48,7 +48,7 @@ export async function createOneOnOnePlan(formData: FormData) {
     const title = formData.get("title") as string;
     const classesPerWeek = parseInt(formData.get("classesPerWeek") as string);
     const defaultPrice = parseFloat(formData.get("defaultPrice") as string);
-    const currency = (formData.get("currency") as string) || "USD";
+    const currency = (formData.get("currency") as string) || "PKR";
     const courseId = (formData.get("courseId") as string) || null;
 
     if (!title || isNaN(classesPerWeek) || isNaN(defaultPrice)) {
@@ -97,7 +97,7 @@ export async function setTeacherPlanFee(formData: FormData) {
     const teacherId = formData.get("teacherId") as string;
     const planId = formData.get("planId") as string;
     const monthlyFee = parseFloat(formData.get("monthlyFee") as string);
-    const currency = (formData.get("currency") as string) || "USD";
+    const currency = (formData.get("currency") as string) || "PKR";
 
     if (!teacherId || !planId || isNaN(monthlyFee)) {
       return { error: "Teacher, Plan, and Monthly Fee are required." };

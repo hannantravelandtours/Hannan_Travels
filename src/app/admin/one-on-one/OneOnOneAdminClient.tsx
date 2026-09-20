@@ -171,7 +171,7 @@ export function OneOnOneAdminClient({
     formData.set("classesPerWeek", planClassesPerWeek.toString());
     formData.set("defaultPrice", planPrice.toString());
     formData.set("courseId", planCourseId);
-    formData.set("currency", "USD");
+    formData.set("currency", "PKR");
 
     const res = await createOneOnOnePlan(formData);
     if (res?.error) {
@@ -182,7 +182,7 @@ export function OneOnOneAdminClient({
         title: planTitle,
         classesPerWeek: planClassesPerWeek,
         defaultPrice: planPrice,
-        currency: "USD",
+        currency: "PKR",
         courseId: planCourseId || null,
         course: courses.find((c) => c.id === planCourseId) || null,
       };
@@ -211,7 +211,7 @@ export function OneOnOneAdminClient({
     formData.set("teacherId", rateTeacherId);
     formData.set("planId", ratePlanId);
     formData.set("monthlyFee", rateFee.toString());
-    formData.set("currency", "USD");
+    formData.set("currency", "PKR");
 
     const res = await setTeacherPlanFee(formData);
     if (res?.error) {
@@ -225,7 +225,7 @@ export function OneOnOneAdminClient({
         teacherId: rateTeacherId,
         planId: ratePlanId,
         monthlyFee: rateFee,
-        currency: "USD",
+        currency: "PKR",
         teacher: { user: { name: targetTeacher?.name || "Teacher" } },
         plan: {
           title: targetPlan?.title || "Plan",
@@ -463,7 +463,7 @@ export function OneOnOneAdminClient({
                           </div>
                           {item.oneOnOnePlan ? (
                             <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                              {item.oneOnOnePlan.title} (${item.oneOnOnePlan.defaultPrice}/mo)
+                              {item.oneOnOnePlan.title} (Rs {item.oneOnOnePlan.defaultPrice}/mo)
                             </span>
                           ) : (
                             <span className="text-[10px] text-gray-400 uppercase">1-on-1 Standard</span>
@@ -581,7 +581,7 @@ export function OneOnOneAdminClient({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Monthly Fee ($)</label>
+                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Monthly Fee (PKR)</label>
                 <input
                   type="number"
                   min="5"
@@ -629,7 +629,7 @@ export function OneOnOneAdminClient({
                   </span>
                   <h3 className="text-lg font-bold text-navy-custom mt-1">{p.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">Default Monthly Fee:</p>
-                  <span className="text-2xl font-black text-emerald-custom">${p.defaultPrice} <span className="text-xs font-semibold text-gray-400">/ mo</span></span>
+                  <span className="text-2xl font-black text-emerald-custom">Rs {p.defaultPrice} <span className="text-xs font-semibold text-gray-400">/ mo</span></span>
                 </div>
 
                 <div className="pt-3 border-t border-gray-100 flex justify-end">
@@ -692,14 +692,14 @@ export function OneOnOneAdminClient({
                   <option value="">Choose Package Plan</option>
                   {plans.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.title} (Default ${p.defaultPrice})
+                      {p.title} (Default Rs {p.defaultPrice})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Custom Teacher Fee ($)</label>
+                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Custom Teacher Fee (PKR)</label>
                 <input
                   type="number"
                   min="5"
@@ -737,7 +737,7 @@ export function OneOnOneAdminClient({
                     <tr key={f.id} className="hover:bg-gray-50/80">
                       <td className="py-3 px-4 font-bold text-navy-custom">{f.teacher?.user?.name}</td>
                       <td className="py-3 px-4 font-semibold text-gray-700">{f.plan?.title}</td>
-                      <td className="py-3 px-4 font-black text-emerald-custom">${f.monthlyFee} / month</td>
+                      <td className="py-3 px-4 font-black text-emerald-custom">Rs {f.monthlyFee} / month</td>
                     </tr>
                   ))}
 
