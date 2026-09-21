@@ -113,17 +113,28 @@ function StudentRegistrationForm() {
 
   // Dynamic pricing calculation (Teacher custom rate or package default price)
   const computePrice = () => {
-    if (!selectedPlan) return { price: 0, isCustom: false };
-    if (!selectedTeacher) return { price: selectedPlan.defaultPrice, isCustom: false };
+    let basePrice = 0;
+    let isCustom = false;
 
-    const customFeeObj = selectedPlan.teacherFees?.find(
-      (tf: any) => tf.teacherId === selectedTeacher
-    );
-
-    if (customFeeObj) {
-      return { price: customFeeObj.monthlyFee, isCustom: true };
+    if (selectedPlan) {
+      if (!selectedTeacher) {
+        basePrice = selectedPlan.defaultPrice;
+      } else {
+        const customFeeObj = selectedPlan.teacherFees?.find(
+          (tf: any) => tf.teacherId === selectedTeacher
+        );
+        if (customFeeObj) {
+          basePrice = customFeeObj.monthlyFee;
+          isCustom = true;
+        } else {
+          basePrice = selectedPlan.defaultPrice;
+        }
+      }
     }
-    return { price: selectedPlan.defaultPrice, isCustom: false };
+
+    // Multiply base price by number of selected slots (if more than 1)
+    const multiplier = selectedSlotIds.length > 0 ? selectedSlotIds.length : 1;
+    return { price: basePrice * multiplier, isCustom };
   };
 
   const { price: currentPrice, isCustom: isCustomRate } = computePrice();
