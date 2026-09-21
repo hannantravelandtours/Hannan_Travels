@@ -570,3 +570,18 @@ export async function toggleTeacherSlotStatus(slotId: string, isBooked: boolean)
     return { success: false, error: "Failed to update slot status" };
   }
 }
+export async function setOneOnOneClassLink(registrationId: string, classLink: string) {
+  try {
+    await prisma.registration.update({
+      where: { id: registrationId },
+      data: { classLink }
+    });
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/teacher/one-on-one");
+    revalidatePath("/student");
+    return { success: true };
+  } catch (error) {
+    console.error("Error setting class link:", error);
+    return { success: false, error: "Failed to set class link" };
+  }
+}

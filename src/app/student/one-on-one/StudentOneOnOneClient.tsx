@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { UserCheck, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, Plus, DollarSign } from "lucide-react";
+import { UserCheck, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, Plus, DollarSign, ExternalLink } from "lucide-react";
 
 interface SlotItem {
   id: string;
@@ -33,6 +33,7 @@ interface RegistrationItem {
   } | null;
   teacherSlot?: SlotItem | null;
   allSlots?: SlotItem[];
+  classLink?: string | null;
 }
 
 export function StudentOneOnOneClient({ registrations }: { registrations: RegistrationItem[] }) {
@@ -139,19 +140,31 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-gray-400 font-medium">
-                  Registered: {new Date(item.registeredAt).toLocaleDateString()}
-                </span>
-                {isConfirmed ? (
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-lg">
-                    Class Ready
+              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-xs gap-3">
+                <div className="flex-1">
+                  {item.classLink ? (
+                    <a href={item.classLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 bg-emerald-custom hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Join Class Link</span>
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic text-[11px]">No class link assigned yet.</span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-[11px] text-gray-400 font-medium">
+                    Registered: {new Date(item.registeredAt).toLocaleDateString()}
                   </span>
-                ) : (
-                  <span className="text-amber-700 font-bold bg-amber-50 px-3 py-1 rounded-lg">
-                    Admin Approval Pending
-                  </span>
-                )}
+                  {isConfirmed ? (
+                    <span className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-lg">
+                      Class Ready
+                    </span>
+                  ) : (
+                    <span className="text-amber-700 font-bold bg-amber-50 px-3 py-1 rounded-lg">
+                      Pending
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           );

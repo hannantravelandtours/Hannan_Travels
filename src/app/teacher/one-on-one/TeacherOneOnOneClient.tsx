@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Plus, Trash2, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, UserCheck } from "lucide-react";
-import { createTeacherSlot, deleteTeacherSlot } from "@/app/actions/oneOnOne";
+import { createTeacherSlot, deleteTeacherSlot, setOneOnOneClassLink } from "@/app/actions/oneOnOne";
 
 interface SlotItem {
   id: string;
@@ -33,6 +33,7 @@ interface RegistrationItem {
   } | null;
   teacherSlot?: SlotItem | null;
   allSlots?: SlotItem[];
+  classLink?: string | null;
 }
 
 // Generate 30-minute interval options between 14:00 (2:00 PM) and 23:30 (11:30 PM)
@@ -71,13 +72,27 @@ export function TeacherOneOnOneClient({
   initialRegistrations: RegistrationItem[];
 }) {
   const [slots, setSlots] = useState<SlotItem[]>(initialSlots);
-  const [registrations] = useState<RegistrationItem[]>(initialRegistrations);
+  const [registrations, setRegistrations] = useState<RegistrationItem[]>(initialRegistrations);
+  const [linkEditId, setLinkEditId] = useState<string | null>(null);
+  const [linkInput, setLinkInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [dayOfWeek, setDayOfWeek] = useState("Monday");
   const [selectedTimeSlotIndex, setSelectedTimeSlotIndex] = useState(0);
+
+  const handleSaveLink = async (registrationId: string) => {
+    const res = await setOneOnOneClassLink(registrationId, linkInput);
+    if (res.success) {
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === registrationId ? { ...r, classLink: linkInput } : r))
+      );
+      setLinkEditId(null);
+    } else {
+      alert(res.error || "Failed to set class link");
+    }
+  };
 
   const handleAddSlot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +228,7 @@ export function TeacherOneOnOneClient({
                 <th className="py-3 px-4">Course & Package</th>
                 <th className="py-3 px-4">30-Min Slots (Schedule)</th>
                 <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Class Link</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -248,7 +264,7 @@ export function TeacherOneOnOneClient({
                           ))}
                         </div>
                       ) : (
-                        <span className="text-gray-400 italic">No slots selected</span>
+                        <span className="text-gray-400 text-xs italic">No Slot Assigned</span>
                       )}
                     </td>
 
@@ -263,6 +279,53 @@ export function TeacherOneOnOneClient({
                           <AlertCircle className="w-3 h-3" />
                           <span>Pending Admin Confirmation</span>
                         </span>
+                      )}
+                    </td>
+
+                    <td className="py-3 px-4">
+                      {linkEditId === item.id ? (
+                        <div className="flex flex-col space-y-1">
+                          <input
+                            type="text"
+                            value={linkInput}
+                            onChange={(e) => setLinkInput(e.target.value)}
+                            placeholder="e.g. Zoom link..."
+                            className="w-full text-[10px] px-2 py-1 border rounded outline-none"
+                          />
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => handleSaveLink(item.id)}
+                              className="bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold hover:bg-emerald-700 w-1/2"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setLinkEditId(null)}
+                              className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-[10px] font-bold hover:bg-gray-300 w-1/2"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          {item.classLink ? (
+                            <a href={item.classLink} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline text-[11px] font-bold truncate max-w-[100px] inline-block">
+                              {item.classLink}
+                            </a>
+                          ) : (
+                            <span className="text-gray-400 text-[10px] italic">No Link</span>
+                          )}
+                          <button
+                            onClick={() => {
+                              setLinkEditId(item.id);
+                              setLinkInput(item.classLink || "");
+                            }}
+                            className="text-xs text-blue-500 hover:underline font-semibold"
+                          >
+                            {item.classLink ? "Edit" : "Set Link"}
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
