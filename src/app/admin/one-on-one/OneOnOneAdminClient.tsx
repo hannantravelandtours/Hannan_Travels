@@ -128,7 +128,7 @@ export function OneOnOneAdminClient({
   const [slots, setSlots] = useState<SlotItem[]>(initialSlots);
 
   const [search, setSearch] = useState("");
-  const [filterDay, setFilterDay] = useState("ALL");
+  
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [linkEditId, setLinkEditId] = useState<string | null>(null);
@@ -152,12 +152,12 @@ export function OneOnOneAdminClient({
 
   // Slot form state
   const [slotTeacherId, setSlotTeacherId] = useState("");
-  const [slotDayOfWeek, setSlotDayOfWeek] = useState("Monday");
+  
   const [selectedTimeSlotIndex, setSelectedTimeSlotIndex] = useState(0);
   const [slotSubmitting, setSlotSubmitting] = useState(false);
   const [slotError, setSlotError] = useState<string | null>(null);
   const [slotFilterTeacher, setSlotFilterTeacher] = useState("ALL");
-  const [slotFilterDay, setSlotFilterDay] = useState("ALL");
+  
 
   const THIRTY_MIN_SLOTS: { start: string; end: string; label: string }[] = [];
   for (let hour = 14; hour <= 23; hour++) {
@@ -185,7 +185,7 @@ export function OneOnOneAdminClient({
     const slotInfo = THIRTY_MIN_SLOTS[selectedTimeSlotIndex];
     const formData = new FormData();
     formData.set("teacherId", slotTeacherId);
-    formData.set("dayOfWeek", slotDayOfWeek);
+    formData.set("dayOfWeek", "Mon-Sat");
     formData.set("startTime", slotInfo.start);
     formData.set("endTime", slotInfo.end);
 
@@ -353,17 +353,14 @@ export function OneOnOneAdminClient({
       teacherName.includes(query) ||
       courseName.includes(query);
 
-    const matchesDay =
-      filterDay === "ALL" ||
-      r.allSlots?.some((s) => s.dayOfWeek === filterDay) ||
-      r.teacherSlot?.dayOfWeek === filterDay;
+    const matchesDay = true;
 
     const matchesStatus =
       filterStatus === "ALL" ||
       (filterStatus === "PENDING" && r.status !== "ACTIVE") ||
       (filterStatus === "ACTIVE" && r.status === "ACTIVE");
 
-    return matchesQuery && matchesDay && matchesStatus;
+    return matchesQuery && matchesStatus;
   });
 
   const pendingCount = registrations.filter((r) => r.status !== "ACTIVE").length;
@@ -490,20 +487,7 @@ export function OneOnOneAdminClient({
                 <span>Filters:</span>
               </div>
 
-              <select
-                value={filterDay}
-                onChange={(e) => setFilterDay(e.target.value)}
-                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 outline-none"
-              >
-                <option value="ALL">All Days</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-                <option value="Sunday">Sunday</option>
-              </select>
+
 
               <select
                 value={filterStatus}
@@ -934,22 +918,6 @@ export function OneOnOneAdminClient({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Day of Week</label>
-                  <select
-                    value={slotDayOfWeek}
-                    onChange={(e) => setSlotDayOfWeek(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-custom font-semibold outline-none focus:border-emerald-custom"
-                  >
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                  </select>
-                </div>
-                <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Time Interval (30m)</label>
                   <select
                     value={selectedTimeSlotIndex}
@@ -989,20 +957,7 @@ export function OneOnOneAdminClient({
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
-                  <select
-                    value={slotFilterDay}
-                    onChange={(e) => setSlotFilterDay(e.target.value)}
-                    className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-navy-custom font-semibold outline-none"
-                  >
-                    <option value="ALL">All Days</option>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                  </select>
+
                 </div>
               </div>
 
@@ -1010,7 +965,7 @@ export function OneOnOneAdminClient({
                 {Object.entries(
                   slots
                     .filter((s) => slotFilterTeacher === "ALL" || s.teacherId === slotFilterTeacher)
-                    .filter((s) => slotFilterDay === "ALL" || s.dayOfWeek === slotFilterDay)
+                    
                     .reduce((acc, slot) => {
                       const tName = slot.teacher?.user?.name || "Unknown Teacher";
                       if (!acc[tName]) acc[tName] = {};
@@ -1059,7 +1014,7 @@ export function OneOnOneAdminClient({
                   </div>
                 ))}
                 
-                {slots.filter((s) => slotFilterTeacher === "ALL" || s.teacherId === slotFilterTeacher).filter((s) => slotFilterDay === "ALL" || s.dayOfWeek === slotFilterDay).length === 0 && (
+                {slots.filter((s) => slotFilterTeacher === "ALL" || s.teacherId === slotFilterTeacher).length === 0 && (
                   <div className="py-8 text-center text-xs text-gray-400">
                     No time slots match the selected filters.
                   </div>
