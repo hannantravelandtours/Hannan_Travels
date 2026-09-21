@@ -525,7 +525,7 @@ function StudentRegistrationForm() {
               disabled={isSubmitting}
               className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer"
             >
-              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class (Rs {currentPrice}/mo)` : "Complete Registration"}</span>
+              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class (Rs ${currentPrice}/mo)` : "Complete Registration"}</span>
             </button>
           </form>
         </div>
