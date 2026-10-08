@@ -33,9 +33,7 @@ function StudentRegistrationForm() {
   const initialCategory = searchParams.get("category") as CourseCategory | null;
   const initialMode = searchParams.get("mode") || searchParams.get("type");
 
-  const [isOneOnOne, setIsOneOnOne] = useState(
-    initialMode === "1-on-1" || initialMode === "one-on-one"
-  );
+  const [isOneOnOne, setIsOneOnOne] = useState(true);
 
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -227,49 +225,10 @@ function StudentRegistrationForm() {
               Register as a Student
             </h1>
             <p className="text-sm text-gray-400">
-              Join Al-Hannan Academy for Group Batches or 1-on-1 Private Classes.
+              Join Al-Hannan Academy for 1-on-1 Private Classes.
             </p>
           </div>
 
-          {/* Registration Mode Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
-              Select Registration Mode
-            </label>
-            <div className="grid grid-cols-2 gap-3 p-1.5 bg-stone-900 border border-stone-800 rounded-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOneOnOne(false);
-                  setSelectedSlotIds([]);
-                }}
-                className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  !isOneOnOne
-                    ? "bg-emerald-custom text-white shadow-lg shadow-emerald-custom/20 border border-emerald-500"
-                    : "text-gray-400 hover:text-white hover:bg-stone-850"
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                <span>Group Batch Class</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOneOnOne(true);
-                  setSelectedBatch("");
-                }}
-                className={`flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  isOneOnOne
-                    ? "bg-emerald-custom text-white shadow-lg shadow-emerald-custom/20 border border-emerald-500"
-                    : "text-gray-400 hover:text-white hover:bg-stone-850"
-                }`}
-              >
-                <UserCheck className="w-4 h-4 text-gold-custom-light" />
-                <span>1-on-1 Private Class</span>
-              </button>
-            </div>
-          </div>
 
           {/* Active 1-on-1 Banner */}
           {isOneOnOne && (
