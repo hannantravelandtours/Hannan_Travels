@@ -179,6 +179,7 @@ model Registration {
   registeredAt       DateTime           @default(now())
   classLink          String?
   feeRecords         FeeRecord[]
+  attendance         AttendanceRecord[]
 }
 
 model FeeRecord {
@@ -204,13 +205,16 @@ model SalaryPayment {
 }
 
 model AttendanceRecord {
-  id        String   @id @default(cuid())
-  batchId   String
-  batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  studentId String
-  date      DateTime
-  status    String   // "PRESENT" | "ABSENT" | "LEAVE"
-  markedBy  String   // teacher userId
+  id             String        @id @default(cuid())
+  batchId        String?
+  batch          Batch?        @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  registrationId String?
+  registration   Registration? @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  isOneOnOne     Boolean       @default(false)
+  studentId      String
+  date           DateTime
+  status         String        // "PRESENT" | "ABSENT" | "LEAVE"
+  markedBy       String        // teacher userId
 }
 
 model ClassRecording {

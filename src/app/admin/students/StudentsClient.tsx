@@ -151,6 +151,9 @@ export function StudentsClient({ students }: { students: any[] }) {
                          {student.studentProfile?.registrations?.map((reg: any) => (
                            <div key={reg.id} className="flex items-center space-x-2">
                              <span className="font-semibold text-emerald-700">{reg.course.name}</span>
+                             <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${reg.isOneOnOne ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                               {reg.isOneOnOne ? '1-on-1' : 'Batch'}
+                             </span>
                              <span className="text-gray-400 font-normal">({reg.status})</span>
                              <button
                                onClick={() => handleAccessToggle(reg.id, reg.accessEnabled !== false)}

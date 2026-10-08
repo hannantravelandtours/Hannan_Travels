@@ -34,6 +34,7 @@ export default async function StudentAttendancePage() {
     where: { studentId: student.id },
     include: {
       batch: { include: { course: true } },
+      registration: { include: { course: true } },
     },
     orderBy: { date: "desc" },
   });
@@ -92,7 +93,7 @@ export default async function StudentAttendancePage() {
               <tr>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Course</th>
-                <th className="px-6 py-4">Batch</th>
+                <th className="px-6 py-4">Batch / Type</th>
                 <th className="px-6 py-4">Status</th>
               </tr>
             </thead>
@@ -104,29 +105,45 @@ export default async function StudentAttendancePage() {
                   </td>
                 </tr>
               )}
-              {attendanceRecords.map((record) => (
-                <tr key={record.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-navy-custom">
-                    {new Date(record.date).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-                  </td>
-                  <td className="px-6 py-4">{record.batch.course.name}</td>
-                  <td className="px-6 py-4 text-xs">{record.batch.name}</td>
-                  <td className="px-6 py-4">
-                    <span className={`flex items-center text-xs font-bold px-2.5 py-1 rounded-md w-fit ${
-                      record.status === "PRESENT"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : record.status === "ABSENT"
-                        ? "bg-red-50 text-red-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}>
-                      {record.status === "PRESENT" && <CheckCircle className="w-3.5 h-3.5 mr-1" />}
-                      {record.status === "ABSENT" && <XCircle className="w-3.5 h-3.5 mr-1" />}
-                      {record.status === "LEAVE" && <Clock className="w-3.5 h-3.5 mr-1" />}
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {attendanceRecords.map((record) => {
+                const courseName = record.isOneOnOne 
+                  ? record.registration?.course?.name || "1-on-1 Class"
+                  : record.batch?.course?.name || "Batch Class";
+                  
+                const batchOrType = record.isOneOnOne
+                  ? "1-on-1"
+                  : record.batch?.name || "-";
+
+                return (
+                  <tr key={record.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-navy-custom">
+                      {new Date(record.date).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                    </td>
+                    <td className="px-6 py-4">{courseName}</td>
+                    <td className="px-6 py-4 text-xs font-medium">
+                      {record.isOneOnOne ? (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md">1-ON-1</span>
+                      ) : (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md">{batchOrType}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`flex items-center text-xs font-bold px-2.5 py-1 rounded-md w-fit ${
+                        record.status === "PRESENT"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : record.status === "ABSENT"
+                          ? "bg-red-50 text-red-700"
+                          : "bg-amber-50 text-amber-700"
+                      }`}>
+                        {record.status === "PRESENT" && <CheckCircle className="w-3.5 h-3.5 mr-1" />}
+                        {record.status === "ABSENT" && <XCircle className="w-3.5 h-3.5 mr-1" />}
+                        {record.status === "LEAVE" && <Clock className="w-3.5 h-3.5 mr-1" />}
+                        {record.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

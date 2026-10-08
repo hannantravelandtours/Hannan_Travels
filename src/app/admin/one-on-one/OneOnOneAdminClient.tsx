@@ -28,6 +28,7 @@ import {
   toggleTeacherSlotStatus,
   setOneOnOneClassLink,
 } from "@/app/actions/oneOnOne";
+import { AdminOneOnOneAttendance } from "./AdminOneOnOneAttendance";
 
 interface SlotItem {
   id: string;
@@ -119,7 +120,7 @@ export function OneOnOneAdminClient({
   courses: any[];
   initialSlots: SlotItem[];
 }) {
-  const [activeTab, setActiveTab] = useState<"timetable" | "packages" | "pricing" | "slots">("timetable");
+  const [activeTab, setActiveTab] = useState<"timetable" | "packages" | "pricing" | "slots" | "attendance">("timetable");
 
   const [registrations, setRegistrations] = useState<RegistrationItem[]>(initialRegistrations);
   const [plans, setPlans] = useState<PlanItem[]>(initialPlans);
@@ -435,6 +436,14 @@ export function OneOnOneAdminClient({
           >
             <Clock className="w-4 h-4" />
             <span>Teacher Time Slots ({slots.length})</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab("attendance")}
+            className={`pb-3 px-4 text-xs font-bold transition-all flex items-center space-x-2 border-b-2 cursor-pointer ${activeTab === "attendance" ? "border-emerald-custom text-emerald-custom" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Attendance Record</span>
           </button>
       </div>
 
@@ -1022,6 +1031,11 @@ export function OneOnOneAdminClient({
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB 5: ATTENDANCE */}
+        {activeTab === "attendance" && (
+          <AdminOneOnOneAttendance />
         )}
       </div>
     );
