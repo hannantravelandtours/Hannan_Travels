@@ -33,6 +33,11 @@ function StudentRegistrationForm() {
   const initialCategory = searchParams.get("category") as CourseCategory | null;
   const initialMode = searchParams.get("mode") || searchParams.get("type");
 
+  const initialCourse = searchParams.get("course") || searchParams.get("courseId") || "";
+  const initialTeacher = searchParams.get("teacher") || searchParams.get("teacherId") || "";
+  const initialPlan = searchParams.get("plan") || searchParams.get("planId") || "";
+  const initialSlot = searchParams.get("slot") || searchParams.get("slotId") || "";
+
   const [isOneOnOne, setIsOneOnOne] = useState(true);
 
   const [courses, setCourses] = useState<any[]>([]);
@@ -42,14 +47,14 @@ function StudentRegistrationForm() {
 
   // 1-on-1 Plans & Slots State
   const [plans, setPlans] = useState<any[]>([]);
-  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState(initialPlan);
   const [slots, setSlots] = useState<any[]>([]);
-  const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>([]);
+  const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>(initialSlot ? [initialSlot] : []);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState(initialCourse);
   const [selectedBatch, setSelectedBatch] = useState("");
-  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [selectedTeacher, setSelectedTeacher] = useState(initialTeacher);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,9 +62,14 @@ function StudentRegistrationForm() {
 
   useEffect(() => {
     // Fetch courses, all teachers on load
-    getActiveCourses(initialCategory || undefined).then(setCourses);
+    getActiveCourses(initialCategory || undefined).then((cList) => {
+      setCourses(cList);
+      if (initialCourse && !selectedCourse) {
+        setSelectedCourse(initialCourse);
+      }
+    });
     getAllTeachers().then(setAllTeachers);
-  }, [initialCategory]);
+  }, [initialCategory, initialCourse]);
 
   useEffect(() => {
     if (selectedCourse) {
@@ -75,19 +85,14 @@ function StudentRegistrationForm() {
     getOneOnOnePlans(selectedCourse || undefined).then((res) => {
       if (res.success && res.plans) {
         setPlans(res.plans);
-        if (res.plans.length > 0) {
-          setSelectedPlanId(res.plans[0].id);
-        } else {
-          setSelectedPlanId("");
+        if (initialPlan && res.plans.some((p: any) => p.id === initialPlan)) {
+          setSelectedPlanId(initialPlan);
+        } else if (res.plans.length > 0) {
+          setSelectedPlanId((prev) => prev || res.plans[0].id);
         }
       }
     });
-
-    setSelectedTeacher("");
-    setSelectedBatch("");
-    setSelectedSlotIds([]);
-    setSlots([]);
-  }, [selectedCourse, courses]);
+  }, [selectedCourse, courses, initialPlan]);
 
   // Fetch slots whenever teacher changes in 1-on-1 mode
   useEffect(() => {
@@ -96,6 +101,9 @@ function StudentRegistrationForm() {
       getAvailableSlotsForTeacher(selectedTeacher).then((res) => {
         if (res.success && res.slots) {
           setSlots(res.slots);
+          if (initialSlot && res.slots.some((s: any) => s.id === initialSlot)) {
+            setSelectedSlotIds([initialSlot]);
+          }
         } else {
           setSlots([]);
         }
@@ -105,7 +113,7 @@ function StudentRegistrationForm() {
       setSlots([]);
       setSelectedSlotIds([]);
     }
-  }, [isOneOnOne, selectedTeacher]);
+  }, [isOneOnOne, selectedTeacher, initialSlot]);
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 

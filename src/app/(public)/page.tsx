@@ -440,9 +440,13 @@ export default function HomePage() {
                   </p>
 
                   <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-y border-gray-50 py-3">
-                    <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                      <Clock className="h-4 w-4 text-emerald-custom-light" />
-                      <span>{course.batches?.length || 0} Batches Available</span>
+                    <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
+                      <UserCheck className="h-4 w-4 text-emerald-custom" />
+                      <span>1-on-1 Private Classes</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-emerald-custom font-bold">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>Flexible Slots</span>
                     </div>
                   </div>
                 </div>
@@ -454,13 +458,13 @@ export default function HomePage() {
                   href={`/courses/${course.id}`}
                   className="flex-1 text-center py-2.5 rounded-lg border border-gray-200 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom transition-all"
                 >
-                  View Curriculum
+                  View Details
                 </Link>
                 <Link
-                  href="/register"
+                  href={`/courses/${course.id}`}
                   className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow"
                 >
-                  Start Free Trial
+                  1-on-1 & Free Slots
                 </Link>
               </div>
             </div>

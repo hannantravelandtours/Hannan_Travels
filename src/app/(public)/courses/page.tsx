@@ -1,20 +1,11 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { BookOpen, Clock, Award, Star, Users } from "lucide-react";
-
+import { BookOpen, Clock, Award, Star, Users, UserCheck, Sparkles } from "lucide-react";
 import { getActiveCourses } from "@/app/actions/courses";
 import { staticCoursesData } from "@/data/staticCourses";
 
-export default function CoursesPage() {
-  const [allCourses, setAllCourses] = useState<any[]>([]);
-
-  useEffect(() => {
-    getActiveCourses().then(setAllCourses);
-  }, []);
-
-
+export default async function CoursesPage() {
+  const allCourses = await getActiveCourses();
 
   return (
     <div className="space-y-16 pb-20">
@@ -30,7 +21,7 @@ export default function CoursesPage() {
           {/* Trust Badge */}
           <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-4 py-2 rounded-full bg-emerald-custom/20 text-white font-semibold text-xs border border-emerald-custom/30">
             <BookOpen className="h-4 w-4 text-gold-custom-light" />
-            <span>Curated Islamic Education Pathways</span>
+            <span>1-on-1 Personalized Quran Pathways</span>
           </div>
 
           <div className="space-y-6 max-w-2xl">
@@ -39,7 +30,7 @@ export default function CoursesPage() {
                 Quranic Curriculums
               </h1>
               <span className="block text-xl sm:text-2xl font-bold tracking-widest text-white uppercase">
-                Select a specialized course matching your goals
+                Dedicated 1-on-1 Online Quran Instruction
               </span>
             </div>
             
@@ -101,32 +92,32 @@ export default function CoursesPage() {
 
                   <div className="p-6 space-y-4 flex-grow flex flex-col">
                     <p className="text-xs text-gray-500 font-semibold line-clamp-2 leading-relaxed flex-grow">
-                      {course.description || staticCoursesData[course.id]?.desc || "Learn the Quran with our expert scholars."}
+                      {course.description || staticCoursesData[course.id]?.desc || "Learn the Quran with our certified 1-on-1 scholars."}
                     </p>
 
                     <div className="flex justify-between items-center text-xs font-bold text-gray-600 border-y border-gray-50 py-3 mt-auto">
                       <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4 text-emerald-custom-light" />
-                        <span>{course.batches?.length || 0} Batches Available</span>
+                        <UserCheck className="h-4 w-4 text-emerald-custom" />
+                        <span>1-on-1 Classes</span>
                       </div>
                       <div className="flex items-center space-x-1 text-gold-custom">
                         <Star className="h-4 w-4 fill-gold-custom text-gold-custom" />
-                        <span>{course.rating || 5.0}</span>
+                        <span>{course.rating || 4.9}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Users className="h-4 w-4 text-emerald-custom" />
-                        <span>{course.students || 0} Students</span>
+                        <span>Private Slot</span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between text-xs mt-2">
                       <div className="space-y-1">
-                        <span className="block text-gray-400 font-medium">Lead Scholar:</span>
-                        <span className="block font-bold text-navy-custom">{course.batches?.[0]?.teacher?.user?.name || "Various Scholars"}</span>
+                        <span className="block text-gray-400 font-medium">Instruction:</span>
+                        <span className="block font-bold text-navy-custom">Personal Scholar</span>
                       </div>
                       <div className="text-right">
                         <span className="block text-gray-400 font-medium">Schedule:</span>
-                        <span className="block font-bold text-emerald-custom text-xs">Varies by Batch</span>
+                        <span className="block font-bold text-emerald-custom text-xs">Flexible (24/7)</span>
                       </div>
                     </div>
                   </div>
@@ -138,13 +129,13 @@ export default function CoursesPage() {
                     href={`/courses/${course.id}`}
                     className="flex-1 text-center py-2.5 rounded-lg border border-gray-200 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom transition-all"
                   >
-                    View Details
+                    Curriculum
                   </Link>
                   <Link
                     href={`/courses/${course.id}`}
                     className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow flex items-center justify-center space-x-1"
                   >
-                    <span>View Batches & Trial</span>
+                    <span>1-on-1 & Free Slots</span>
                   </Link>
                 </div>
               </div>
@@ -153,7 +144,7 @@ export default function CoursesPage() {
         ) : (
           <div className="text-center py-16 space-y-4">
             <BookOpen className="h-16 w-16 text-gray-300 mx-auto" />
-            <h3 className="text-lg font-bold text-navy-custom">Loading Courses...</h3>
+            <h3 className="text-lg font-bold text-navy-custom">No Courses Available</h3>
           </div>
         )}
       </section>
