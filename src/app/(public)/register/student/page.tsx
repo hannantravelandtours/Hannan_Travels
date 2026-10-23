@@ -19,6 +19,7 @@ import {
   Sparkles,
   DollarSign,
   Layers,
+  Loader2,
 } from "lucide-react";
 import { getActiveCourses, getTeachersForCourse } from "@/app/actions/courses";
 import { getAllTeachers } from "@/app/actions/teachers";
@@ -51,6 +52,7 @@ function StudentRegistrationForm() {
   const [slots, setSlots] = useState<any[]>([]);
   const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>(initialSlot ? [initialSlot] : []);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [loadingCourseData, setLoadingCourseData] = useState(false);
 
   const [selectedCourse, setSelectedCourse] = useState(initialCourse);
   const [selectedBatch, setSelectedBatch] = useState("");
@@ -72,26 +74,54 @@ function StudentRegistrationForm() {
   }, [initialCategory, initialCourse]);
 
   useEffect(() => {
-    if (selectedCourse) {
-      getTeachersForCourse(selectedCourse).then(setTeachers);
-      const course = courses.find((c) => c.id === selectedCourse);
-      setBatches(course?.batches || []);
-    } else {
+    if (!selectedCourse) {
       setTeachers([]);
       setBatches([]);
+      setPlans([]);
+      setSelectedPlanId("");
+      setLoadingCourseData(false);
+      return;
     }
 
-    // Fetch plans/packages specific to the selected course (or universal if none)
-    getOneOnOnePlans(selectedCourse || undefined).then((res) => {
-      if (res.success && res.plans) {
-        setPlans(res.plans);
-        if (initialPlan && res.plans.some((p: any) => p.id === initialPlan)) {
-          setSelectedPlanId(initialPlan);
-        } else if (res.plans.length > 0) {
-          setSelectedPlanId((prev) => prev || res.plans[0].id);
+    let isCurrent = true;
+    setLoadingCourseData(true);
+
+    const course = courses.find((c) => c.id === selectedCourse);
+    setBatches(course?.batches || []);
+
+    // Parallel fetch for optimal speed
+    Promise.all([
+      getTeachersForCourse(selectedCourse),
+      getOneOnOnePlans(selectedCourse || undefined),
+    ])
+      .then(([teachersRes, plansRes]) => {
+        if (!isCurrent) return;
+        setTeachers(teachersRes || []);
+
+        if (plansRes.success && plansRes.plans) {
+          setPlans(plansRes.plans);
+          if (initialPlan && plansRes.plans.some((p: any) => p.id === initialPlan)) {
+            setSelectedPlanId(initialPlan);
+          } else if (plansRes.plans.length > 0) {
+            setSelectedPlanId(plansRes.plans[0].id);
+          } else {
+            setSelectedPlanId("");
+          }
+        } else {
+          setPlans([]);
+          setSelectedPlanId("");
         }
-      }
-    });
+        setLoadingCourseData(false);
+      })
+      .catch((err) => {
+        if (!isCurrent) return;
+        console.error("Error loading course plans:", err);
+        setLoadingCourseData(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedCourse, courses, initialPlan]);
 
   // Fetch slots whenever teacher changes in 1-on-1 mode
@@ -328,21 +358,45 @@ function StudentRegistrationForm() {
 
             {/* Course Selection */}
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Course</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Course</label>
+                {loadingCourseData && (
+                  <span className="flex items-center text-xs text-emerald-400 gap-1.5 font-medium animate-pulse">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Loading course data...</span>
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <select
                   name="courseId"
                   required
                   value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full bg-stone-900 border border-stone-850 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
+                  onChange={(e) => {
+                    const nextCourse = e.target.value;
+                    setSelectedCourse(nextCourse);
+                    setPlans([]);
+                    setSelectedPlanId("");
+                    setSelectedTeacher("");
+                    setSelectedSlotIds([]);
+                    setSlots([]);
+                    if (nextCourse) setLoadingCourseData(true);
+                  }}
+                  className={`w-full bg-stone-900 border ${loadingCourseData ? "border-emerald-500/70 ring-1 ring-emerald-500/30" : "border-stone-850"} focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none`}
                 >
                   <option value="" disabled>Choose a course</option>
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>{c.name} ({c.category})</option>
                   ))}
                 </select>
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+                  {loadingCourseData ? (
+                    <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                  ) : (
+                    <span className="text-gray-500 text-xs">▼</span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -371,65 +425,105 @@ function StudentRegistrationForm() {
             )}
 
             {/* 1-on-1 Frequency Package Plan Selection */}
-            {isOneOnOne && plans.length > 0 && (
+            {isOneOnOne && (
               <div className="space-y-2">
-                <label className="text-xs font-bold text-emerald-custom-light uppercase tracking-wider block flex items-center justify-between">
+                <label className="text-xs font-bold text-emerald-custom-light uppercase tracking-wider flex items-center justify-between">
                   <span>Select 1-on-1 Class Frequency Package</span>
+                  {loadingCourseData && (
+                    <span className="text-xs text-emerald-400 font-normal flex items-center gap-1.5 animate-pulse">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fetching plans...
+                    </span>
+                  )}
                 </label>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {plans.map((p) => {
-                    const isSelected = selectedPlanId === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedPlanId(p.id);
-                          setSelectedSlotIds([]);
-                        }}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-emerald-950/80 border-emerald-500 text-white shadow-md"
-                            : "bg-stone-900 border-stone-800 text-gray-400 hover:border-stone-700"
-                        }`}
-                      >
-                        <div className="text-xs font-bold flex justify-between items-center">
-                          <span>{p.title}</span>
-                          <span className="text-emerald-400 font-extrabold">Rs {p.defaultPrice}/mo</span>
-                        </div>
-                        <span className="text-[10px] text-gray-400 block mt-0.5">
-                          {p.classesPerWeek} classes per week
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {loadingCourseData ? (
+                  <div className="bg-stone-900/90 border border-emerald-500/40 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 animate-pulse shadow-inner">
+                    <div className="flex items-center space-x-2 text-emerald-400">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span className="text-sm font-semibold text-white">Loading course packages &amp; pricing...</span>
+                    </div>
+                    <p className="text-xs text-gray-400">Please wait while we fetch the 1-on-1 plans for this course</p>
+                  </div>
+                ) : plans.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {plans.map((p) => {
+                      const isSelected = selectedPlanId === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedPlanId(p.id);
+                            setSelectedSlotIds([]);
+                          }}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-950/80 border-emerald-500 text-white shadow-md"
+                              : "bg-stone-900 border-stone-800 text-gray-400 hover:border-stone-700"
+                          }`}
+                        >
+                          <div className="text-xs font-bold flex justify-between items-center">
+                            <span>{p.title}</span>
+                            <span className="text-emerald-400 font-extrabold">Rs {p.defaultPrice}/mo</span>
+                          </div>
+                          <span className="text-[10px] text-gray-400 block mt-0.5">
+                            {p.classesPerWeek} classes per week
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : selectedCourse ? (
+                  <div className="bg-stone-900 border border-stone-800 p-4 rounded-xl text-center text-xs text-gray-400">
+                    No custom 1-on-1 packages listed for this course yet.
+                  </div>
+                ) : null}
               </div>
             )}
 
             {/* Teacher Selection */}
             {(isOneOnOne || selectedCourse) && (
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
-                  {isOneOnOne ? "Select Personal Teacher (Required for 1-on-1)" : "Preferred Teacher (Optional)"}
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+                    {isOneOnOne ? "Select Personal Teacher (Required for 1-on-1)" : "Preferred Teacher (Optional)"}
+                  </label>
+                  {loadingCourseData && (
+                    <span className="text-xs text-emerald-400 font-normal flex items-center gap-1.5 animate-pulse">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Updating teachers...
+                    </span>
+                  )}
+                </div>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
                   <select
                     name="preferredTeacherId"
                     required={isOneOnOne}
                     value={selectedTeacher}
+                    disabled={loadingCourseData}
                     onChange={(e) => setSelectedTeacher(e.target.value)}
-                    className="w-full bg-stone-900 border border-stone-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none"
+                    className="w-full bg-stone-900 border border-stone-800 focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none disabled:opacity-60"
                   >
-                    <option value="">{isOneOnOne ? "Choose a Teacher from Academy" : "Any Available Teacher"}</option>
+                    <option value="">
+                      {loadingCourseData
+                        ? "Loading teachers for selected course..."
+                        : isOneOnOne
+                          ? "Choose a Teacher from Academy"
+                          : "Any Available Teacher"}
+                    </option>
                     {availableTeachersList.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name} {t.qualification ? `- ${t.qualification}` : ''} {t.bio ? `(${t.bio})` : ''}
                       </option>
                     ))}
                   </select>
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+                    {loadingCourseData ? (
+                      <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                    ) : (
+                      <span className="text-gray-500 text-xs">▼</span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Display Calculated Fee */}
@@ -500,10 +594,17 @@ function StudentRegistrationForm() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-emerald-custom hover:bg-emerald-600 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer"
+              disabled={isSubmitting || loadingCourseData}
+              className="w-full bg-emerald-custom hover:bg-emerald-600 disabled:opacity-50 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
             >
-              <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class (Rs ${currentPrice}/mo)` : "Complete Registration"}</span>
+              {loadingCourseData ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Loading course data...</span>
+                </>
+              ) : (
+                <span>{isSubmitting ? "Registering..." : isOneOnOne ? `Register for 1-on-1 Class (Rs ${currentPrice}/mo)` : "Complete Registration"}</span>
+              )}
             </button>
           </form>
         </div>
