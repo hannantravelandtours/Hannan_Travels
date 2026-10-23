@@ -170,10 +170,10 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-wrap items-center justify-start rtl:justify-end gap-4 pt-2">
               <Link
-                href="/courses"
+                href="/register"
                 className="px-8 py-3.5 rounded-full text-sm font-bold text-white bg-emerald-custom hover:bg-emerald-900 transition-all shadow-lg hover-lift flex items-center space-x-2 rtl:space-x-reverse"
               >
-                <span>Start Free Trial</span>
+                <span>{t("hero.cta.trial")}</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -457,7 +457,7 @@ export default function HomePage() {
                   View Curriculum
                 </Link>
                 <Link
-                  href="/courses"
+                  href="/register"
                   className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow"
                 >
                   Start Free Trial
