@@ -34,6 +34,7 @@ interface RegistrationItem {
   teacherSlot?: SlotItem | null;
   allSlots?: SlotItem[];
   classLink?: string | null;
+  preferredTeacherName?: string | null;
 }
 
 export function StudentOneOnOneClient({ registrations }: { registrations: RegistrationItem[] }) {
@@ -73,7 +74,9 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
           const teacherName =
             slotsList[0]?.teacher?.user?.name ||
             item.teacherSlot?.teacher?.user?.name ||
-            "Teacher to be confirmed";
+            (item.preferredTeacherName
+              ? `${item.preferredTeacherName} (Pending Confirmation)`
+              : "Teacher to be confirmed");
 
           return (
             <div

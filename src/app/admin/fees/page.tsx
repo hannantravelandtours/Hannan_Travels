@@ -9,7 +9,12 @@ export default async function FeesPage() {
       where: { 
         status: { in: ["ACTIVE", "PENDING_EMAIL_VERIFICATION"] } 
       },
-      include: { student: { include: { user: true } }, course: true }
+      include: {
+        student: { include: { user: true } },
+        course: true,
+        oneOnOnePlan: true,
+        batch: true,
+      }
     }),
     prisma.teacherProfile.findMany({
       include: { user: true }

@@ -72,9 +72,17 @@ export function FeesClient({ activeRegistrations, teachers, feeRecords, salaryPa
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Student & Course</label>
                 <select name="registrationId" required className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none">
                   <option value="">Select Registration...</option>
-                  {activeRegistrations.map(reg => (
-                    <option key={reg.id} value={reg.id}>{reg.student.user.name} - {reg.course.name}</option>
-                  ))}
+                  {activeRegistrations.map((reg: any) => {
+                    const planBadge = reg.isOneOnOne
+                      ? `[1-on-1: ${reg.oneOnOnePlan?.title || "Plan"} - Rs ${Number(reg.oneOnOnePlan?.defaultPrice || 0).toLocaleString()}/mo]`
+                      : `[Batch: ${reg.batch?.name || "General"} - Rs ${Number(reg.batch?.price || 0).toLocaleString()}/mo]`;
+
+                    return (
+                      <option key={reg.id} value={reg.id}>
+                        {reg.student.user.name} — {reg.course.name} {planBadge}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div>

@@ -24,5 +24,30 @@ export default async function TeacherSendLinkPage() {
     },
   });
 
-  return <SendLinkClient batches={teacher?.batches || []} teacherUserId={session.user.id} />;
+  const oneOnOneRegistrations = teacher?.id
+    ? await prisma.registration.findMany({
+        where: {
+          isOneOnOne: true,
+          status: "ACTIVE",
+          OR: [
+            { teacherSlots: { some: { teacherId: teacher.id } } },
+            { preferredTeacherId: teacher.id },
+          ],
+        },
+        include: {
+          student: { include: { user: true } },
+          course: true,
+          oneOnOnePlan: true,
+          teacherSlots: true,
+        },
+      })
+    : [];
+
+  return (
+    <SendLinkClient
+      batches={teacher?.batches || []}
+      oneOnOneRegistrations={oneOnOneRegistrations}
+      teacherUserId={session.user.id}
+    />
+  );
 }

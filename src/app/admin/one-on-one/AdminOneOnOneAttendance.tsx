@@ -74,9 +74,12 @@ export function AdminOneOnOneAttendance() {
               {attendanceRecords.map((record) => {
                 const reg = record.registration;
                 const studentName = reg?.student?.user?.name || "Unknown Student";
-                // Get teacher from teacher slots
-                const teacherName = reg?.teacherSlots?.[0]?.teacher?.user?.name || "Unknown Teacher";
-                const courseName = reg?.course?.name || "Unknown Course";
+                // Get teacher from teacher slots or preferred teacher fallback
+                const teacherName =
+                  reg?.teacherSlots?.[0]?.teacher?.user?.name ||
+                  (record as any).fallbackTeacherName ||
+                  "Pending Assignment";
+                const courseName = reg?.course?.name || "1-on-1 Class";
 
                 return (
                   <tr key={record.id} className="hover:bg-gray-50 transition-colors">

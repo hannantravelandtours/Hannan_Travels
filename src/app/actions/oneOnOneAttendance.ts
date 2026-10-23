@@ -153,7 +153,7 @@ export async function getAllOneOnOneAttendance(date: string) {
   const endOfDay = new Date(date);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
-  return prisma.attendanceRecord.findMany({
+  const records = await prisma.attendanceRecord.findMany({
     where: {
       isOneOnOne: true,
       date: {
@@ -167,6 +167,8 @@ export async function getAllOneOnOneAttendance(date: string) {
           student: {
             include: { user: true }
           },
+          course: true,
+          oneOnOnePlan: true,
           teacherSlots: {
             include: {
               teacher: {
@@ -177,6 +179,29 @@ export async function getAllOneOnOneAttendance(date: string) {
         }
       }
     }
+  });
+
+  // Collect any preferredTeacherIds where teacherSlots is empty
+  const missingTeacherIds = records
+    .map(r => r.registration?.preferredTeacherId)
+    .filter((id): id is string => Boolean(id));
+
+  const preferredTeachers = missingTeacherIds.length > 0
+    ? await prisma.teacherProfile.findMany({
+        where: { id: { in: missingTeacherIds } },
+        include: { user: true }
+      })
+    : [];
+
+  const teacherMap = new Map(preferredTeachers.map(t => [t.id, t.user.name]));
+
+  return records.map(r => {
+    const reg = r.registration;
+    const fallbackTeacherName = reg?.preferredTeacherId ? teacherMap.get(reg.preferredTeacherId) : null;
+    return {
+      ...r,
+      fallbackTeacherName,
+    };
   });
 }
 

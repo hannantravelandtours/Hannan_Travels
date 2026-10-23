@@ -1,6 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { Users, GraduationCap, BookOpen, Clock } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Clock, UserCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -8,28 +8,32 @@ export default async function AdminDashboardPage() {
   // Fetch aggregate stats
   const [
     totalStudents,
+    totalOneOnOneStudents,
     totalTeachers,
     totalCourses,
     totalBatches,
     recentRegistrations,
   ] = await Promise.all([
     prisma.user.count({ where: { role: "STUDENT" } }),
+    prisma.registration.count({ where: { isOneOnOne: true, status: "ACTIVE" } }),
     prisma.user.count({ where: { role: "TEACHER" } }),
     prisma.course.count({ where: { isActive: true } }),
     prisma.batch.count(),
     prisma.registration.findMany({
-      take: 5,
+      take: 6,
       orderBy: { registeredAt: "desc" },
       include: {
         student: { include: { user: true } },
         course: true,
+        oneOnOnePlan: true,
       },
     }),
   ]);
 
   const stats = [
     { name: "Total Students", value: totalStudents, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { name: "Total Teachers", value: totalTeachers, icon: GraduationCap, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { name: "1-on-1 Students", value: totalOneOnOneStudents, icon: UserCheck, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+    { name: "Total Teachers", value: totalTeachers, icon: GraduationCap, color: "text-teal-500", bg: "bg-teal-500/10" },
     { name: "Active Courses", value: totalCourses, icon: BookOpen, color: "text-amber-500", bg: "bg-amber-500/10" },
     { name: "Total Batches", value: totalBatches, icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
   ];
@@ -42,17 +46,17 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center space-x-4">
-              <div className={`p-4 rounded-xl ${stat.bg} ${stat.color}`}>
-                <Icon className="w-6 h-6" />
+            <div key={idx} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center space-x-3 sm:space-x-4">
+              <div className={`p-3 sm:p-4 rounded-xl ${stat.bg} ${stat.color} shrink-0`}>
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-400">{stat.name}</p>
-                <h3 className="text-2xl font-bold text-navy-custom">{stat.value}</h3>
+                <p className="text-xs font-semibold text-gray-400">{stat.name}</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-navy-custom">{stat.value}</h3>
               </div>
             </div>
           );
@@ -70,6 +74,7 @@ export default async function AdminDashboardPage() {
               <tr>
                 <th className="px-6 py-4">Student Name</th>
                 <th className="px-6 py-4">Course</th>
+                <th className="px-6 py-4">Mode / Plan</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Date</th>
               </tr>
@@ -77,7 +82,7 @@ export default async function AdminDashboardPage() {
             <tbody className="divide-y divide-gray-100">
               {recentRegistrations.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
                     No recent registrations found.
                   </td>
                 </tr>
@@ -89,6 +94,17 @@ export default async function AdminDashboardPage() {
                   </td>
                   <td className="px-6 py-4">
                     {reg.course.name} <span className="text-xs text-gray-400">({reg.course.category})</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {reg.isOneOnOne ? (
+                      <span className="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200/60">
+                        1-on-1 ({reg.oneOnOnePlan?.title || "Custom"})
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-200/60">
+                        Batch Class
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide ${

@@ -49,3 +49,30 @@ export async function sendClassLink(
     return { error: "Failed to send class link." };
   }
 }
+
+export async function sendOneOnOneClassLink(
+  registrationId: string,
+  url: string,
+  teacherUserId: string
+) {
+  try {
+    if (!registrationId || !url) {
+      return { error: "Registration and link URL are required." };
+    }
+
+    await prisma.registration.update({
+      where: { id: registrationId },
+      data: { classLink: url.trim() },
+    });
+
+    revalidatePath("/teacher/send-link");
+    revalidatePath("/teacher/one-on-one");
+    revalidatePath("/student");
+    revalidatePath("/student/classes");
+    revalidatePath("/student/one-on-one");
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending 1-on-1 class link:", error);
+    return { error: "Failed to update 1-on-1 class link." };
+  }
+}

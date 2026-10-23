@@ -522,14 +522,38 @@ export async function getOneOnOneStudentSchedule(userId: string) {
       orderBy: { registeredAt: "desc" },
     });
 
+    const preferredTeacherIds = registrations
+      .map((r) => r.preferredTeacherId)
+      .filter((id): id is string => Boolean(id));
+
+    const preferredTeachers =
+      preferredTeacherIds.length > 0
+        ? await prisma.teacherProfile.findMany({
+            where: { id: { in: preferredTeacherIds } },
+            include: { user: true },
+          })
+        : [];
+
+    const preferredTeacherMap = new Map(
+      preferredTeachers.map((t) => [t.id, t.user.name])
+    );
+
     const formatted = registrations.map((r) => {
-      const allSlots = r.teacherSlots && r.teacherSlots.length > 0
-        ? r.teacherSlots
-        : r.teacherSlot ? [r.teacherSlot] : [];
+      const allSlots =
+        r.teacherSlots && r.teacherSlots.length > 0
+          ? r.teacherSlots
+          : r.teacherSlot
+          ? [r.teacherSlot]
+          : [];
+
+      const preferredTeacherName = r.preferredTeacherId
+        ? preferredTeacherMap.get(r.preferredTeacherId) || null
+        : null;
 
       return {
         ...r,
         allSlots,
+        preferredTeacherName,
       };
     });
 

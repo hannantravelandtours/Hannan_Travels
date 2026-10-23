@@ -373,7 +373,7 @@ function TrialBookingForm() {
 
                 <div className="pt-4">
                   <Link
-                    href="/dashboard/student"
+                    href="/student"
                     className="inline-block px-8 py-3 bg-emerald-custom hover:bg-emerald-900 text-white font-bold text-sm rounded-full shadow-md"
                   >
                     Go To Student Portal Dashboard

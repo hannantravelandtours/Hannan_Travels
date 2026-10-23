@@ -15,6 +15,7 @@ export default async function StudentFeesPage() {
         include: {
           course: true,
           batch: true,
+          oneOnOnePlan: true,
           feeRecords: {
             orderBy: { month: "desc" }
           }
@@ -27,7 +28,9 @@ export default async function StudentFeesPage() {
     reg.feeRecords.map(fee => ({ 
       ...fee, 
       courseName: reg.course.name,
-      batchName: reg.batch?.name || "N/A"
+      batchName: reg.isOneOnOne
+        ? (reg.oneOnOnePlan?.title ? `1-on-1: ${reg.oneOnOnePlan.title}` : "1-on-1 Private Tuition")
+        : (reg.batch?.name || "N/A")
     }))
   ) || [];
 
