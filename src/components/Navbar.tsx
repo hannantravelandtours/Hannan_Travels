@@ -3,7 +3,15 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, BookOpen } from "lucide-react";
+import { Menu, X, ChevronDown, BookOpen, Loader2 } from "lucide-react";
+import { getActiveCourses } from "@/app/actions/courses";
+
+const DEFAULT_NAV_COURSES = [
+  { name: "Noorani Qaida", path: "/courses/qaida" },
+  { name: "Nazra Quran", path: "/courses/nazra" },
+  { name: "Hifz Quran", path: "/courses/hifz" },
+  { name: "Hajj & Umrah Guide", path: "/courses/hajj-umrah" },
+];
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,17 +37,22 @@ export const Navbar: React.FC = () => {
     { name: "About Us", path: "/about" },
   ];
 
-  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>([]);
+  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>(DEFAULT_NAV_COURSES);
+  const [loadingCourses, setLoadingCourses] = useState(true);
 
   useEffect(() => {
-    // Dynamically fetch courses for the dropdown
-    import("@/app/actions/courses").then((module) => {
-      module.getActiveCourses().then((courses) => {
+    // Dynamically fetch courses for the dropdown from database
+    getActiveCourses()
+      .then((courses) => {
         if (courses && courses.length > 0) {
           setCoursesList(courses.map((c) => ({ name: c.name, path: `/courses/${c.id}` })));
         }
+        setLoadingCourses(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load navbar courses:", err);
+        setLoadingCourses(false);
       });
-    });
   }, []);
 
   const bottomLinks = [
@@ -104,20 +117,31 @@ export const Navbar: React.FC = () => {
             >
               <button
                 onClick={() => setCoursesDropdownOpen(!coursesDropdownOpen)}
-                className={`flex items-center space-x-1 rtl:space-x-reverse transition-colors duration-200 cursor-pointer py-1 ${
+                className={`flex items-center space-x-1.5 rtl:space-x-reverse transition-colors duration-200 cursor-pointer py-1 ${
                   isHome ? "text-white/80 hover:text-gold-custom-light" : "text-navy-custom/80 hover:text-emerald-custom"
                 }`}
               >
                 <span>Courses</span>
-                <ChevronDown className="h-4 w-4" />
+                {loadingCourses ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-custom-light" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </button>
 
               {coursesDropdownOpen && (
                 <div className="absolute left-0 mt-0 w-64 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-2 transition-all text-navy-custom border border-gray-100 z-50">
                   {coursesList.length === 0 ? (
-                    <div className="px-3 py-4 text-xs font-semibold text-gray-400 text-center">
-                      No courses available yet
-                    </div>
+                    loadingCourses ? (
+                      <div className="flex items-center justify-center space-x-2 py-4 px-3 text-xs text-gray-500">
+                        <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+                        <span>Loading courses...</span>
+                      </div>
+                    ) : (
+                      <div className="px-3 py-4 text-xs font-semibold text-gray-400 text-center">
+                        No courses available yet
+                      </div>
+                    )
                   ) : (
                     coursesList.map((course) => {
                       const isCourseActive = pathname === course.path;
@@ -126,11 +150,12 @@ export const Navbar: React.FC = () => {
                           key={course.path}
                           href={course.path}
                           onClick={() => setCoursesDropdownOpen(false)}
-                          className={`block px-3 py-2 text-xs font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-custom transition-all ${
+                          className={`flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-custom transition-all ${
                             isCourseActive ? "bg-emerald-50 text-emerald-custom" : ""
                           }`}
                         >
-                          {course.name}
+                          <BookOpen className="h-3.5 w-3.5 text-emerald-custom/70 shrink-0" />
+                          <span>{course.name}</span>
                         </Link>
                       );
                     })
@@ -215,15 +240,25 @@ export const Navbar: React.FC = () => {
                   isHome ? "border-emerald-950 text-white/80" : "border-gray-50 text-navy-custom/80"
                 }`}
               >
-                <span>Courses</span>
+                <div className="flex items-center space-x-2">
+                  <span>Courses</span>
+                  {loadingCourses && <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-custom-light" />}
+                </div>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-205 ${mobileCoursesOpen ? "rotate-180" : ""}`} />
               </button>
               {mobileCoursesOpen && (
                 <div className="pl-4 pt-2 space-y-2 flex flex-col text-xs">
                   {coursesList.length === 0 ? (
-                    <div className="py-2 font-medium text-gray-400 text-sm">
-                      No courses available yet
-                    </div>
+                    loadingCourses ? (
+                      <div className="flex items-center space-x-2 py-2 text-xs text-gray-400">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                        <span>Loading courses...</span>
+                      </div>
+                    ) : (
+                      <div className="py-2 font-medium text-gray-400 text-sm">
+                        No courses available yet
+                      </div>
+                    )
                   ) : (
                     coursesList.map((course) => (
                       <Link
