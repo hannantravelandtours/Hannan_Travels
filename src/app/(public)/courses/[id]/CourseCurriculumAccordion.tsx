@@ -51,3 +51,4 @@ export function CourseCurriculumAccordion({ curriculum }: { curriculum: Curricul
     </div>
   );
 }
+

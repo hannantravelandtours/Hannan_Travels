@@ -585,3 +585,161 @@ export async function setOneOnOneClassLink(registrationId: string, classLink: st
     return { success: false, error: "Failed to set class link" };
   }
 }
+
+// --------------------------------------------------------
+// 5. Edit 1-on-1 Student Registration & Dynamic Teacher/Slot Reassignment
+// --------------------------------------------------------
+
+export async function getSlotsForTeacherEdit(teacherProfileId: string, registrationId?: string) {
+  try {
+    if (!teacherProfileId) {
+      return { success: true, slots: [] };
+    }
+
+    const slots = await prisma.teacherSlot.findMany({
+      where: {
+        teacherId: teacherProfileId,
+        OR: [
+          { isBooked: false },
+          ...(registrationId ? [{ registrations: { some: { id: registrationId } } }] : []),
+          ...(registrationId ? [{ singleRegistrations: { some: { id: registrationId } } }] : []),
+        ],
+      },
+      include: {
+        teacher: { include: { user: true } },
+      },
+      orderBy: [
+        { dayOfWeek: "asc" },
+        { startTime: "asc" },
+      ],
+    });
+
+    slots.sort((a, b) => {
+      const dayA = DAY_ORDER[a.dayOfWeek] || 8;
+      const dayB = DAY_ORDER[b.dayOfWeek] || 8;
+      if (dayA !== dayB) return dayA - dayB;
+      return a.startTime.localeCompare(b.startTime);
+    });
+
+    return { success: true, slots };
+  } catch (error) {
+    console.error("Error fetching slots for teacher edit:", error);
+    return { success: false, slots: [] };
+  }
+}
+
+export async function update1on1Registration(data: {
+  registrationId: string;
+  teacherId?: string;
+  slotIds?: string[];
+  courseId?: string;
+  planId?: string;
+  status?: string;
+  classLink?: string;
+  studentName?: string;
+  studentPhone?: string;
+}) {
+  try {
+    const currentReg = await prisma.registration.findUnique({
+      where: { id: data.registrationId },
+      include: {
+        teacherSlots: true,
+        teacherSlot: true,
+        student: { include: { user: true } },
+      },
+    });
+
+    if (!currentReg) {
+      return { success: false, error: "Registration record not found." };
+    }
+
+    // Identify old slots
+    const oldSlotIds = [
+      ...currentReg.teacherSlots.map((s) => s.id),
+      ...(currentReg.teacherSlotId ? [currentReg.teacherSlotId] : []),
+    ];
+    const uniqueOldSlotIds = Array.from(new Set(oldSlotIds));
+    const newSlotIds = data.slotIds !== undefined ? data.slotIds : uniqueOldSlotIds;
+
+    // Determine slots to free and slots to book
+    const slotsToFree = uniqueOldSlotIds.filter((id) => !newSlotIds.includes(id));
+    const slotsToBook = newSlotIds.filter((id) => !uniqueOldSlotIds.includes(id));
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Free previous teacher's slots
+      if (slotsToFree.length > 0) {
+        await tx.teacherSlot.updateMany({
+          where: { id: { in: slotsToFree } },
+          data: { isBooked: false },
+        });
+      }
+
+      // 2. Mark new teacher's slots as booked
+      if (slotsToBook.length > 0) {
+        await tx.teacherSlot.updateMany({
+          where: { id: { in: slotsToBook } },
+          data: { isBooked: true },
+        });
+      }
+
+      // 3. Update registration details
+      const updateData: any = {};
+
+      if (data.teacherId !== undefined) {
+        updateData.preferredTeacherId = data.teacherId || null;
+      }
+      if (data.courseId) {
+        updateData.courseId = data.courseId;
+      }
+      if (data.planId !== undefined) {
+        updateData.oneOnOnePlanId = data.planId || null;
+      }
+      if (data.status) {
+        updateData.status = data.status as any;
+      }
+      if (data.classLink !== undefined) {
+        updateData.classLink = data.classLink;
+      }
+
+      if (data.slotIds !== undefined) {
+        updateData.teacherSlots = {
+          set: newSlotIds.map((id) => ({ id })),
+        };
+        updateData.teacherSlotId = newSlotIds.length > 0 ? newSlotIds[0] : null;
+      }
+
+      await tx.registration.update({
+        where: { id: data.registrationId },
+        data: updateData,
+      });
+
+      // 4. Update student profile / user information if edited
+      if (currentReg.student?.user?.id && (data.studentName || data.studentPhone !== undefined)) {
+        await tx.user.update({
+          where: { id: currentReg.student.user.id },
+          data: {
+            ...(data.studentName ? { name: data.studentName } : {}),
+            ...(data.studentPhone !== undefined ? { phone: data.studentPhone } : {}),
+          },
+        });
+      }
+    });
+
+    // 5. Invalidate all relevant caches across application
+    revalidatePath("/admin/one-on-one");
+    revalidatePath("/admin/students");
+    revalidatePath("/teacher/one-on-one");
+    revalidatePath("/teacher/one-on-one-attendance");
+    revalidatePath("/student/one-on-one");
+    revalidatePath("/courses");
+    revalidatePath(`/courses/${currentReg.courseId}`);
+    if (data.courseId && data.courseId !== currentReg.courseId) {
+      revalidatePath(`/courses/${data.courseId}`);
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating 1-on-1 registration:", error);
+    return { success: false, error: error.message || "Failed to update registration." };
+  }
+}

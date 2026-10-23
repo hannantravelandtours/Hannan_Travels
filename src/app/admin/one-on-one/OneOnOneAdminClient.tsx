@@ -16,6 +16,9 @@ import {
   Trash2,
   DollarSign,
   Layers,
+  Edit2,
+  X,
+  Save,
 } from "lucide-react";
 import {
   confirmOneOnOneRegistration,
@@ -27,6 +30,9 @@ import {
   deleteTeacherSlot,
   toggleTeacherSlotStatus,
   setOneOnOneClassLink,
+  update1on1Registration,
+  getSlotsForTeacherEdit,
+  getAllTeacherSlots,
 } from "@/app/actions/oneOnOne";
 import { AdminOneOnOneAttendance } from "./AdminOneOnOneAttendance";
 
@@ -49,6 +55,7 @@ interface RegistrationItem {
   status: string;
   isOneOnOne: boolean;
   registeredAt: Date;
+  preferredTeacherId?: string | null;
   preferredTeacherName: string;
   classLink?: string | null;
   student: {
@@ -58,10 +65,13 @@ interface RegistrationItem {
       phone: string | null;
     };
   };
+  courseId?: string;
   course: {
+    id?: string;
     name: string;
     category: string;
   };
+  oneOnOnePlanId?: string | null;
   oneOnOnePlan?: {
     id: string;
     title: string;
@@ -69,7 +79,9 @@ interface RegistrationItem {
     defaultPrice: number;
     currency: string;
   } | null;
+  teacherSlotId?: string | null;
   teacherSlot?: SlotItem | null;
+  teacherSlots?: SlotItem[];
   allSlots?: SlotItem[];
 }
 
@@ -158,6 +170,129 @@ export function OneOnOneAdminClient({
   const [slotSubmitting, setSlotSubmitting] = useState(false);
   const [slotError, setSlotError] = useState<string | null>(null);
   const [slotFilterTeacher, setSlotFilterTeacher] = useState("ALL");
+  
+  // Edit Registration Modal State
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingReg, setEditingReg] = useState<RegistrationItem | null>(null);
+
+  const [editStudentName, setEditStudentName] = useState("");
+  const [editStudentPhone, setEditStudentPhone] = useState("");
+  const [editCourseId, setEditCourseId] = useState("");
+  const [editPlanId, setEditPlanId] = useState("");
+  const [editTeacherId, setEditTeacherId] = useState("");
+  const [editSlotIds, setEditSlotIds] = useState<string[]>([]);
+  const [editStatus, setEditStatus] = useState("ACTIVE");
+  const [editClassLink, setEditClassLink] = useState("");
+
+  const [loadingTeacherSlots, setLoadingTeacherSlots] = useState(false);
+  const [availableTeacherSlots, setAvailableTeacherSlots] = useState<SlotItem[]>([]);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccessMsg, setEditSuccessMsg] = useState<string | null>(null);
+
+  const handleOpenEdit = async (reg: RegistrationItem) => {
+    setEditingReg(reg);
+    setEditStudentName(reg.student?.user?.name || "");
+    setEditStudentPhone(reg.student?.user?.phone || "");
+    setEditCourseId(reg.courseId || reg.course?.id || "");
+    setEditPlanId(reg.oneOnOnePlanId || reg.oneOnOnePlan?.id || "");
+
+    const currentTeacherId =
+      reg.preferredTeacherId ||
+      reg.allSlots?.[0]?.teacherId ||
+      reg.teacherSlot?.teacherId ||
+      "";
+    setEditTeacherId(currentTeacherId);
+
+    const currentSlotIds =
+      reg.allSlots && reg.allSlots.length > 0
+        ? reg.allSlots.map((s) => s.id)
+        : reg.teacherSlot
+        ? [reg.teacherSlot.id]
+        : [];
+    setEditSlotIds(currentSlotIds);
+
+    setEditStatus(reg.status || "ACTIVE");
+    setEditClassLink(reg.classLink || "");
+    setEditError(null);
+    setEditSuccessMsg(null);
+    setEditModalOpen(true);
+
+    if (currentTeacherId) {
+      setLoadingTeacherSlots(true);
+      const res = await getSlotsForTeacherEdit(currentTeacherId, reg.id);
+      if (res.success && res.slots) {
+        setAvailableTeacherSlots(res.slots as any);
+      } else {
+        setAvailableTeacherSlots([]);
+      }
+      setLoadingTeacherSlots(false);
+    } else {
+      setAvailableTeacherSlots([]);
+    }
+  };
+
+  const handleTeacherChangeInEdit = async (newTeacherId: string) => {
+    setEditTeacherId(newTeacherId);
+    setEditSlotIds([]);
+    if (newTeacherId) {
+      setLoadingTeacherSlots(true);
+      const res = await getSlotsForTeacherEdit(newTeacherId, editingReg?.id);
+      if (res.success && res.slots) {
+        setAvailableTeacherSlots(res.slots as any);
+      } else {
+        setAvailableTeacherSlots([]);
+      }
+      setLoadingTeacherSlots(false);
+    } else {
+      setAvailableTeacherSlots([]);
+    }
+  };
+
+  const toggleEditSlot = (slotId: string) => {
+    setEditSlotIds((prev) =>
+      prev.includes(slotId) ? prev.filter((id) => id !== slotId) : [...prev, slotId]
+    );
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReg) return;
+    setSavingEdit(true);
+    setEditError(null);
+
+    const res = await update1on1Registration({
+      registrationId: editingReg.id,
+      teacherId: editTeacherId,
+      slotIds: editSlotIds,
+      courseId: editCourseId,
+      planId: editPlanId,
+      status: editStatus,
+      classLink: editClassLink,
+      studentName: editStudentName,
+      studentPhone: editStudentPhone,
+    });
+
+    if (res.success) {
+      setEditSuccessMsg("Student registration, teacher & slots updated successfully!");
+      const regRes = await getOneOnOneAdminTimetable();
+      if (regRes.success && regRes.registrations) {
+        setRegistrations(regRes.registrations as any);
+      }
+      const slotsRes = await getAllTeacherSlots();
+      if (slotsRes.success && slotsRes.slots) {
+        setSlots(slotsRes.slots as any);
+      }
+      setTimeout(() => {
+        setEditModalOpen(false);
+        setEditingReg(null);
+        setEditSuccessMsg(null);
+      }, 700);
+    } else {
+      setEditError(res.error || "Failed to update registration");
+    }
+    setSavingEdit(false);
+  };
   
 
   const THIRTY_MIN_SLOTS: { start: string; end: string; label: string }[] = [];
@@ -646,18 +781,30 @@ export function OneOnOneAdminClient({
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          {!isConfirmed && (
+                          <div className="flex items-center justify-end space-x-2">
                             <button
-                              onClick={() => handleConfirm(item.id)}
-                              disabled={loadingId === item.id}
-                              className="bg-emerald-custom hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer shadow-sm"
+                              onClick={() => handleOpenEdit(item)}
+                              className="inline-flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-custom text-emerald-custom hover:text-white border border-emerald-300 hover:border-emerald-custom font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm cursor-pointer"
+                              title="Edit Student, Teacher & Slots"
                             >
-                              {loadingId === item.id ? "Confirming..." : "Confirm Registration"}
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
                             </button>
-                          )}
-                          {isConfirmed && (
-                            <span className="text-[11px] text-gray-400 font-semibold">Active</span>
-                          )}
+
+                            {!isConfirmed && (
+                              <button
+                                onClick={() => handleConfirm(item.id)}
+                                disabled={loadingId === item.id}
+                                className="bg-emerald-custom hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer shadow-sm"
+                              >
+                                {loadingId === item.id ? "Confirming..." : "Confirm"}
+                              </button>
+                            )}
+
+                            {isConfirmed && (
+                              <span className="text-[11px] text-gray-400 font-semibold">Active</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1036,6 +1183,273 @@ export function OneOnOneAdminClient({
         {/* TAB 5: ATTENDANCE */}
         {activeTab === "attendance" && (
           <AdminOneOnOneAttendance />
+        )}
+
+        {/* EDIT 1-ON-1 REGISTRATION MODAL */}
+        {editModalOpen && editingReg && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-150 p-6 sm:p-8 space-y-6">
+              {/* Modal Header */}
+              <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-custom bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                    1-on-1 Student Timetable
+                  </span>
+                  <h3 className="text-xl font-extrabold text-navy-custom mt-1">
+                    Edit Student & Teacher Assignment
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Update student details, change assigned teacher, and modify class timing slots.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditModalOpen(false);
+                    setEditingReg(null);
+                  }}
+                  className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {editError && (
+                <div className="p-3.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              {editSuccessMsg && (
+                <div className="p-3.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-xl border border-emerald-200 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <span>{editSuccessMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveEdit} className="space-y-5">
+                {/* Student Details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Student Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editStudentName}
+                      onChange={(e) => setEditStudentName(e.target.value)}
+                      required
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Phone / WhatsApp Number
+                    </label>
+                    <input
+                      type="text"
+                      value={editStudentPhone}
+                      onChange={(e) => setEditStudentPhone(e.target.value)}
+                      placeholder="+92 300 1234567"
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Course & Plan */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Enrolled Course
+                    </label>
+                    <select
+                      value={editCourseId}
+                      onChange={(e) => setEditCourseId(e.target.value)}
+                      required
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    >
+                      <option value="">Select Course</option>
+                      {courses.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      1-on-1 Class Frequency Package
+                    </label>
+                    <select
+                      value={editPlanId}
+                      onChange={(e) => setEditPlanId(e.target.value)}
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    >
+                      <option value="">Standard 1-on-1</option>
+                      {plans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title} (Rs {p.defaultPrice}/mo)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Teacher Assignment Box */}
+                <div className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <UserCheck className="w-4 h-4 text-emerald-custom" />
+                    <label className="text-xs font-extrabold text-navy-custom">
+                      Assigned 1-on-1 Scholar (Teacher)
+                    </label>
+                  </div>
+                  <select
+                    value={editTeacherId}
+                    onChange={(e) => handleTeacherChangeInEdit(e.target.value)}
+                    className="w-full text-xs font-bold p-3 rounded-xl border border-emerald-300 bg-white text-navy-custom outline-none focus:ring-2 focus:ring-emerald-custom"
+                  >
+                    <option value="">-- No Teacher Assigned (Unassigned) --</option>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} {t.qualification ? `(${t.qualification})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
+                    💡 <strong>Smart Reassignment:</strong> Jab aap teacher change karenge, yeh student automatic nayi teacher ke timetable/portal par chala jaye ga, previous teacher se remove ho jaye ga, previous slots free ho kar course page par wapis show ho jayengi, aur nayi slots book ho jayengi.
+                  </p>
+                </div>
+
+                {/* Time Slots Selection */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-extrabold text-gray-700 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-custom" />
+                      <span>Select 30-Min Time Slots ({editSlotIds.length} Selected)</span>
+                    </label>
+                    <span className="text-[11px] text-gray-400">
+                      Click slots to select / deselect
+                    </span>
+                  </div>
+
+                  {loadingTeacherSlots ? (
+                    <div className="p-6 text-center text-xs text-gray-400 font-semibold bg-gray-50 rounded-xl">
+                      Loading teacher available time slots...
+                    </div>
+                  ) : !editTeacherId ? (
+                    <div className="p-6 text-center text-xs text-gray-500 font-semibold bg-gray-50 rounded-xl border border-gray-150">
+                      Please select a teacher above to view and assign their available free time slots.
+                    </div>
+                  ) : availableTeacherSlots.length > 0 ? (
+                    <div className="border border-gray-150 rounded-xl p-3 bg-gray-50 max-h-56 overflow-y-auto space-y-3">
+                      {/* Group by Day of Week */}
+                      {Object.entries(
+                        availableTeacherSlots.reduce((acc, slot) => {
+                          acc[slot.dayOfWeek] = acc[slot.dayOfWeek] || [];
+                          acc[slot.dayOfWeek].push(slot);
+                          return acc;
+                        }, {} as Record<string, SlotItem[]>)
+                      ).map(([day, daySlots]) => (
+                        <div key={day} className="space-y-1">
+                          <span className="text-[11px] font-bold text-navy-custom flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-emerald-custom" />
+                            {day}
+                          </span>
+                          <div className="flex flex-wrap gap-1.5 pl-3">
+                            {daySlots.map((slot) => {
+                              const isSelected = editSlotIds.includes(slot.id);
+                              return (
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  onClick={() => toggleEditSlot(slot.id)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center space-x-1 ${
+                                    isSelected
+                                      ? "bg-emerald-custom text-white shadow-sm ring-2 ring-emerald-custom"
+                                      : "bg-white hover:bg-emerald-50 text-gray-700 hover:text-emerald-custom border border-gray-200"
+                                  }`}
+                                >
+                                  {isSelected && <CheckCircle2 className="w-3 h-3" />}
+                                  <span>{slot.startTime} - {slot.endTime}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-xs text-gray-400 font-semibold bg-gray-50 rounded-xl border border-gray-150">
+                      This teacher has no available free slots currently configured.
+                    </div>
+                  )}
+                </div>
+
+                {/* Status & Meeting Link */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Registration Status
+                    </label>
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value)}
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    >
+                      <option value="ACTIVE">Confirmed / Active</option>
+                      <option value="PENDING_ADMIN_CONFIRMATION">Pending Admin Confirmation</option>
+                      <option value="PAUSED">Paused</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Live Class Link (Zoom / Meet)
+                    </label>
+                    <input
+                      type="text"
+                      value={editClassLink}
+                      onChange={(e) => setEditClassLink(e.target.value)}
+                      placeholder="https://zoom.us/j/..."
+                      className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-200 focus:border-emerald-custom outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-150">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditModalOpen(false);
+                      setEditingReg(null);
+                    }}
+                    className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdit}
+                    className="px-6 py-2.5 rounded-xl bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {savingEdit ? (
+                      <span>Saving Changes...</span>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        <span>Save & Update Timetable</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     );

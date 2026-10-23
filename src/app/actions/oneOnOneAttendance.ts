@@ -154,17 +154,21 @@ export async function getStudentOneOnOneAttendance(studentProfileId: string) {
 /**
  * Get all 1-on-1 students for a specific teacher
  */
-export async function getTeacherOneOnOneStudents(teacherId: string) {
+export async function getTeacherOneOnOneStudents(teacherUserId: string) {
+  const teacherProfile = await prisma.teacherProfile.findUnique({
+    where: { userId: teacherUserId }
+  });
+
+  if (!teacherProfile) return [];
+
   return prisma.registration.findMany({
     where: {
       isOneOnOne: true,
-      teacherSlots: {
-        some: {
-          teacher: {
-            userId: teacherId
-          }
-        }
-      },
+      OR: [
+        { teacherSlots: { some: { teacherId: teacherProfile.id } } },
+        { teacherSlot: { teacherId: teacherProfile.id } },
+        { preferredTeacherId: teacherProfile.id }
+      ],
       status: {
         in: ["ACTIVE", "PENDING_ADMIN_CONFIRMATION"]
       }
@@ -174,7 +178,8 @@ export async function getTeacherOneOnOneStudents(teacherId: string) {
         include: { user: true }
       },
       course: true,
-      teacherSlots: true
+      teacherSlots: true,
+      teacherSlot: true,
     }
   });
 }

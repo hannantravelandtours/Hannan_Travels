@@ -339,3 +339,4 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
     </div>
   );
 }
+
