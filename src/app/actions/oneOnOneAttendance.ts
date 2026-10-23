@@ -18,11 +18,20 @@ export async function markOneOnOneAttendance(data: {
     throw new Error("Unauthorized");
   }
 
+  // Parse YYYY-MM-DD cleanly in UTC (midday to eliminate timezone drift)
+  const [year, month, day] = data.date.split("-").map(Number);
+  const targetDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+  const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
   // Check if attendance already exists for this registration & date
   const existing = await prisma.attendanceRecord.findFirst({
     where: {
       registrationId: data.registrationId,
-      date: new Date(data.date),
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
       isOneOnOne: true,
     },
   });
@@ -42,7 +51,7 @@ export async function markOneOnOneAttendance(data: {
       data: {
         registrationId: data.registrationId,
         studentId: data.studentId,
-        date: new Date(data.date),
+        date: targetDate,
         status: data.status,
         markedBy: session.user.id,
         isOneOnOne: true,
@@ -51,6 +60,48 @@ export async function markOneOnOneAttendance(data: {
   }
 
   return { success: true };
+}
+
+/**
+ * Get all 1-on-1 attendance records for a teacher's students (across all dates)
+ */
+export async function getTeacherAllOneOnOneAttendance(teacherUserId: string) {
+  const teacherProfile = await prisma.teacherProfile.findUnique({
+    where: { userId: teacherUserId }
+  });
+
+  if (!teacherProfile) return [];
+
+  // Find all registrations for this teacher
+  const registrations = await prisma.registration.findMany({
+    where: {
+      isOneOnOne: true,
+      OR: [
+        { teacherSlots: { some: { teacherId: teacherProfile.id } } },
+        { teacherSlot: { teacherId: teacherProfile.id } },
+        { preferredTeacherId: teacherProfile.id }
+      ]
+    },
+    select: { id: true, studentId: true }
+  });
+
+  const regIds = registrations.map(r => r.id);
+  const studentIds = registrations.map(r => r.studentId);
+
+  if (regIds.length === 0) return [];
+
+  return prisma.attendanceRecord.findMany({
+    where: {
+      isOneOnOne: true,
+      OR: [
+        { registrationId: { in: regIds } },
+        { studentId: { in: studentIds }, markedBy: teacherUserId }
+      ]
+    },
+    orderBy: {
+      date: "asc"
+    }
+  });
 }
 
 /**
