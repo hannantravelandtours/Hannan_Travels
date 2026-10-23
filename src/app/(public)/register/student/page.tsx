@@ -28,6 +28,13 @@ import { getAvailableSlotsForTeacher, getOneOnOnePlans } from "@/app/actions/one
 import { CourseCategory } from "@prisma/client";
 import { Suspense } from "react";
 
+const DEFAULT_COURSES = [
+  { id: "qaida", name: "Noorani Qaida", category: "QAIDA" },
+  { id: "nazra", name: "Nazra Quran", category: "NAZRA" },
+  { id: "hifz", name: "Hifz Quran", category: "HIFZ" },
+  { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" },
+];
+
 function StudentRegistrationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,7 +48,8 @@ function StudentRegistrationForm() {
 
   const [isOneOnOne, setIsOneOnOne] = useState(true);
 
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>(DEFAULT_COURSES);
+  const [loadingCourses, setLoadingCourses] = useState(true);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [allTeachers, setAllTeachers] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
@@ -63,14 +71,36 @@ function StudentRegistrationForm() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Fetch courses, all teachers on load
-    getActiveCourses(initialCategory || undefined).then((cList) => {
-      setCourses(cList);
-      if (initialCourse && !selectedCourse) {
-        setSelectedCourse(initialCourse);
-      }
-    });
-    getAllTeachers().then(setAllTeachers);
+    let isCurrent = true;
+    setLoadingCourses(true);
+
+    // Parallel fetch courses and teachers on page load
+    Promise.all([
+      getActiveCourses(initialCategory || undefined),
+      getAllTeachers(),
+    ])
+      .then(([cList, tList]) => {
+        if (!isCurrent) return;
+        if (cList && cList.length > 0) {
+          setCourses(cList);
+        }
+        if (tList) {
+          setAllTeachers(tList);
+        }
+        if (initialCourse && !selectedCourse) {
+          setSelectedCourse(initialCourse);
+        }
+        setLoadingCourses(false);
+      })
+      .catch((err) => {
+        if (!isCurrent) return;
+        console.error("Error loading courses/teachers:", err);
+        setLoadingCourses(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [initialCategory, initialCourse]);
 
   useEffect(() => {
@@ -360,10 +390,10 @@ function StudentRegistrationForm() {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Select Course</label>
-                {loadingCourseData && (
+                {(loadingCourses || loadingCourseData) && (
                   <span className="flex items-center text-xs text-emerald-400 gap-1.5 font-medium animate-pulse">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Loading course data...</span>
+                    <span>{loadingCourses ? "Loading courses from academy..." : "Loading course data..."}</span>
                   </span>
                 )}
               </div>
@@ -383,15 +413,23 @@ function StudentRegistrationForm() {
                     setSlots([]);
                     if (nextCourse) setLoadingCourseData(true);
                   }}
-                  className={`w-full bg-stone-900 border ${loadingCourseData ? "border-emerald-500/70 ring-1 ring-emerald-500/30" : "border-stone-850"} focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none`}
+                  className={`w-full bg-stone-900 border ${
+                    loadingCourses || loadingCourseData
+                      ? "border-emerald-500/70 ring-1 ring-emerald-500/30"
+                      : "border-stone-850"
+                  } focus:border-emerald-custom-light rounded-xl py-3 pl-10 pr-10 text-sm text-white outline-none transition-all appearance-none`}
                 >
-                  <option value="" disabled>Choose a course</option>
+                  <option value="" disabled>
+                    {loadingCourses && courses.length === 0 ? "Loading courses from academy..." : "Choose a course"}
+                  </option>
                   {courses.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name} ({c.category})</option>
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.category})
+                    </option>
                   ))}
                 </select>
                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
-                  {loadingCourseData ? (
+                  {loadingCourses || loadingCourseData ? (
                     <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
                   ) : (
                     <span className="text-gray-500 text-xs">▼</span>
@@ -594,10 +632,15 @@ function StudentRegistrationForm() {
 
             <button
               type="submit"
-              disabled={isSubmitting || loadingCourseData}
+              disabled={isSubmitting || loadingCourseData || loadingCourses}
               className="w-full bg-emerald-custom hover:bg-emerald-600 disabled:opacity-50 text-white font-bold text-sm py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-custom/25 flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
             >
-              {loadingCourseData ? (
+              {loadingCourses ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Loading academy courses...</span>
+                </>
+              ) : loadingCourseData ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
                   <span>Loading course data...</span>
