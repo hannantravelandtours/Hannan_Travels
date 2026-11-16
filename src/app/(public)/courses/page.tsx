@@ -4,7 +4,7 @@ import { BookOpen, Clock, Award, Star, Users, UserCheck, Sparkles } from "lucide
 import { getActiveCourses } from "@/app/actions/courses";
 import { staticCoursesData } from "@/data/staticCourses";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function CoursesPage() {
   const allCourses = await getActiveCourses();

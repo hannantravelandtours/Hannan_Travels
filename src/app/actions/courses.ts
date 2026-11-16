@@ -240,7 +240,13 @@ export async function getCourseDetails(courseId: string) {
             category: true,
             description: true,
             isActive: true,
-            batches: true,
+            batches: {
+              include: {
+                teacher: {
+                  include: { user: true },
+                },
+              },
+            },
           }
         }) as any;
       }

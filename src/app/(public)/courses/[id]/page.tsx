@@ -18,16 +18,7 @@ import {
   ArrowRight
 } from "lucide-react";
 
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  return [
-    { id: "qaida" },
-    { id: "nazra" },
-    { id: "hifz" },
-    { id: "hajj-umrah" },
-  ];
-}
+export const dynamic = "force-dynamic";
 
 export default async function CourseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

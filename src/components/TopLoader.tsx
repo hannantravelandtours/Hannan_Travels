@@ -1,16 +1,23 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 export function TopLoader() {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  const clearAllTimeouts = () => {
+    timeoutsRef.current.forEach((t) => clearTimeout(t));
+    timeoutsRef.current = [];
+  };
 
   useEffect(() => {
     // When pathname changes, finish the progress bar
     if (loading) {
+      clearAllTimeouts();
       setProgress(100);
       const timer = setTimeout(() => {
         setLoading(false);
@@ -46,6 +53,7 @@ export function TopLoader() {
         const targetPath = href.split("?")[0].split("#")[0];
 
         if (targetPath !== currentPath) {
+          clearAllTimeouts();
           setLoading(true);
           setProgress(25);
 
@@ -59,17 +67,16 @@ export function TopLoader() {
             setProgress(0);
           }, 8000);
 
-          return () => {
-            clearTimeout(t1);
-            clearTimeout(t2);
-            clearTimeout(t3);
-          };
+          timeoutsRef.current = [t1, t2, t3];
         }
       }
     };
 
     document.addEventListener("click", handleClick, { capture: true });
-    return () => document.removeEventListener("click", handleClick, { capture: true });
+    return () => {
+      clearAllTimeouts();
+      document.removeEventListener("click", handleClick, { capture: true });
+    };
   }, []);
 
   if (!loading && progress === 0) return null;
