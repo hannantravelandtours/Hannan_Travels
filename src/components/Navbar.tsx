@@ -13,12 +13,19 @@ const DEFAULT_NAV_COURSES = [
   { name: "Hajj & Umrah Guide", path: "/courses/hajj-umrah" },
 ];
 
+let cachedNavbarCourses: { name: string; path: string }[] | null = null;
+
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [coursesDropdownOpen, setCoursesDropdownOpen] = useState(false);
   const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
+  const [navigatingPath, setNavigatingPath] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setNavigatingPath(null);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,21 +44,24 @@ export const Navbar: React.FC = () => {
     { name: "About Us", path: "/about" },
   ];
 
-  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>(DEFAULT_NAV_COURSES);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [coursesList, setCoursesList] = useState<{name: string, path: string}[]>(
+    cachedNavbarCourses || DEFAULT_NAV_COURSES
+  );
 
   useEffect(() => {
-    // Dynamically fetch courses for the dropdown from database
+    if (cachedNavbarCourses) return;
+
+    // Fetch in the background once per session without blocking UI
     getActiveCourses()
       .then((courses) => {
         if (courses && courses.length > 0) {
-          setCoursesList(courses.map((c) => ({ name: c.name, path: `/courses/${c.id}` })));
+          const formatted = courses.map((c) => ({ name: c.name, path: `/courses/${c.id}` }));
+          cachedNavbarCourses = formatted;
+          setCoursesList(formatted);
         }
-        setLoadingCourses(false);
       })
       .catch((err) => {
         console.error("Failed to load navbar courses:", err);
-        setLoadingCourses(false);
       });
   }, []);
 
@@ -122,40 +132,41 @@ export const Navbar: React.FC = () => {
                 }`}
               >
                 <span>Courses</span>
-                {loadingCourses ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-custom-light" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${coursesDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {coursesDropdownOpen && (
                 <div className="absolute left-0 mt-0 w-64 rounded-xl bg-white shadow-xl ring-1 ring-black/5 p-2 transition-all text-navy-custom border border-gray-100 z-50">
                   {coursesList.length === 0 ? (
-                    loadingCourses ? (
-                      <div className="flex items-center justify-center space-x-2 py-4 px-3 text-xs text-gray-500">
-                        <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
-                        <span>Loading courses...</span>
-                      </div>
-                    ) : (
-                      <div className="px-3 py-4 text-xs font-semibold text-gray-400 text-center">
-                        No courses available yet
-                      </div>
-                    )
+                    <div className="px-3 py-4 text-xs font-semibold text-gray-400 text-center">
+                      Loading courses...
+                    </div>
                   ) : (
                     coursesList.map((course) => {
                       const isCourseActive = pathname === course.path;
+                      const isNavigating = navigatingPath === course.path;
                       return (
                         <Link
                           key={course.path}
                           href={course.path}
-                          onClick={() => setCoursesDropdownOpen(false)}
+                          prefetch={true}
+                          onClick={() => {
+                            setNavigatingPath(course.path);
+                            setCoursesDropdownOpen(false);
+                          }}
                           className={`flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-custom transition-all ${
                             isCourseActive ? "bg-emerald-50 text-emerald-custom" : ""
                           }`}
                         >
-                          <BookOpen className="h-3.5 w-3.5 text-emerald-custom/70 shrink-0" />
+                          {isNavigating ? (
+                            <Loader2 className="h-3.5 w-3.5 text-emerald-600 animate-spin shrink-0" />
+                          ) : (
+                            <BookOpen className="h-3.5 w-3.5 text-emerald-custom/70 shrink-0" />
+                          )}
                           <span>{course.name}</span>
+                          {isNavigating && (
+                            <span className="ml-auto text-[10px] text-emerald-600 font-bold animate-pulse">Opening...</span>
+                          )}
                         </Link>
                       );
                     })
@@ -240,44 +251,36 @@ export const Navbar: React.FC = () => {
                   isHome ? "border-emerald-950 text-white/80" : "border-gray-50 text-navy-custom/80"
                 }`}
               >
-                <div className="flex items-center space-x-2">
-                  <span>Courses</span>
-                  {loadingCourses && <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-custom-light" />}
-                </div>
+                <span>Courses</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-205 ${mobileCoursesOpen ? "rotate-180" : ""}`} />
               </button>
               {mobileCoursesOpen && (
                 <div className="pl-4 pt-2 space-y-2 flex flex-col text-xs">
-                  {coursesList.length === 0 ? (
-                    loadingCourses ? (
-                      <div className="flex items-center space-x-2 py-2 text-xs text-gray-400">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-                        <span>Loading courses...</span>
-                      </div>
-                    ) : (
-                      <div className="py-2 font-medium text-gray-400 text-sm">
-                        No courses available yet
-                      </div>
-                    )
-                  ) : (
-                    coursesList.map((course) => (
+                  {coursesList.map((course) => {
+                    const isNavigating = navigatingPath === course.path;
+                    return (
                       <Link
                         key={course.path}
                         href={course.path}
+                        prefetch={true}
                         onClick={() => {
+                          setNavigatingPath(course.path);
                           setMobileCoursesOpen(false);
                           setMobileMenuOpen(false);
                         }}
-                        className={`py-1 font-semibold transition-all border-b ${
+                        className={`py-1.5 font-semibold transition-all border-b flex items-center justify-between ${
                           isHome 
                             ? "border-emerald-950/30 text-white/70 hover:text-gold-custom-light" 
                             : "border-gray-50/50 text-navy-custom/75 hover:text-emerald-custom"
                         }`}
                       >
-                        {course.name}
+                        <span>{course.name}</span>
+                        {isNavigating && (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400 shrink-0" />
+                        )}
                       </Link>
-                    ))
-                  )}
+                    );
+                  })}
                 </div>
               )}
             </div>

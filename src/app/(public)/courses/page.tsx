@@ -4,6 +4,8 @@ import { BookOpen, Clock, Award, Star, Users, UserCheck, Sparkles } from "lucide
 import { getActiveCourses } from "@/app/actions/courses";
 import { staticCoursesData } from "@/data/staticCourses";
 
+export const revalidate = 60;
+
 export default async function CoursesPage() {
   const allCourses = await getActiveCourses();
 
@@ -127,12 +129,14 @@ export default async function CoursesPage() {
                 <div className="p-6 pt-0 flex gap-3 mt-auto">
                   <Link
                     href={`/courses/${course.id}`}
+                    prefetch={true}
                     className="flex-1 text-center py-2.5 rounded-lg border border-gray-200 hover:border-emerald-custom hover:text-emerald-custom text-xs font-bold text-navy-custom transition-all"
                   >
                     Curriculum
                   </Link>
                   <Link
                     href={`/courses/${course.id}`}
+                    prefetch={true}
                     className="flex-1 text-center py-2.5 rounded-lg bg-emerald-custom hover:bg-emerald-900 text-white text-xs font-bold transition-all shadow flex items-center justify-center space-x-1"
                   >
                     <span>1-on-1 & Free Slots</span>

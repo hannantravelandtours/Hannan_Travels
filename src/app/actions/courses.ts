@@ -6,35 +6,7 @@ import { staticCoursesData } from "@/data/staticCourses";
 
 export async function getActiveCourses(category?: CourseCategory) {
   try {
-    // 1. Auto-seed logic to ensure 4 static courses always exist
-    const staticIds = ["qaida", "nazra", "hifz", "hajj-umrah"];
-    const existingCount = await prisma.course.count({
-      where: { id: { in: staticIds } }
-    });
-
-    if (existingCount !== 4) {
-      const staticCourses = [
-        { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/qaida_banner_ai.png" },
-        { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/nazra_banner_ai.png" },
-        { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/hifz_banner_ai.png" },
-        { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp" },
-      ];
-
-      for (const c of staticCourses) {
-        await prisma.course.upsert({
-          where: { id: c.id },
-          update: { name: c.name, category: c.category, bannerImage: c.bannerImage, isActive: true },
-          create: { id: c.id, name: c.name, category: c.category, bannerImage: c.bannerImage, description: "Static Course", isActive: true },
-        });
-      }
-
-      // Cleanup old dynamic courses
-      await prisma.course.deleteMany({
-        where: { id: { notIn: staticIds } }
-      });
-    }
-
-    // 2. Fetch courses
+    // 1. Direct fetch of active courses for maximum speed
     const courses = await prisma.course.findMany({
       where: {
         isActive: true,
@@ -66,21 +38,56 @@ export async function getActiveCourses(category?: CourseCategory) {
       }
     });
 
-    // 3. Override DB banner images with static source of truth to ensure instant updates
-    const mappedCourses = courses.map((course) => ({
-      ...course,
-      bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage,
-      thumbnailImage: staticCoursesData[course.id]?.thumbnailImage || course.bannerImage,
-      oneOnOnePlans: course.oneOnOnePlans.map((p) => ({
-        ...p,
-        defaultPrice: Number(p.defaultPrice),
-      })),
-    }));
+    // If courses already exist in DB, return them immediately
+    if (courses && courses.length > 0) {
+      return courses.map((course) => ({
+        ...course,
+        bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage,
+        thumbnailImage: staticCoursesData[course.id]?.thumbnailImage || course.bannerImage,
+        oneOnOnePlans: course.oneOnOnePlans.map((p) => ({
+          ...p,
+          defaultPrice: Number(p.defaultPrice),
+        })),
+      }));
+    }
 
-    return mappedCourses;
+    // Fallback: If DB is empty, seed 4 static courses
+    const staticCourses = [
+      { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/qaida_banner_ai.png" },
+      { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/nazra_banner_ai.png" },
+      { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/hifz_banner_ai.png" },
+      { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp" },
+    ];
+
+    for (const c of staticCourses) {
+      await prisma.course.upsert({
+        where: { id: c.id },
+        update: { name: c.name, category: c.category, bannerImage: c.bannerImage, isActive: true },
+        create: { id: c.id, name: c.name, category: c.category, bannerImage: c.bannerImage, description: "Static Course", isActive: true },
+      });
+    }
+
+    return staticCourses.map(c => ({
+      ...c,
+      subtitle: "Personalized 1-on-1 Quran Classes",
+      description: "Learn Quran with verified native scholars.",
+      batches: [],
+      oneOnOnePlans: [
+        { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500, currency: "PKR" },
+        { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500, currency: "PKR" },
+        { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000, currency: "PKR" },
+      ],
+      thumbnailImage: staticCoursesData[c.id]?.thumbnailImage || c.bannerImage,
+    }));
   } catch (error) {
     console.error("Failed to get courses:", error);
-    return [];
+    // Return static courses data as graceful fallback so user is never stuck
+    return [
+      { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as any, bannerImage: "/qaida_banner_ai.png", subtitle: "1-on-1 Basics", description: "", batches: [], oneOnOnePlans: [] },
+      { id: "nazra", name: "Nazra Quran", category: "NAZRA" as any, bannerImage: "/nazra_banner_ai.png", subtitle: "Recitation & Tajweed", description: "", batches: [], oneOnOnePlans: [] },
+      { id: "hifz", name: "Hifz Quran", category: "HIFZ" as any, bannerImage: "/hifz_banner_ai.png", subtitle: "Quran Memorization", description: "", batches: [], oneOnOnePlans: [] },
+      { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as any, bannerImage: "/hajj_umrahGuide.webp", subtitle: "Practical Guide", description: "", batches: [], oneOnOnePlans: [] },
+    ];
   }
 }
 
@@ -126,47 +133,8 @@ export async function getTeachersForCourse(courseId: string) {
 
 export async function getCourseDetails(courseId: string) {
   try {
-    // 1. Ensure 4 core static courses exist
-    const staticCourses = [
-      { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as const, bannerImage: "/Qaidabanner.webp" },
-      { id: "nazra", name: "Nazra Quran", category: "NAZRA" as const, bannerImage: "/Nazra_Hifzbanner.webp" },
-      { id: "hifz", name: "Hifz Quran", category: "HIFZ" as const, bannerImage: "/Nazra_Hifzbanner.webp" },
-      { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as const, bannerImage: "/hajj_umrahGuide.webp" },
-    ];
-
-    const courseExists = await prisma.course.findUnique({ where: { id: courseId } });
-    if (!courseExists) {
-      const match = staticCourses.find((c) => c.id === courseId);
-      if (match) {
-        await prisma.course.upsert({
-          where: { id: match.id },
-          update: { isActive: true },
-          create: {
-            id: match.id,
-            name: match.name,
-            category: match.category as any,
-            bannerImage: match.bannerImage,
-            description: "Online 1-on-1 Quran Course",
-            isActive: true,
-          },
-        });
-      }
-    }
-
-    // 2. Ensure default 1-on-1 plans exist in DB
-    const existingPlansCount = await prisma.oneOnOnePlan.count();
-    if (existingPlansCount === 0) {
-      await prisma.oneOnOnePlan.createMany({
-        data: [
-          { title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500, currency: "PKR" },
-          { title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500, currency: "PKR" },
-          { title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000, currency: "PKR" },
-        ],
-      });
-    }
-
-    // 3. Parallel fetch of Course, 1-on-1 Plans, and Teachers with Free Slots
-    const [course, plans, teachers] = await Promise.all([
+    // 1. Parallel fetch of Course, 1-on-1 Plans, and Teachers with Free Slots in a single roundtrip
+    let [course, plans, teachers] = await Promise.all([
       prisma.course.findUnique({
         where: { id: courseId },
         select: {
@@ -243,33 +211,76 @@ export async function getCourseDetails(courseId: string) {
       }),
     ]);
 
+    // Fallback: If course is not in DB yet, create it on the fly
+    if (!course) {
+      const staticCourses = [
+        { id: "qaida", name: "Noorani Qaida", category: "QAIDA" as const, bannerImage: "/Qaidabanner.webp" },
+        { id: "nazra", name: "Nazra Quran", category: "NAZRA" as const, bannerImage: "/Nazra_Hifzbanner.webp" },
+        { id: "hifz", name: "Hifz Quran", category: "HIFZ" as const, bannerImage: "/Nazra_Hifzbanner.webp" },
+        { id: "hajj-umrah", name: "Hajj & Umrah Guide", category: "ISLAMIC_STUDIES" as const, bannerImage: "/hajj_umrahGuide.webp" },
+      ];
+      const match = staticCourses.find((c) => c.id === courseId);
+      if (match) {
+        course = await prisma.course.upsert({
+          where: { id: match.id },
+          update: { isActive: true },
+          create: {
+            id: match.id,
+            name: match.name,
+            category: match.category as any,
+            bannerImage: match.bannerImage,
+            description: "Online 1-on-1 Quran Course",
+            isActive: true,
+          },
+          select: {
+            id: true,
+            name: true,
+            subtitle: true,
+            bannerImage: true,
+            category: true,
+            description: true,
+            isActive: true,
+            batches: true,
+          }
+        }) as any;
+      }
+    }
+
     if (!course) return null;
 
-    // 4. Ensure teachers have free slots in DB if they have none
+    // Fallback plans if none in DB
+    if (!plans || plans.length === 0) {
+      plans = [
+        { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500 as any, currency: "PKR", courseId: null, teacherFees: [] },
+        { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500 as any, currency: "PKR", courseId: null, teacherFees: [] },
+        { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000 as any, currency: "PKR", courseId: null, teacherFees: [] },
+      ];
+      // Seed asynchronously in background without delaying user
+      prisma.oneOnOnePlan.createMany({
+        data: [
+          { title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500, currency: "PKR" },
+          { title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500, currency: "PKR" },
+          { title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000, currency: "PKR" },
+        ],
+      }).catch(() => {});
+    }
+
+    // Default template slots if teachers have none
+    const defaultSlotTemplates = [
+      { dayOfWeek: "Monday", startTime: "15:00", endTime: "15:30" },
+      { dayOfWeek: "Monday", startTime: "17:00", endTime: "17:30" },
+      { dayOfWeek: "Tuesday", startTime: "16:00", endTime: "16:30" },
+      { dayOfWeek: "Tuesday", startTime: "18:00", endTime: "18:30" },
+      { dayOfWeek: "Wednesday", startTime: "15:00", endTime: "15:30" },
+      { dayOfWeek: "Wednesday", startTime: "17:00", endTime: "17:30" },
+      { dayOfWeek: "Thursday", startTime: "16:00", endTime: "16:30" },
+      { dayOfWeek: "Friday", startTime: "15:00", endTime: "15:30" },
+      { dayOfWeek: "Saturday", startTime: "11:00", endTime: "11:30" },
+    ];
+
     const teachersWithNoSlots = teachers.filter((t) => t.slots.length === 0);
     if (teachersWithNoSlots.length > 0) {
-      const defaultSlotTemplates = [
-        { dayOfWeek: "Monday", startTime: "15:00", endTime: "15:30" },
-        { dayOfWeek: "Monday", startTime: "17:00", endTime: "17:30" },
-        { dayOfWeek: "Tuesday", startTime: "16:00", endTime: "16:30" },
-        { dayOfWeek: "Tuesday", startTime: "18:00", endTime: "18:30" },
-        { dayOfWeek: "Wednesday", startTime: "15:00", endTime: "15:30" },
-        { dayOfWeek: "Wednesday", startTime: "17:00", endTime: "17:30" },
-        { dayOfWeek: "Thursday", startTime: "16:00", endTime: "16:30" },
-        { dayOfWeek: "Friday", startTime: "15:00", endTime: "15:30" },
-        { dayOfWeek: "Saturday", startTime: "11:00", endTime: "11:30" },
-      ];
-
       for (const t of teachersWithNoSlots) {
-        await prisma.teacherSlot.createMany({
-          data: defaultSlotTemplates.map((s) => ({
-            teacherId: t.id,
-            dayOfWeek: s.dayOfWeek,
-            startTime: s.startTime,
-            endTime: s.endTime,
-            isBooked: false,
-          })),
-        });
         t.slots = defaultSlotTemplates.map((s, idx) => ({
           id: `slot-auto-${t.id}-${idx}`,
           dayOfWeek: s.dayOfWeek,
@@ -277,6 +288,16 @@ export async function getCourseDetails(courseId: string) {
           endTime: s.endTime,
           isBooked: false,
         })) as any;
+        // Seed DB in background asynchronously
+        prisma.teacherSlot.createMany({
+          data: defaultSlotTemplates.map((s) => ({
+            teacherId: t.id,
+            dayOfWeek: s.dayOfWeek,
+            startTime: s.startTime,
+            endTime: s.endTime,
+            isBooked: false,
+          })),
+        }).catch(() => {});
       }
     }
 
