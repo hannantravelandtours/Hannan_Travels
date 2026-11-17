@@ -76,11 +76,11 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
     teachers.length > 0 ? teachers[0].id : ""
   );
 
-  const selectedPlan = plans.find(p => p.id === selectedPlanId) || plans[0];
+  const selectedPlan = plans.find(p => p.id === selectedPlanId) || (plans.length > 0 ? plans[0] : null);
   const selectedTeacher = teachers.find(t => t.id === selectedTeacherId);
 
   // Compute active price
-  let activePrice = selectedPlan?.defaultPrice || 5000;
+  let activePrice = selectedPlan ? selectedPlan.defaultPrice : null;
   let activeCurrency = selectedPlan?.currency || "PKR";
 
   if (selectedTeacher && selectedPlan) {
@@ -114,12 +114,25 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
             <h2 className="text-xl font-extrabold text-navy-custom mt-1">Available 1-on-1 Plans</h2>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-black text-emerald-custom">
-              {activePrice.toLocaleString()} {activeCurrency}
-            </span>
-            <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Per Month
-            </span>
+            {activePrice !== null ? (
+              <>
+                <span className="text-2xl font-black text-emerald-custom">
+                  {activePrice.toLocaleString()} {activeCurrency}
+                </span>
+                <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Per Month
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-base font-bold text-gray-500">
+                  Custom
+                </span>
+                <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Upon Request
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -161,8 +174,13 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
             </div>
           </div>
         ) : (
-          <div className="p-3 bg-gray-50 rounded-xl border border-gray-150 text-center text-xs text-gray-500 font-medium">
-            Standard 1-on-1 private tuition packages apply. Select a scholar below to begin.
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-150 text-center space-y-1">
+            <span className="block text-xs font-bold text-navy-custom">
+              No specific 1-on-1 package listed yet for this course
+            </span>
+            <span className="block text-[11px] text-gray-500 font-medium">
+              Packages added in Admin will appear here automatically.
+            </span>
           </div>
         )}
 
@@ -188,7 +206,7 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
             href={registerUrl}
             className="w-full block text-center py-3.5 rounded-xl bg-emerald-custom hover:bg-emerald-900 text-white text-sm font-bold transition-all shadow-md hover:shadow-lg"
           >
-            {selectedSlotId ? "Book Selected Slot & Register" : "Enroll in 1-on-1 Class"}
+            {selectedSlotId ? "Book Selected Slot & Register" : selectedPlan ? "Enroll in 1-on-1 Class" : "Register for 1-on-1 Class"}
           </Link>
           <p className="text-[11px] text-center text-gray-400 font-medium">
             3-Class Free Trial • Direct Teacher Match

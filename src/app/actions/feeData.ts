@@ -43,22 +43,13 @@ export async function getOneOnOneFeePlans() {
         title: p.title,
         classesPerWeek: p.classesPerWeek,
         defaultPrice: Number(p.defaultPrice),
-        currency: p.currency || "USD",
+        currency: p.currency || "PKR",
       }));
     }
 
-    // Default fallback plans if database has none seeded
-    return [
-      { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 35, currency: "USD" },
-      { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 50, currency: "USD" },
-      { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 75, currency: "USD" },
-    ];
+    return [];
   } catch (error) {
     console.error("Failed to get 1-on-1 plans:", error);
-    return [
-      { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 35, currency: "USD" },
-      { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 50, currency: "USD" },
-      { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 75, currency: "USD" },
-    ];
+    return [];
   }
 }

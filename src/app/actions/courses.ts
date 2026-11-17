@@ -72,11 +72,7 @@ export async function getActiveCourses(category?: CourseCategory) {
       subtitle: "Personalized 1-on-1 Quran Classes",
       description: "Learn Quran with verified native scholars.",
       batches: [],
-      oneOnOnePlans: [
-        { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500, currency: "PKR" },
-        { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500, currency: "PKR" },
-        { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000, currency: "PKR" },
-      ],
+      oneOnOnePlans: [],
       thumbnailImage: staticCoursesData[c.id]?.thumbnailImage || c.bannerImage,
     }));
   } catch (error) {
@@ -276,13 +272,8 @@ export async function getCourseDetails(courseId: string) {
       });
     }
 
-    // Graceful fallback plans if DB has no plans configured yet
-    if (!finalPlans || finalPlans.length === 0) {
-      finalPlans = [
-        { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500 as any, currency: "PKR", courseId: null, teacherFees: [] },
-        { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500 as any, currency: "PKR", courseId: null, teacherFees: [] },
-        { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000 as any, currency: "PKR", courseId: null, teacherFees: [] },
-      ];
+    if (!finalPlans) {
+      finalPlans = [];
     }
 
     // Default template slots if teachers have none
