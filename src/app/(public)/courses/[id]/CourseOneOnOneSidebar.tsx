@@ -68,7 +68,7 @@ function formatTime(timeStr: string) {
 
 export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }: Props) {
   const [selectedPlanId, setSelectedPlanId] = useState<string>(
-    plans.length > 0 ? (plans.find(p => p.classesPerWeek === 3)?.id || plans[0].id) : ""
+    plans.length > 0 ? plans[0].id : ""
   );
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const [selectedSlotId, setSelectedSlotId] = useState<string>("");
@@ -80,7 +80,7 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
   const selectedTeacher = teachers.find(t => t.id === selectedTeacherId);
 
   // Compute active price
-  let activePrice = selectedPlan?.defaultPrice || 3500;
+  let activePrice = selectedPlan?.defaultPrice || 5000;
   let activeCurrency = selectedPlan?.currency || "PKR";
 
   if (selectedTeacher && selectedPlan) {
@@ -124,12 +124,14 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
         </div>
 
         {/* Plans Chips */}
-        {plans.length > 0 && (
+        {plans.length > 0 ? (
           <div className="space-y-2">
             <label className="text-xs font-bold text-navy-custom block">
-              Choose Weekly Frequency:
+              Choose 1-on-1 Frequency Package:
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className={`grid gap-2.5 ${
+              plans.length === 1 ? "grid-cols-1" : plans.length === 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
+            }`}>
               {plans.map((plan) => {
                 const isSelected = plan.id === selectedPlanId;
                 return (
@@ -140,20 +142,27 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
                       setSelectedPlanId(plan.id);
                       setSelectedSlotId("");
                     }}
-                    className={`py-3 px-3 rounded-xl border text-center transition-all cursor-pointer ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                       isSelected
-                        ? "border-emerald-custom bg-emerald-custom/5 text-emerald-custom shadow-sm font-bold ring-1 ring-emerald-custom"
+                        ? "border-emerald-custom bg-emerald-custom/5 text-emerald-custom shadow-sm font-bold ring-2 ring-emerald-custom/20"
                         : "border-gray-200 hover:border-gray-300 bg-white text-gray-700 font-medium"
                     }`}
                   >
-                    <span className="block text-xs font-extrabold">{plan.title}</span>
-                    <span className="block text-[11px] text-gray-500 mt-0.5">
-                      {plan.defaultPrice} {plan.currency}
+                    <span className="block text-xs font-extrabold leading-snug">{plan.title}</span>
+                    <span className="block text-xs font-bold text-emerald-custom mt-1">
+                      Rs {plan.defaultPrice.toLocaleString()} / mo
+                    </span>
+                    <span className="block text-[10px] text-gray-500 mt-0.5 font-medium">
+                      {plan.classesPerWeek} Classes / Week
                     </span>
                   </button>
                 );
               })}
             </div>
+          </div>
+        ) : (
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-150 text-center text-xs text-gray-500 font-medium">
+            Standard 1-on-1 private tuition packages apply. Select a scholar below to begin.
           </div>
         )}
 

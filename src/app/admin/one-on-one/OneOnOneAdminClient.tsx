@@ -910,9 +910,16 @@ export function OneOnOneAdminClient({
             {plans.map((p) => (
               <div key={p.id} className="bg-white rounded-2xl p-5 border border-gray-150 shadow-sm flex flex-col justify-between space-y-4 relative">
                 <div>
-                  <span className="text-[10px] font-bold text-emerald-custom uppercase tracking-wider block">
-                    {p.classesPerWeek} Classes Per Week
-                  </span>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="text-[10px] font-bold text-emerald-custom uppercase tracking-wider block">
+                      {p.classesPerWeek} Classes Per Week
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      p.courseId ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-gray-100 text-gray-600"
+                    }`}>
+                      {p.course?.name || courses.find(c => c.id === p.courseId)?.name || "All Courses"}
+                    </span>
+                  </div>
                   <h3 className="text-lg font-bold text-navy-custom mt-1">{p.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">Default Monthly Fee:</p>
                   <span className="text-2xl font-black text-emerald-custom">Rs {p.defaultPrice} <span className="text-xs font-semibold text-gray-400">/ mo</span></span>

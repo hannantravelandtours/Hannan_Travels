@@ -63,7 +63,7 @@ export async function getActiveCourses(category?: CourseCategory) {
       await prisma.course.upsert({
         where: { id: c.id },
         update: { name: c.name, category: c.category, bannerImage: c.bannerImage, isActive: true },
-        create: { id: c.id, name: c.name, category: c.category, bannerImage: c.bannerImage, description: "Static Course", isActive: true },
+        create: { id: c.id, name: c.name, category: c.category, bannerImage: c.bannerImage, description: staticCoursesData[c.id]?.desc || "Learn Quran with verified native scholars.", isActive: true },
       });
     }
 
@@ -155,9 +155,7 @@ export async function getCourseDetails(courseId: string) {
         },
       }),
       prisma.oneOnOnePlan.findMany({
-        where: {
-          OR: [{ courseId }, { courseId: null }],
-        },
+        where: { courseId },
         orderBy: { classesPerWeek: "asc" },
         select: {
           id: true,
@@ -254,21 +252,37 @@ export async function getCourseDetails(courseId: string) {
 
     if (!course) return null;
 
-    // Fallback plans if none in DB
-    if (!plans || plans.length === 0) {
-      plans = [
+    // If no course-specific plans exist in DB, look for universal plans (courseId: null)
+    let finalPlans = plans;
+    if (!finalPlans || finalPlans.length === 0) {
+      finalPlans = await prisma.oneOnOnePlan.findMany({
+        where: { courseId: null },
+        orderBy: { classesPerWeek: "asc" },
+        select: {
+          id: true,
+          title: true,
+          classesPerWeek: true,
+          defaultPrice: true,
+          currency: true,
+          courseId: true,
+          teacherFees: {
+            select: {
+              teacherId: true,
+              monthlyFee: true,
+              currency: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Graceful fallback plans if DB has no plans configured yet
+    if (!finalPlans || finalPlans.length === 0) {
+      finalPlans = [
         { id: "plan-2", title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500 as any, currency: "PKR", courseId: null, teacherFees: [] },
         { id: "plan-3", title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500 as any, currency: "PKR", courseId: null, teacherFees: [] },
         { id: "plan-5", title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000 as any, currency: "PKR", courseId: null, teacherFees: [] },
       ];
-      // Seed asynchronously in background without delaying user
-      prisma.oneOnOnePlan.createMany({
-        data: [
-          { title: "2 Classes / Week", classesPerWeek: 2, defaultPrice: 2500, currency: "PKR" },
-          { title: "3 Classes / Week", classesPerWeek: 3, defaultPrice: 3500, currency: "PKR" },
-          { title: "5 Classes / Week", classesPerWeek: 5, defaultPrice: 5000, currency: "PKR" },
-        ],
-      }).catch(() => {});
     }
 
     // Default template slots if teachers have none
@@ -335,21 +349,27 @@ export async function getCourseDetails(courseId: string) {
       };
     });
 
-    const formattedPlans = plans.map((p) => ({
+    const formattedPlans = finalPlans.map((p) => ({
       id: p.id,
       title: p.title,
       classesPerWeek: p.classesPerWeek,
       defaultPrice: Number(p.defaultPrice),
       currency: p.currency,
-      teacherFees: p.teacherFees.map((tf) => ({
+      courseId: (p as any).courseId || null,
+      teacherFees: (p.teacherFees || []).map((tf: any) => ({
         teacherId: tf.teacherId,
         monthlyFee: Number(tf.monthlyFee),
         currency: tf.currency,
       })),
     }));
 
+    const cleanDescription = (course.description && course.description !== "Static Course" && course.description !== "Online 1-on-1 Quran Course")
+      ? course.description
+      : (staticCoursesData[course.id]?.desc || course.description || "Comprehensive Islamic & Quran instruction with certified scholars.");
+
     return {
       ...course,
+      description: cleanDescription,
       bannerImage: staticCoursesData[course.id]?.bannerImage || course.bannerImage,
       plans: formattedPlans,
       teachers: formattedTeachers,

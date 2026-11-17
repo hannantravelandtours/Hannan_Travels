@@ -19,22 +19,56 @@ const DAY_ORDER: Record<string, number> = {
 
 export async function getOneOnOnePlans(courseId?: string) {
   try {
-    const plans = await prisma.oneOnOnePlan.findMany({
-      where: courseId
-        ? { OR: [{ courseId }, { courseId: null }] }
-        : {},
-      include: {
-        course: true,
-        teacherFees: {
-          include: {
-            teacher: {
-              include: { user: true },
+    let plans: any[] = [];
+    if (courseId) {
+      // Prioritize plans specifically assigned to this course
+      plans = await prisma.oneOnOnePlan.findMany({
+        where: { courseId },
+        include: {
+          course: true,
+          teacherFees: {
+            include: {
+              teacher: {
+                include: { user: true },
+              },
             },
           },
         },
-      },
-      orderBy: { classesPerWeek: "asc" },
-    });
+        orderBy: { classesPerWeek: "asc" },
+      });
+
+      // If no course-specific plans exist, fall back to universal plans
+      if (plans.length === 0) {
+        plans = await prisma.oneOnOnePlan.findMany({
+          where: { courseId: null },
+          include: {
+            course: true,
+            teacherFees: {
+              include: {
+                teacher: {
+                  include: { user: true },
+                },
+              },
+            },
+          },
+          orderBy: { classesPerWeek: "asc" },
+        });
+      }
+    } else {
+      plans = await prisma.oneOnOnePlan.findMany({
+        include: {
+          course: true,
+          teacherFees: {
+            include: {
+              teacher: {
+                include: { user: true },
+              },
+            },
+          },
+        },
+        orderBy: { classesPerWeek: "asc" },
+      });
+    }
 
     return { success: true, plans };
   } catch (error) {
@@ -67,6 +101,8 @@ export async function createOneOnOnePlan(formData: FormData) {
 
     revalidatePath("/admin/one-on-one");
     revalidatePath("/register/student");
+    revalidatePath("/courses");
+    revalidatePath("/fee");
     return { success: true };
   } catch (error) {
     console.error("Error creating 1-on-1 plan:", error);
@@ -81,6 +117,8 @@ export async function deleteOneOnOnePlan(planId: string) {
     });
     revalidatePath("/admin/one-on-one");
     revalidatePath("/register/student");
+    revalidatePath("/courses");
+    revalidatePath("/fee");
     return { success: true };
   } catch (error) {
     console.error("Error deleting plan:", error);

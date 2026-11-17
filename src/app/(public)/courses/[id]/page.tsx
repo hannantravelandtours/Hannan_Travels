@@ -159,7 +159,9 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-navy-custom">Course Overview</h2>
               <p className="text-sm text-gray-600 font-medium leading-relaxed whitespace-pre-line">
-                {course.description || courseStaticInfo?.desc}
+                {(course.description && course.description !== "Static Course" && course.description !== "Online 1-on-1 Quran Course")
+                  ? course.description
+                  : (courseStaticInfo?.desc || course.description)}
               </p>
             </div>
 
