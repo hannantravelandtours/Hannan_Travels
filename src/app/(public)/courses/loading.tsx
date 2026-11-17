@@ -1,5 +1,5 @@
 import React from "react";
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpen, Loader2 } from "@/components/Icons";
 
 export default function CoursesLoading() {
   return (

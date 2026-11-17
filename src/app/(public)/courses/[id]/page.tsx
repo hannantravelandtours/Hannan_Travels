@@ -16,7 +16,7 @@ import {
   CalendarCheck,
   ShieldCheck,
   ArrowRight
-} from "lucide-react";
+} from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 

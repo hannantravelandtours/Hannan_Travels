@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { DollarSign, Calendar, TrendingUp, CreditCard } from "lucide-react";
+import { DollarSign, Calendar, TrendingUp, CreditCard } from "@/components/Icons";
 
 export default async function TeacherSalaryPage() {
   const session = await getServerSession(authOptions);

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Calendar, CheckCircle, XCircle, Clock, BarChart3 } from "lucide-react";
+import { Calendar, CheckCircle, XCircle, Clock, BarChart3 } from "@/components/Icons";
 
 export default async function StudentAttendancePage() {
   const session = await getServerSession(authOptions);

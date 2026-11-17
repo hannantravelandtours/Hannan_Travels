@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CreditCard, CheckCircle, Clock, DollarSign, Calendar, TrendingUp } from "lucide-react";
+import { CreditCard, CheckCircle, Clock, DollarSign, Calendar, TrendingUp } from "@/components/Icons";
 
 export default async function StudentFeesPage() {
   const session = await getServerSession(authOptions);

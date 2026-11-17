@@ -2,7 +2,7 @@ import React from "react";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { Users, BookOpen, Clock, Calendar, Video, Bell, UserCheck, ExternalLink, Link as LinkIcon } from "lucide-react";
+import { Users, BookOpen, Clock, Calendar, Video, Bell, UserCheck, ExternalLink, Link as LinkIcon } from "@/components/Icons";
 import Link from "next/link";
 import { getAnnouncementsForTeacher } from "@/app/actions/announcements";
 

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { User, Mail, Shield } from "lucide-react";
+import { User, Mail, Shield } from "@/components/Icons";
 
 export default async function TeacherProfilePage() {
   const session = await getServerSession(authOptions);

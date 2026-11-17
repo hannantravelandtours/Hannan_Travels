@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Video, Calendar, Clock, BookOpen, User } from "lucide-react";
+import { Video, Calendar, Clock, BookOpen, User } from "@/components/Icons";
 
 export default async function StudentClassesPage() {
   const session = await getServerSession(authOptions);

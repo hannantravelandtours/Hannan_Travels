@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Calendar, CheckCircle, XCircle, Clock, ArrowLeft, Users } from "lucide-react";
+import { Calendar, CheckCircle, XCircle, Clock, ArrowLeft, Users } from "@/components/Icons";
 
 export default async function AdminBatchAttendancePage({ params }: { params: Promise<{ batchId: string }> }) {
   const { batchId } = await params;

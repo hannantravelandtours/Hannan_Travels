@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Bell, Lock, Globe } from "lucide-react";
+import { User, Bell, Lock, Globe } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 

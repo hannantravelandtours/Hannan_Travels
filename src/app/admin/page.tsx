@@ -1,6 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { Users, GraduationCap, BookOpen, Clock, UserCheck } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Clock, UserCheck } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 

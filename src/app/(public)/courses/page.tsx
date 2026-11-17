@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BookOpen, Clock, Award, Star, Users, UserCheck, Sparkles } from "lucide-react";
+import { BookOpen, Clock, Award, Star, Users, UserCheck, Sparkles } from "@/components/Icons";
 import { getActiveCourses } from "@/app/actions/courses";
 import { staticCoursesData } from "@/data/staticCourses";
 
