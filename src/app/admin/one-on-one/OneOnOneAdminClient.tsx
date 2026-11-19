@@ -34,6 +34,7 @@ import {
   getSlotsForTeacherEdit,
   getAllTeacherSlots,
 } from "@/app/actions/oneOnOne";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 import { AdminOneOnOneAttendance } from "./AdminOneOnOneAttendance";
 
 interface SlotItem {
@@ -303,14 +304,14 @@ export function OneOnOneAdminClient({
     THIRTY_MIN_SLOTS.push({
       start: `${hStr}:00`,
       end: `${endHStr1}:30`,
-      label: `${hStr}:00 - ${endHStr1}:30`,
+      label: formatSlotRange(`${hStr}:00`, `${endHStr1}:30`),
     });
     const nextHour = hour + 1;
     const nextHStr = nextHour < 10 ? `0${nextHour}` : `${nextHour}`;
     THIRTY_MIN_SLOTS.push({
       start: `${hStr}:30`,
       end: `${nextHStr}:00`,
-      label: `${hStr}:30 - ${nextHStr}:00`,
+      label: formatSlotRange(`${hStr}:30`, `${nextHStr}:00`),
     });
   }
 
@@ -707,7 +708,7 @@ export function OneOnOneAdminClient({
                               {slotsList.map((s) => (
                                 <div key={s.id} className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold mr-1">
                                   <Clock className="w-3 h-3 text-emerald-600" />
-                                  <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                                  <span>{s.dayOfWeek}: {formatSlotRange(s.startTime, s.endTime)}</span>
                                 </div>
                               ))}
                             </div>
@@ -1152,7 +1153,7 @@ export function OneOnOneAdminClient({
                                 className={"flex items-center space-x-2 p-2 rounded-lg border transition-all " + (slot.isBooked ? "bg-emerald-50/60 border-emerald-200 text-emerald-900" : "bg-white border-gray-200 text-gray-700 hover:border-emerald-300")}
                               >
                                 <div className="text-[11px] font-semibold">
-                                  {slot.startTime} - {slot.endTime}
+                                  {formatSlotRange(slot.startTime, slot.endTime)}
                                 </div>
                                 <button
                                   onClick={() => handleToggleSlotStatus(slot.id, !slot.isBooked)}
@@ -1379,7 +1380,7 @@ export function OneOnOneAdminClient({
                                   }`}
                                 >
                                   {isSelected && <CheckCircle2 className="w-3 h-3" />}
-                                  <span>{slot.startTime} - {slot.endTime}</span>
+                                  <span>{formatSlotRange(slot.startTime, slot.endTime)}</span>
                                 </button>
                               );
                             })}

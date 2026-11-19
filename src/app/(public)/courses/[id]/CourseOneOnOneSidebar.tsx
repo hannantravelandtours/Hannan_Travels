@@ -13,6 +13,7 @@ import {
   ChevronRight,
   ChevronDown
 } from "lucide-react";
+import { formatSlotRange } from "@/lib/timeUtils";
 
 interface PlanItem {
   id: string;
@@ -53,17 +54,6 @@ interface Props {
   courseName: string;
   plans: PlanItem[];
   teachers: TeacherItem[];
-}
-
-function formatTime(timeStr: string) {
-  if (!timeStr) return "";
-  const parts = timeStr.split(":");
-  if (parts.length < 2) return timeStr;
-  const hour = parseInt(parts[0], 10);
-  const min = parts[1];
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const hour12 = hour % 12 || 12;
-  return `${hour12}:${min} ${ampm}`;
 }
 
 export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }: Props) {
@@ -322,7 +312,7 @@ export function CourseOneOnOneSidebar({ courseId, courseName, plans, teachers }:
                                           : "bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-custom border border-gray-200"
                                       }`}
                                     >
-                                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                                      {formatSlotRange(slot.startTime, slot.endTime)}
                                     </button>
                                   );
                                 })}

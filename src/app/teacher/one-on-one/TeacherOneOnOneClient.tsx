@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, UserCheck } from "lucide-react";
 import { createTeacherSlot, deleteTeacherSlot, setOneOnOneClassLink } from "@/app/actions/oneOnOne";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 
 interface SlotItem {
   id: string;
@@ -47,7 +48,7 @@ for (let hour = 14; hour <= 23; hour++) {
   THIRTY_MIN_SLOTS.push({
     start: `${hStr}:00`,
     end: `${endHStr1}:30`,
-    label: `${hStr}:00 - ${endHStr1}:30`,
+    label: formatSlotRange(`${hStr}:00`, `${endHStr1}:30`),
   });
 
   // Slot 2: :30 to :00 (next hour)
@@ -56,7 +57,7 @@ for (let hour = 14; hour <= 23; hour++) {
   THIRTY_MIN_SLOTS.push({
     start: `${hStr}:30`,
     end: `${nextHStr}:00`,
-    label: `${hStr}:30 - ${nextHStr}:00`,
+    label: formatSlotRange(`${hStr}:30`, `${nextHStr}:00`),
   });
 }
 
@@ -187,7 +188,7 @@ export function TeacherOneOnOneClient({
               <div>
                 <span className="block text-xs font-bold">{slot.dayOfWeek}</span>
                 <span className="block text-[11px] text-gray-500 font-medium">
-                  {slot.startTime} - {slot.endTime} (30 min)
+                  {formatSlotRange(slot.startTime, slot.endTime)} (30 min)
                 </span>
                 {slot.isBooked ? (
                   <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
@@ -259,7 +260,7 @@ export function TeacherOneOnOneClient({
                           {slotsList.map((s) => (
                             <div key={s.id} className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold mr-1">
                               <Clock className="w-3 h-3 text-emerald-600" />
-                              <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                              <span>{s.dayOfWeek}: {formatSlotRange(s.startTime, s.endTime)}</span>
                             </div>
                           ))}
                         </div>

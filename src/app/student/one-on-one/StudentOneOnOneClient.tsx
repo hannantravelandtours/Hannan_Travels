@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { UserCheck, Clock, Calendar, CheckCircle2, AlertCircle, BookOpen, User, Plus, DollarSign, ExternalLink } from "lucide-react";
+import { formatSlotRange } from "@/lib/timeUtils";
 
 interface SlotItem {
   id: string;
@@ -132,7 +133,7 @@ export function StudentOneOnOneClient({ registrations }: { registrations: Regist
                         {slotsList.map((s) => (
                           <div key={s.id} className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg text-[11px] font-bold mr-1.5 mb-1">
                             <Clock className="w-3 h-3 text-emerald-600" />
-                            <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                            <span>{s.dayOfWeek}: {formatSlotRange(s.startTime, s.endTime)}</span>
                           </div>
                         ))}
                       </div>

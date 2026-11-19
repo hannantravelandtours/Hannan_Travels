@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { updateLiveLink } from "@/app/actions/teacherActions";
 import { Users, Clock, Calendar, Video, Edit2, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { formatTime12 } from "@/lib/timeUtils";
 
 export function TeacherClassesClient({ batches }: { batches: any[] }) {
   const [editingLink, setEditingLink] = useState<string | null>(null);
@@ -56,7 +57,7 @@ export function TeacherClassesClient({ batches }: { batches: any[] }) {
                <div className="flex items-center text-sm">
                   <Clock className="w-4 h-4 mr-3 text-emerald-custom" />
                   <span className="font-semibold text-gray-700 w-24">Time:</span> 
-                  <span className="text-gray-600">{batch.time} (UTC)</span>
+                  <span className="text-gray-600">{batch.time ? (batch.time.toUpperCase().includes("UTC") ? formatTime12(batch.time) : `${formatTime12(batch.time)} (UTC)`) : "TBD"}</span>
                </div>
                <div className="flex items-center text-sm">
                   <Users className="w-4 h-4 mr-3 text-emerald-custom" />

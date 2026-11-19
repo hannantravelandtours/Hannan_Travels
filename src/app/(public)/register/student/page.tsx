@@ -27,6 +27,7 @@ import { registerStudent } from "@/app/actions/register";
 import { getAvailableSlotsForTeacher, getOneOnOnePlans } from "@/app/actions/oneOnOne";
 import { CourseCategory } from "@prisma/client";
 import { Suspense } from "react";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 
 const DEFAULT_COURSES = [
   { id: "qaida", name: "Noorani Qaida", category: "QAIDA" },
@@ -454,7 +455,7 @@ function StudentRegistrationForm() {
                     <option value="" disabled>Choose a batch</option>
                     {batches.map((b: any) => (
                       <option key={b.id} value={b.id}>
-                        {b.name} — {b.daysOfWeek?.join(", ")} {b.time} — {b.price} {b.currency}/mo — Teacher: {b.teacher?.user?.name || "TBD"}
+                        {b.name} — {b.daysOfWeek?.join(", ")} {formatTime12(b.time)} — {b.price} {b.currency}/mo — Teacher: {b.teacher?.user?.name || "TBD"}
                       </option>
                     ))}
                   </select>
@@ -612,7 +613,7 @@ function StudentRegistrationForm() {
                           >
                             <div className="flex items-center space-x-2">
                               <Clock className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                              <span>{s.dayOfWeek}: {s.startTime} - {s.endTime}</span>
+                              <span>{s.dayOfWeek}: {formatSlotRange(s.startTime, s.endTime)}</span>
                             </div>
                             {isSelected && <Check className="w-4 h-4 shrink-0 text-white" />}
                           </button>

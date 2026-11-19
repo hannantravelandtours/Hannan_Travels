@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { Users, BookOpen, Clock, Calendar, Video, Bell, UserCheck, ExternalLink, Link as LinkIcon } from "@/components/Icons";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 import Link from "next/link";
 import { getAnnouncementsForTeacher } from "@/app/actions/announcements";
 
@@ -165,7 +166,7 @@ export default async function TeacherDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {oneOnOneRegistrations.map((reg) => {
               const slotsText = reg.teacherSlots.length > 0
-                ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)} ${s.startTime}-${s.endTime}`).join(", ")
+                ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)} ${formatSlotRange(s.startTime, s.endTime)}`).join(", ")
                 : "Slots pending confirmation";
 
               return (
@@ -259,7 +260,7 @@ export default async function TeacherDashboardPage() {
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                    <span className="font-semibold text-navy-custom">{batch.time}</span>
+                    <span className="font-semibold text-navy-custom">{formatTime12(batch.time)}</span>
                   </div>
                 </div>
 

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { createBatch, deleteBatch, editBatch } from "@/app/actions/batchesAdmin";
 import { Clock, Plus, Trash2, Video, Users, Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { formatTime12 } from "@/lib/timeUtils";
 
 export function BatchesClient({ batches, courses, teachers }: { batches: any[], courses: any[], teachers: any[] }) {
   const [isAdding, setIsAdding] = useState(false);
@@ -84,7 +85,7 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
 
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Time (UTC)</label>
-                <input name="time" required defaultValue={editingBatch?.time || ""} placeholder="E.g. 18:00 UTC" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
+                <input name="time" required defaultValue={editingBatch?.time || ""} placeholder="E.g. 06:00 PM (UTC)" className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-custom focus:ring-1 focus:ring-emerald-custom rounded-xl py-2.5 px-4 text-sm outline-none transition-all" />
               </div>
 
               <div>
@@ -156,7 +157,7 @@ export function BatchesClient({ batches, courses, teachers }: { batches: any[], 
                </div>
                <div className="flex items-center text-xs font-bold text-gray-600">
                  <Clock className="w-4 h-4 mr-2 text-emerald-custom" />
-                 {batch.time} ({batch.daysOfWeek.join(", ")})
+                 {formatTime12(batch.time)} ({batch.daysOfWeek.join(", ")})
                </div>
                <div className="flex items-center text-xs font-bold text-gray-600">
                  <Users className="w-4 h-4 mr-2 text-emerald-custom" />

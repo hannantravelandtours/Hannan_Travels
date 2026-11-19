@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { Video, Calendar, Clock, BookOpen, Bell, User } from "@/components/Icons";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 import Link from "next/link";
 import { getAnnouncementsForStudent } from "@/app/actions/announcements";
 
@@ -122,9 +123,9 @@ export default async function StudentDashboardPage() {
 
               const timeLabel = isOneOnOne
                 ? (reg.teacherSlots.length > 0
-                    ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)}: ${s.startTime}-${s.endTime}`).join(" | ")
+                    ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)}: ${formatSlotRange(s.startTime, s.endTime)}`).join(" | ")
                     : "Slots to be confirmed by Admin")
-                : (reg.batch?.time || "TBD");
+                : (reg.batch?.time ? formatTime12(reg.batch.time) : "TBD");
 
               const liveLink = isOneOnOne ? reg.classLink : reg.batch?.liveClassLink;
 

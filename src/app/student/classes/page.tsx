@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Video, Calendar, Clock, BookOpen, User } from "@/components/Icons";
+import { formatTime12, formatSlotRange } from "@/lib/timeUtils";
 
 export default async function StudentClassesPage() {
   const session = await getServerSession(authOptions);
@@ -78,9 +79,9 @@ export default async function StudentClassesPage() {
 
           const timeLabel = isOneOnOne
             ? (reg.teacherSlots.length > 0
-                ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)}: ${s.startTime}-${s.endTime}`).join(" | ")
+                ? reg.teacherSlots.map(s => `${s.dayOfWeek.slice(0, 3)}: ${formatSlotRange(s.startTime, s.endTime)}`).join(" | ")
                 : "Slots to be confirmed by Admin")
-            : (reg.batch?.time ? `${reg.batch.time} (UTC)` : "TBD");
+            : (reg.batch?.time ? (reg.batch.time.toUpperCase().includes("UTC") ? formatTime12(reg.batch.time) : `${formatTime12(reg.batch.time)} (UTC)`) : "TBD");
 
           const liveLink = isOneOnOne ? reg.classLink : reg.batch?.liveClassLink;
           const title = isOneOnOne 
